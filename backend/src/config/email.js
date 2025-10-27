@@ -52,11 +52,20 @@ export const sendEmail = async (options) => {
   const transporter = getEmailTransporter();
 
   if (!transporter) {
-    throw new Error("Email service is not configured");
+    throw new Error(
+      "Email service is not configured. Please check SMTP configuration: SMTP_HOST, SMTP_PORT, SMTP_EMAIL, SMTP_PASSWORD"
+    );
   }
 
-  return await transporter.sendMail({
-    from: env.smtp.email,
-    ...options,
-  });
+  try {
+    return await transporter.sendMail({
+      from: env.smtp.email,
+      ...options,
+    });
+  } catch (error) {
+    console.error("Email sending error:", error);
+    throw new Error(
+      `Failed to send email: ${error.message}. Check SMTP credentials and server availability.`
+    );
+  }
 };

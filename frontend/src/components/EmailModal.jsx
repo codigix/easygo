@@ -70,15 +70,32 @@ export default function EmailModal({
       );
 
       if (response.data.success) {
-        setSuccess(`✓ Invoice sent successfully to ${recipientEmail}`);
+        const message = response.data.pdfGenerated
+          ? `✓ Invoice sent successfully to ${recipientEmail} with PDF attachment`
+          : `✓ Invoice sent successfully to ${recipientEmail} (sent as HTML)`;
+        setSuccess(message);
         setTimeout(() => {
           onSuccess?.();
           handleClose();
-        }, 1500);
+        }, 2000);
+      } else {
+        setError(response.data.message || "Failed to send invoice email");
       }
     } catch (err) {
       console.error("Error sending email:", err);
-      setError(err.response?.data?.message || "Failed to send invoice email");
+      const errorMsg =
+        err.response?.data?.message || "Failed to send invoice email";
+
+      // Check if it's a network error or server error
+      if (!err.response) {
+        setError("Network error. Please check your connection and try again.");
+      } else if (err.response.status === 500) {
+        setError(
+          `Server error: ${errorMsg}. Please try again later or contact support.`
+        );
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setLoading(false);
     }

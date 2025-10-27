@@ -1076,20 +1076,6 @@ export const sendInvoiceEmail = async (req, res) => {
       bookings: bookings,
     });
 
-    // Convert HTML to PDF
-    const pdfBuffer = await new Promise((resolve, reject) => {
-      const options = {
-        format: "A4",
-        margin: "10mm",
-        timeout: 30000,
-      };
-
-      pdf.create(html, options).toBuffer((err, buffer) => {
-        if (err) reject(err);
-        else resolve(buffer);
-      });
-    });
-
     // Sanitize filename
     const sanitizedInvoiceNumber = invoiceData.invoice_number.replace(
       /[\/\\?%*:|"<>]/g,
@@ -1097,47 +1083,115 @@ export const sendInvoiceEmail = async (req, res) => {
     );
     const filename = `Invoice-${sanitizedInvoiceNumber}.pdf`;
 
-    // Send email with PDF attachment
+    // Prepare attachments array
+    const attachments = [];
+    let pdfGenerationSuccessful = false;
+
+    // Try to convert HTML to PDF
+    try {
+      const pdfBuffer = await new Promise((resolve, reject) => {
+        const options = {
+          format: "A4",
+          margin: "10mm",
+          timeout: 30000,
+        };
+
+        pdf.create(html, options).toBuffer((err, buffer) => {
+          if (err) reject(err);
+          else resolve(buffer);
+        });
+      });
+
+      attachments.push({
+        filename: filename,
+        content: pdfBuffer,
+        contentType: "application/pdf",
+      });
+      pdfGenerationSuccessful = true;
+    } catch (pdfError) {
+      console.warn(
+        "PDF generation failed, sending HTML email instead:",
+        pdfError
+      );
+      // Continue with sending email without PDF attachment
+    }
+
+    // Prepare email content
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2 style="color: #2c3e50;">Invoice Details</h2>
+        <p>${
+          message ||
+          `Please find ${
+            pdfGenerationSuccessful ? "attached" : "below"
+          } your invoice ${invoiceData.invoice_number}.`
+        }</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;" />
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+          <tr>
+            <td style="padding: 8px; font-weight: bold;">Invoice Number:</td>
+            <td style="padding: 8px;">${invoiceData.invoice_number}</td>
+          </tr>
+          <tr style="background-color: #f9f9f9;">
+            <td style="padding: 8px; font-weight: bold;">Invoice Date:</td>
+            <td style="padding: 8px;">${dayjs(invoiceData.invoice_date).format(
+              "DD MMM YYYY"
+            )}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; font-weight: bold;">Total Amount:</td>
+            <td style="padding: 8px; color: #27ae60; font-weight: bold;">₹${parseFloat(
+              invoiceData.total_amount || 0
+            ).toFixed(2)}</td>
+          </tr>
+          ${
+            invoiceData.payment_status
+              ? `<tr style="background-color: #f9f9f9;">
+                <td style="padding: 8px; font-weight: bold;">Payment Status:</td>
+                <td style="padding: 8px; text-transform: capitalize;">${invoiceData.payment_status}</td>
+              </tr>`
+              : ""
+          }
+        </table>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;" />
+        <p style="color: #666; font-size: 14px;">
+          If you have any questions regarding this invoice, please contact us at <strong>${
+            franchiseData.email
+          }</strong> or <strong>${franchiseData.phone}</strong>
+        </p>
+        <p style="color: #999; font-size: 12px; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+          Thank you for your business!<br>
+          <strong>${franchiseData.company_name}</strong>
+        </p>
+      </div>
+    `;
+
+    // Send email with optional PDF attachment
     await sendEmail({
       to: recipientEmail,
       subject:
         subject ||
         `Invoice ${invoiceData.invoice_number} from ${franchiseData.company_name}`,
-      html: `
-        <h2>Invoice Details</h2>
-        <p>${
-          message ||
-          `Please find attached your invoice ${invoiceData.invoice_number}.`
-        }</p>
-        <hr />
-        <p><strong>Invoice Number:</strong> ${invoiceData.invoice_number}</p>
-        <p><strong>Invoice Date:</strong> ${dayjs(
-          invoiceData.invoice_date
-        ).format("DD MMM YYYY")}</p>
-        <p><strong>Total Amount:</strong> ₹${parseFloat(
-          invoiceData.total_amount || 0
-        ).toFixed(2)}</p>
-        <hr />
-        <p>Thank you for your business!</p>
-      `,
-      attachments: [
-        {
-          filename: filename,
-          content: pdfBuffer,
-          contentType: "application/pdf",
-        },
-      ],
+      html: emailHtml,
+      attachments: attachments,
     });
 
     res.json({
       success: true,
-      message: `Invoice sent successfully to ${recipientEmail}`,
+      message: `Invoice sent successfully to ${recipientEmail}${
+        !pdfGenerationSuccessful
+          ? " (sent as HTML due to PDF generation issue)"
+          : ""
+      }`,
+      pdfGenerated: pdfGenerationSuccessful,
     });
   } catch (error) {
     console.error("Send invoice email error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to send invoice email",
+      details:
+        process.env.NODE_ENV === "development" ? error.toString() : undefined,
     });
   }
 };
