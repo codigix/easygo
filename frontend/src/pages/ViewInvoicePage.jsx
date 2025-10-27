@@ -58,7 +58,7 @@ export default function ViewInvoicePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:5000/api/invoices/summary",
+        `${import.meta.env.VITE_API_URL}/invoices/summary`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -92,7 +92,7 @@ export default function ViewInvoicePage() {
       }).toString();
 
       const response = await fetch(
-        `http://localhost:5000/api/invoices?${queryParams}`,
+        `${import.meta.env.VITE_API_URL}/invoices?${queryParams}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -121,7 +121,7 @@ export default function ViewInvoicePage() {
       }).toString();
 
       const response = await fetch(
-        `http://localhost:5000/api/invoices?${queryParams}`,
+        `${import.meta.env.VITE_API_URL}/invoices?${queryParams}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -159,7 +159,7 @@ export default function ViewInvoicePage() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/invoices/${invoiceId}/download`,
+        `${import.meta.env.VITE_API_URL}/invoices/${invoiceId}/download`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

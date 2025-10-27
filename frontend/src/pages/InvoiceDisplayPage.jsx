@@ -24,7 +24,7 @@ export default function InvoiceDisplayPage() {
 
       // First, try to fetch invoice by number or ID
       const response = await fetch(
-        `http://localhost:5000/api/invoices?invoice_number=${invoiceId}`,
+        `${import.meta.env.VITE_API_URL}/invoices?invoice_number=${invoiceId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -41,7 +41,11 @@ export default function InvoiceDisplayPage() {
         // Fetch associated bookings
         if (invoiceData.period_from && invoiceData.period_to) {
           const bookingsResponse = await fetch(
-            `http://localhost:5000/api/bookings/filter?customer_id=${invoiceData.customer_id}&from_date=${invoiceData.period_from}&to_date=${invoiceData.period_to}`,
+            `${import.meta.env.VITE_API_URL}/bookings/filter?customer_id=${
+              invoiceData.customer_id
+            }&from_date=${invoiceData.period_from}&to_date=${
+              invoiceData.period_to
+            }`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -92,7 +96,7 @@ export default function InvoiceDisplayPage() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/invoices/${invoice.id}/download`,
+        `${import.meta.env.VITE_API_URL}/invoices/${invoice.id}/download`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

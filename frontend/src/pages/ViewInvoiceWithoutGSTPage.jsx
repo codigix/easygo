@@ -36,7 +36,7 @@ export default function ViewInvoiceWithoutGSTPage() {
       }).toString();
 
       const response = await fetch(
-        `http://localhost:5000/api/invoices?${queryParams}`,
+        `${import.meta.env.VITE_API_URL}/invoices?${queryParams}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

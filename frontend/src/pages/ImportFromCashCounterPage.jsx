@@ -10,7 +10,7 @@ export default function ImportFromCashCounterPage() {
   const handleBook = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/bookings/import-cashcounter",
+        `${import.meta.env.VITE_API_URL}/bookings/import-cashcounter`,
         {
           method: "POST",
           headers: {

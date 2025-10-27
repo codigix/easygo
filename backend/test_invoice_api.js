@@ -7,7 +7,7 @@ async function testAPI() {
     // Test 1: Search by invoice number
     console.log("Test 1: Searching for invoice inv_2025_002...");
     const response = await axios.get(
-      "http://localhost:5000/api/invoices?invoice_number=inv_2025_002"
+      `${import.meta.env.VITE_API_URL}/invoices?invoice_number=inv_2025_002`
     );
 
     console.log("Response:", JSON.stringify(response.data, null, 2));

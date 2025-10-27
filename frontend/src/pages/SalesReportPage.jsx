@@ -33,7 +33,7 @@ export default function SalesReportPage() {
     setLoading(true);
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/reports/sales-report",
+        `${import.meta.env.VITE_API_URL}/reports/sales-report`,
         {
           params: {
             fromDate: formData.fromDate,
@@ -66,7 +66,7 @@ export default function SalesReportPage() {
   const handleExportToExcel = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/reports/sales-report/export",
+        `${import.meta.env.VITE_API_URL}/reports/sales-report/export`,
         {
           params: {
             fromDate: formData.fromDate,

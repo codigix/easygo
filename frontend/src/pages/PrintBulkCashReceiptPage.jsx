@@ -23,7 +23,7 @@ export default function PrintBulkCashReceiptPage() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:5000/api/cashcounter/bulk-print",
+        `${import.meta.env.VITE_API_URL}/cashcounter/bulk-print`,
         {
           params: {
             from: formData.from_consignment,

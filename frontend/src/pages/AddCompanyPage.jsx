@@ -61,7 +61,7 @@ const AddCompanyPage = () => {
       setFetchLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:5000/api/rates/company",
+        `${import.meta.env.VITE_API_URL}/rates/company",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -107,7 +107,7 @@ const AddCompanyPage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/rates/company",
+        `${import.meta.env.VITE_API_URL}/rates/company",
         { ...formData, courier_type: activeTab },
         {
           headers: {
@@ -186,7 +186,7 @@ const AddCompanyPage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/rates/company/import-excel",
+        `${import.meta.env.VITE_API_URL}/rates/company/import-excel`,
         formDataToSend,
         {
           headers: {

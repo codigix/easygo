@@ -182,7 +182,9 @@ const InvoiceGeneratePage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5000/api/invoices?invoice_number=${searchInvoiceInput}`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/invoices?invoice_number=${searchInvoiceInput}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -208,7 +210,7 @@ const InvoiceGeneratePage = () => {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/invoices/${invoiceId}/download`,
+        `${import.meta.env.VITE_API_URL}/invoices/${invoiceId}/download`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

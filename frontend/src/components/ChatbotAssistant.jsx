@@ -78,7 +78,7 @@ export default function ChatbotAssistant() {
 
       // Build URL with consignment number filter
       const url = new URL(
-        `http://localhost:5000/api/invoices/${invoiceId}/download`
+        `${import.meta.env.VITE_API_URL}/invoices/${invoiceId}/download`
       );
       if (consignmentNo) {
         url.searchParams.append("consignmentNo", consignmentNo);
@@ -167,7 +167,9 @@ export default function ChatbotAssistant() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/bookings/search-with-invoices?${params.toString()}`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/bookings/search-with-invoices?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

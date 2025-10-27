@@ -25,7 +25,7 @@ export default function AddPaymentGSTPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:5000/api/payments/invoice-summary?gst=true",
+        `${import.meta.env.VITE_API_URL}/payments/invoice-summary?gst=true`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -55,7 +55,7 @@ export default function AddPaymentGSTPage() {
       }).toString();
 
       const response = await fetch(
-        `http://localhost:5000/api/payments/invoice-list?${queryParams}`,
+        `${import.meta.env.VITE_API_URL}/payments/invoice-list?${queryParams}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -74,7 +74,7 @@ export function ChatSidebar({ isOpen, onClose }) {
       const token = localStorage.getItem("token");
 
       const url = new URL(
-        `http://localhost:5000/api/invoices/${invoiceId}/download`
+        `${import.meta.env.VITE_API_URL}/invoices/${invoiceId}/download`
       );
       if (consignmentNo) {
         url.searchParams.append("consignmentNo", consignmentNo);
@@ -158,7 +158,9 @@ export function ChatSidebar({ isOpen, onClose }) {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/bookings/search-with-invoices?${params.toString()}`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/bookings/search-with-invoices?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -391,8 +393,7 @@ export function ChatSidebar({ isOpen, onClose }) {
                         <p className="text-xs opacity-75">Amount</p>
                         <p className="font-medium">
                           ₹
-                          {message.booking.total ||
-                            message.booking.totalAmount}
+                          {message.booking.total || message.booking.totalAmount}
                         </p>
                       </div>
                     </div>
@@ -425,10 +426,7 @@ export function ChatSidebar({ isOpen, onClose }) {
                           >
                             {downloadingInvoiceId === message.id ? (
                               <>
-                                <Loader
-                                  size={14}
-                                  className="animate-spin"
-                                />
+                                <Loader size={14} className="animate-spin" />
                                 Downloading...
                               </>
                             ) : downloadedInvoices.has(message.id) ? (

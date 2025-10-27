@@ -16,7 +16,7 @@ export default function ImportLimitlessPage() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/bookings/import-text",
+        `${import.meta.env.VITE_API_URL}/bookings/import-text`,
         {
           method: "POST",
           headers: {
@@ -49,7 +49,7 @@ export default function ImportLimitlessPage() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/bookings/import-excel-limitless",
+        `${import.meta.env.VITE_API_URL}/bookings/import-excel-limitless`,
         {
           method: "POST",
           headers: {

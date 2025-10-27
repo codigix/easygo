@@ -19,7 +19,9 @@ export default function CustomerCreditPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5000/api/payments/customer-credit?customer_id=${customerId}`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/payments/customer-credit?customer_id=${customerId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

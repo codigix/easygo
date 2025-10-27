@@ -76,7 +76,7 @@ export default function MultipleInvoicePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:5000/api/invoices/generate-multiple",
+        `${import.meta.env.VITE_API_URL}/invoices/generate-multiple`,
         {
           method: "POST",
           headers: {

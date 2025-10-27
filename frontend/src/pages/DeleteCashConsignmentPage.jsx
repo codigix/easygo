@@ -21,7 +21,9 @@ export default function DeleteCashConsignmentPage() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.delete(
-        `http://localhost:5000/api/cashcounter/delete-booking/${consignmentNo}`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/cashcounter/delete-booking/${consignmentNo}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

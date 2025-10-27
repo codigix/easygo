@@ -44,7 +44,7 @@ const ImportCompanyExcelPage = () => {
 
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/rates/company/import-excel",
+        `${import.meta.env.VITE_API_URL}/rates/company/import-excel`,
         formData,
         {
           headers: {
@@ -79,7 +79,7 @@ const ImportCompanyExcelPage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:5000/api/rates/company/export-template",
+        `${import.meta.env.VITE_API_URL}/rates/company/export-template`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "blob",

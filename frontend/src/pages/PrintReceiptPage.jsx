@@ -112,7 +112,7 @@ export default function PrintReceiptPage() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/cashcounter/create-booking",
+        `${import.meta.env.VITE_API_URL}/cashcounter/create-booking`,
         formData,
         {
           headers: {
@@ -139,7 +139,7 @@ export default function PrintReceiptPage() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/cashcounter/create-booking",
+        `${import.meta.env.VITE_API_URL}/cashcounter/create-booking`,
         formData,
         {
           headers: {

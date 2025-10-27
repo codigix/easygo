@@ -27,7 +27,7 @@ export default function EditConsignmentPage() {
     try {
       const query = new URLSearchParams(filters).toString();
       const response = await fetch(
-        `http://localhost:5000/api/bookings/filter?${query}`,
+        `${import.meta.env.VITE_API_URL}/bookings/filter?${query}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -62,7 +62,7 @@ export default function EditConsignmentPage() {
   const handleSave = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/bookings/${editingId}`,
+        `${import.meta.env.VITE_API_URL}/bookings/${editingId}`,
         {
           method: "PUT",
           headers: {
@@ -93,7 +93,7 @@ export default function EditConsignmentPage() {
       const fetchBooking = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/api/bookings/${bookingIdFromUrl}`,
+            `${import.meta.env.VITE_API_URL}/bookings/${bookingIdFromUrl}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,

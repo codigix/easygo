@@ -42,7 +42,7 @@ const EditCompanyPage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:5000/api/rates/company",
+        `${import.meta.env.VITE_API_URL}/rates/company`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -73,7 +73,7 @@ const EditCompanyPage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.delete(
-        `http://localhost:5000/api/rates/company/${id}`,
+        `${import.meta.env.VITE_API_URL}/rates/company/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -95,7 +95,7 @@ const EditCompanyPage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        `http://localhost:5000/api/rates/company/${editingCompany.id}`,
+        `${import.meta.env.VITE_API_URL}/rates/company/${editingCompany.id}`,
         editingCompany,
         {
           headers: {

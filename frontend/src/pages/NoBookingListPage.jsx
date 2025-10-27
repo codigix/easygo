@@ -18,7 +18,9 @@ export default function NoBookingListPage() {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5000/api/bookings/no-booking-list?from_date=${filters.from_date}&to_date=${filters.to_date}`,
+        `${import.meta.env.VITE_API_URL}/bookings/no-booking-list?from_date=${
+          filters.from_date
+        }&to_date=${filters.to_date}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }

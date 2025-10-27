@@ -26,11 +26,11 @@ export default function CheckBookingListPage() {
       const query = new URLSearchParams(filters).toString();
       console.log(
         "Fetching from:",
-        `http://localhost:5000/api/bookings/filter?${query}`
+        `${import.meta.env.VITE_API_URL}/bookings/filter?${query}`
       );
 
       const response = await fetch(
-        `http://localhost:5000/api/bookings/filter?${query}`,
+        `${import.meta.env.VITE_API_URL}/bookings/filter?${query}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }

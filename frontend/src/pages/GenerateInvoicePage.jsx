@@ -73,7 +73,7 @@ export default function GenerateInvoicePage() {
       const token = localStorage.getItem("token");
 
       // Build URL with available filters
-      let url = `http://localhost:5000/api/bookings/filter?`;
+      let url = `${import.meta.env.VITE_API_URL}/bookings/filter?`;
       const params = [];
 
       if (formData.customer_id) {
@@ -138,7 +138,7 @@ export default function GenerateInvoicePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5000/api/rates/company/${customerId}`,
+        `${import.meta.env.VITE_API_URL}/rates/company/${customerId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -167,7 +167,7 @@ export default function GenerateInvoicePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:5000/api/invoices/generate",
+        `${import.meta.env.VITE_API_URL}/invoices/generate`,
         {
           method: "POST",
           headers: {

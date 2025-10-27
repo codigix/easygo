@@ -20,7 +20,7 @@ export default function ImportFromExcelBookingPage() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/bookings/import-excel",
+        `${import.meta.env.VITE_API_URL}/bookings/import-excel`,
         {
           method: "POST",
           headers: {
@@ -51,7 +51,7 @@ export default function ImportFromExcelBookingPage() {
 
   const downloadTemplate = (format) => {
     window.open(
-      `http://localhost:5000/api/bookings/download-template/${format}`,
+      `${import.meta.env.VITE_API_URL}/bookings/download-template/${format}`,
       "_blank"
     );
   };
