@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
-import ChatbotAssistant from "../components/ChatbotAssistant.jsx";
 import { LoginPage } from "./LoginPage.jsx";
 import { DashboardLayout } from "../layouts/DashboardLayout.jsx";
 import { DashboardPage } from "./DashboardPage.jsx";
@@ -85,7 +84,6 @@ export default function App() {
         </div>
       }
     >
-      {isAuthenticated && <ChatbotAssistant />}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
 

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Info, FileText } from "lucide-react";
 
 export default function GenerateInvoicePage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     customer_id: "",
     consignment_no: "",
@@ -140,21 +142,32 @@ export default function GenerateInvoicePage() {
 
       const data = await response.json();
       if (data.success) {
-        alert("Invoice generated successfully!");
-        // Reset form
-        setFormData({
-          customer_id: "",
-          consignment_no: "",
-          address: "",
-          invoice_no: "",
-          invoice_date: new Date().toISOString().split("T")[0],
-          period_from: "",
-          period_to: "",
-          invoice_discount: false,
-          reverse_charge: false,
-          gst_percent: 18,
-        });
-        setBookings([]);
+        // Extract invoice ID and number from response
+        const { id: invoiceId, invoice_number: invoiceNumber } =
+          data.data || {};
+
+        if (invoiceId && invoiceNumber) {
+          // Navigate to ViewInvoicePage with the newly generated invoice details
+          navigate(
+            `/invoices/view?invoiceId=${invoiceId}&invoiceNumber=${invoiceNumber}&generated=true`
+          );
+        } else {
+          alert("Invoice generated successfully! Invoice ID: " + invoiceId);
+          // Reset form if navigation failed
+          setFormData({
+            customer_id: "",
+            consignment_no: "",
+            address: "",
+            invoice_no: "",
+            invoice_date: new Date().toISOString().split("T")[0],
+            period_from: "",
+            period_to: "",
+            invoice_discount: false,
+            reverse_charge: false,
+            gst_percent: 18,
+          });
+          setBookings([]);
+        }
       } else {
         alert(data.message || "Failed to generate invoice");
       }

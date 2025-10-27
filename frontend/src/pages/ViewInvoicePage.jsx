@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Search, Download, Eye, Edit, Loader } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { Search, Download, Eye, Edit, Loader, CheckCircle } from "lucide-react";
 
 export default function ViewInvoicePage() {
+  const location = useLocation();
   const [filters, setFilters] = useState({
     company_name: "",
     invoice_number: "",
@@ -18,10 +20,28 @@ export default function ViewInvoicePage() {
     total_sale: 0,
     partial_paid: 0,
   });
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
   useEffect(() => {
     fetchSummary();
-  }, []);
+    // Check if this is a redirect from invoice generation
+    const params = new URLSearchParams(location.search);
+    const invoiceNumber = params.get("invoiceNumber");
+    const isGenerated = params.get("generated") === "true";
+
+    if (isGenerated && invoiceNumber) {
+      // Auto-load the newly generated invoice
+      setFilters((prev) => ({
+        ...prev,
+        invoice_number: invoiceNumber,
+      }));
+      setShowSuccessAlert(true);
+      // Fetch immediately
+      setTimeout(() => {
+        handleSubmitWithFilter(invoiceNumber);
+      }, 0);
+    }
+  }, [location.search]);
 
   const fetchSummary = async () => {
     try {
@@ -50,6 +70,35 @@ export default function ViewInvoicePage() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleSubmitWithFilter = async (invoiceNumber) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const queryParams = new URLSearchParams({
+        invoice_number: invoiceNumber,
+      }).toString();
+
+      const response = await fetch(
+        `http://localhost:5000/api/invoices?${queryParams}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (data.success) {
+        setInvoices(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      alert("Failed to fetch invoices");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -130,6 +179,25 @@ export default function ViewInvoicePage() {
 
   return (
     <div className="space-y-6">
+      {/* Success Alert for newly generated invoices */}
+      {showSuccessAlert && (
+        <div className="flex items-center gap-3 rounded-lg bg-green-50 p-4 border border-green-200">
+          <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-green-800">
+              ✓ Invoice generated successfully! Your invoice is ready to
+              download.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowSuccessAlert(false)}
+            className="text-green-600 hover:text-green-800 text-sm font-medium"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
