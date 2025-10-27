@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Info, FileText } from "lucide-react";
+import EmailModal from "../components/EmailModal";
 
 export default function GenerateInvoicePage() {
   const navigate = useNavigate();
@@ -29,6 +30,11 @@ export default function GenerateInvoicePage() {
     net_amount: 0,
   });
 
+  // Email modal state
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [currentInvoice, setCurrentInvoice] = useState(null);
+  const [customerEmail, setCustomerEmail] = useState("");
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -38,13 +44,26 @@ export default function GenerateInvoicePage() {
   };
 
   const handleShowBookings = async () => {
-    // Allow search by consignment number OR date range (not both required)
+    // Allow flexible filtering: customer_id, consignment_no, or date range (any combination)
     const hasDateRange = formData.period_from && formData.period_to;
     const hasConsignmentNo = formData.consignment_no;
+    const hasCustomerId = formData.customer_id;
 
-    if (!hasDateRange && !hasConsignmentNo) {
+    // Check for incomplete date range (only one date selected)
+    if (
+      (formData.period_from && !formData.period_to) ||
+      (!formData.period_from && formData.period_to)
+    ) {
       alert(
-        "Please enter Consignment Number OR select both Period From and Period To dates"
+        "Please select BOTH Period From and Period To dates, or leave both empty"
+      );
+      return;
+    }
+
+    // At least one filter must be provided
+    if (!hasCustomerId && !hasConsignmentNo && !hasDateRange) {
+      alert(
+        "Please provide at least one filter: Customer ID, Consignment Number, or Date Range"
       );
       return;
     }
@@ -115,6 +134,29 @@ export default function GenerateInvoicePage() {
     });
   };
 
+  const fetchCustomerEmail = async (customerId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/rates/company/${customerId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (data.success && data.data?.email) {
+        return data.data.email;
+      }
+      return "";
+    } catch (error) {
+      console.error("Error fetching customer email:", error);
+      return "";
+    }
+  };
+
   const handleGenerate = async () => {
     if (!formData.customer_id || bookings.length === 0) {
       alert("Please fill customer details and fetch bookings");
@@ -147,13 +189,17 @@ export default function GenerateInvoicePage() {
           data.data || {};
 
         if (invoiceId && invoiceNumber) {
-          // Navigate to ViewInvoicePage with the newly generated invoice details
-          navigate(
-            `/invoices/view?invoiceId=${invoiceId}&invoiceNumber=${invoiceNumber}&generated=true`
-          );
-        } else {
-          alert("Invoice generated successfully! Invoice ID: " + invoiceId);
-          // Reset form if navigation failed
+          // Fetch customer email
+          const email = await fetchCustomerEmail(formData.customer_id);
+
+          // Store invoice data for email modal
+          setCurrentInvoice({ id: invoiceId, invoice_number: invoiceNumber });
+          setCustomerEmail(email);
+
+          // Show email modal immediately after invoice generation
+          setShowEmailModal(true);
+
+          // Reset form after showing modal
           setFormData({
             customer_id: "",
             consignment_no: "",
@@ -167,6 +213,8 @@ export default function GenerateInvoicePage() {
             gst_percent: 18,
           });
           setBookings([]);
+        } else {
+          alert("Invoice generated successfully! Invoice ID: " + invoiceId);
         }
       } else {
         alert(data.message || "Failed to generate invoice");
@@ -184,7 +232,15 @@ export default function GenerateInvoicePage() {
   };
 
   const handleSendEmail = async () => {
-    alert("Send Invoice From Email feature coming soon!");
+    if (!currentInvoice) {
+      alert("Please generate an invoice first");
+      return;
+    }
+    setShowEmailModal(true);
+  };
+
+  const handleEmailSuccess = () => {
+    setShowEmailModal(false);
   };
 
   return (
@@ -645,6 +701,16 @@ export default function GenerateInvoicePage() {
           </button>
         </div>
       </div>
+
+      {/* Email Modal */}
+      <EmailModal
+        isOpen={showEmailModal}
+        invoiceId={currentInvoice?.id}
+        invoiceNumber={currentInvoice?.invoice_number}
+        customerEmail={customerEmail}
+        onClose={() => setShowEmailModal(false)}
+        onSuccess={handleEmailSuccess}
+      />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import {
   getSingleInvoiceSummary,
   getRecycledInvoices,
   downloadInvoice,
+  sendInvoiceEmail,
 } from "../controllers/invoiceController.js";
 import { authenticate } from "../middleware/auth.js";
 
@@ -31,6 +32,9 @@ router.post("/generate", authenticate, generateInvoice);
 router.post("/generate-multiple", authenticate, generateMultipleInvoices);
 router.post("/generate-single", authenticate, generateSingleInvoice);
 router.post("/generate-without-gst", authenticate, generateInvoiceWithoutGST);
+
+// Email routes
+router.post("/:id/send-email", authenticate, sendInvoiceEmail);
 
 // Update and delete routes
 router.put("/:id", authenticate, updateInvoice);

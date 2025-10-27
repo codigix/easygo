@@ -4,6 +4,11 @@ import ejs from "ejs";
 import path from "path";
 import { fileURLToPath } from "url";
 import pdf from "html-pdf";
+import { sendEmail } from "../config/email.js";
+
+// Define __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Helper function to generate unique invoice number with retry logic
 const generateUniqueInvoiceNumber = async (
@@ -990,5 +995,149 @@ export const downloadInvoice = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Failed to download invoice" });
+  }
+};
+
+// Send invoice via email
+export const sendInvoiceEmail = async (req, res) => {
+  try {
+    const { invoiceId, recipientEmail, subject, message } = req.body;
+    const franchiseId = req.user.franchise_id;
+
+    if (!invoiceId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invoice ID is required" });
+    }
+
+    if (!recipientEmail) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Recipient email is required" });
+    }
+
+    const db = getDb();
+
+    // Fetch invoice data
+    const [[invoice]] = await db.query(
+      `SELECT i.*, f.franchise_name, f.email as franchise_email,
+              f.phone as franchise_phone, f.address as franchise_address
+       FROM invoices i
+       LEFT JOIN franchises f ON i.franchise_id = f.id
+       WHERE i.id = ? AND i.franchise_id = ?`,
+      [invoiceId, franchiseId]
+    );
+
+    if (!invoice) {
+      return res.status(404).json({
+        success: false,
+        message: "Invoice not found",
+      });
+    }
+
+    // Fetch booking items for the invoice
+    let bookings = [];
+    const [bookingItems] = await db.query(
+      `SELECT b.* FROM bookings b
+       INNER JOIN invoice_items ii ON b.id = ii.booking_id
+       WHERE ii.invoice_id = ?`,
+      [invoiceId]
+    );
+    bookings = bookingItems || [];
+
+    // Generate PDF
+    const templatePath = path.join(__dirname, "../templates/invoice.ejs");
+
+    const invoiceData = {
+      ...invoice,
+      invoice_number: invoice.invoice_number || `INV-${invoiceId}`,
+      invoice_date: invoice.invoice_date || new Date().toISOString(),
+    };
+
+    const franchiseData = {
+      company_name: invoice.franchise_name || "Billing Company",
+      email: invoice.franchise_email || "",
+      phone: invoice.franchise_phone || "",
+      address: invoice.franchise_address || "",
+    };
+
+    const customerData = {
+      company_name: invoice.customer_name || "Customer",
+      email: invoice.customer_email || "",
+      phone: invoice.customer_phone || "",
+      address: invoice.customer_address || "",
+    };
+
+    // Render EJS template
+    const html = await ejs.renderFile(templatePath, {
+      invoice: invoiceData,
+      franchise: franchiseData,
+      customer: customerData,
+      bookings: bookings,
+    });
+
+    // Convert HTML to PDF
+    const pdfBuffer = await new Promise((resolve, reject) => {
+      const options = {
+        format: "A4",
+        margin: "10mm",
+        timeout: 30000,
+      };
+
+      pdf.create(html, options).toBuffer((err, buffer) => {
+        if (err) reject(err);
+        else resolve(buffer);
+      });
+    });
+
+    // Sanitize filename
+    const sanitizedInvoiceNumber = invoiceData.invoice_number.replace(
+      /[\/\\?%*:|"<>]/g,
+      "-"
+    );
+    const filename = `Invoice-${sanitizedInvoiceNumber}.pdf`;
+
+    // Send email with PDF attachment
+    await sendEmail({
+      to: recipientEmail,
+      subject:
+        subject ||
+        `Invoice ${invoiceData.invoice_number} from ${franchiseData.company_name}`,
+      html: `
+        <h2>Invoice Details</h2>
+        <p>${
+          message ||
+          `Please find attached your invoice ${invoiceData.invoice_number}.`
+        }</p>
+        <hr />
+        <p><strong>Invoice Number:</strong> ${invoiceData.invoice_number}</p>
+        <p><strong>Invoice Date:</strong> ${dayjs(
+          invoiceData.invoice_date
+        ).format("DD MMM YYYY")}</p>
+        <p><strong>Total Amount:</strong> ₹${parseFloat(
+          invoiceData.total_amount || 0
+        ).toFixed(2)}</p>
+        <hr />
+        <p>Thank you for your business!</p>
+      `,
+      attachments: [
+        {
+          filename: filename,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    res.json({
+      success: true,
+      message: `Invoice sent successfully to ${recipientEmail}`,
+    });
+  } catch (error) {
+    console.error("Send invoice email error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to send invoice email",
+    });
   }
 };

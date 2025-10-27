@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Search, Download, Eye, Edit, Loader, CheckCircle } from "lucide-react";
+import {
+  Search,
+  Download,
+  Eye,
+  Edit,
+  Loader,
+  CheckCircle,
+  Mail,
+} from "lucide-react";
+import EmailModal from "../components/EmailModal";
 
 export default function ViewInvoicePage() {
   const location = useLocation();
@@ -21,6 +30,8 @@ export default function ViewInvoicePage() {
     partial_paid: 0,
   });
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   useEffect(() => {
     fetchSummary();
@@ -175,6 +186,16 @@ export default function ViewInvoicePage() {
     } finally {
       setDownloadingId(null);
     }
+  };
+
+  const handleSendEmail = (invoice) => {
+    setSelectedInvoice(invoice);
+    setShowEmailModal(true);
+  };
+
+  const handleEmailSuccess = () => {
+    setShowEmailModal(false);
+    setSelectedInvoice(null);
   };
 
   return (
@@ -453,6 +474,14 @@ export default function ViewInvoicePage() {
                           Download
                         </button>
                         <button
+                          onClick={() => handleSendEmail(invoice)}
+                          className="rounded bg-purple-600 px-3 py-1 text-xs font-medium text-white hover:bg-purple-700 flex items-center gap-1"
+                          title="Send invoice via email"
+                        >
+                          <Mail className="h-3 w-3" />
+                          Email
+                        </button>
+                        <button
                           onClick={() => handleView(invoice.id)}
                           className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700"
                         >
@@ -473,6 +502,16 @@ export default function ViewInvoicePage() {
           </table>
         </div>
       </div>
+
+      {/* Email Modal */}
+      <EmailModal
+        isOpen={showEmailModal}
+        invoiceId={selectedInvoice?.id}
+        invoiceNumber={selectedInvoice?.invoice_number}
+        customerEmail={selectedInvoice?.customer_email || ""}
+        onClose={() => setShowEmailModal(false)}
+        onSuccess={handleEmailSuccess}
+      />
     </div>
   );
 }

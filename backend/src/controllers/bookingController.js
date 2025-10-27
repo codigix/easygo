@@ -393,33 +393,41 @@ export const filterBookings = async (req, res) => {
     const db = getDb();
     let whereClause = "WHERE franchise_id = ?";
     const params = [franchiseId];
+    const conditions = [];
+    const conditionParams = [];
 
+    // Build independent filter conditions
     if (hasConsignmentNo) {
-      whereClause += " AND consignment_number LIKE ?";
-      params.push(`%${consignment_no.trim()}%`);
+      conditions.push("consignment_number LIKE ?");
+      conditionParams.push(`%${consignment_no.trim()}%`);
     }
 
     if (hasCustomerId) {
-      whereClause += " AND customer_id = ?";
-      params.push(customer_id.trim());
+      conditions.push("customer_id = ?");
+      conditionParams.push(customer_id.trim());
     }
 
     // Use DATE() function for proper date comparison (ignores time)
     if (hasDateRange) {
-      whereClause += " AND DATE(booking_date) >= ?";
-      params.push(from_date);
-
-      whereClause += " AND DATE(booking_date) <= ?";
-      params.push(to_date);
+      conditions.push("(DATE(booking_date) >= ? AND DATE(booking_date) <= ?)");
+      conditionParams.push(from_date, to_date);
     }
 
-    console.log("Filter query:", {
+    // Combine conditions with OR logic if multiple provided, AND if single
+    if (conditions.length > 0) {
+      const operator = conditions.length > 1 ? " OR " : " AND ";
+      whereClause += " AND (" + conditions.join(operator) + ")";
+      params.push(...conditionParams);
+    }
+
+    console.log("Filter query (v2):", {
       whereClause,
       params,
-      customer_id,
-      consignment_no,
-      from_date,
-      to_date,
+      filtersApplied: {
+        customer_id: hasCustomerId ? customer_id : null,
+        consignment_no: hasConsignmentNo ? consignment_no : null,
+        date_range: hasDateRange ? { from: from_date, to: to_date } : null,
+      },
     });
 
     const [bookings] = await db.query(
@@ -428,11 +436,12 @@ export const filterBookings = async (req, res) => {
     );
 
     console.log(
-      `Found ${bookings.length} bookings for franchise ${franchiseId}`
+      `✅ Found ${bookings.length} bookings for franchise ${franchiseId} with filters`
     );
 
     res.json({
       success: true,
+      count: bookings.length,
       data: { bookings },
     });
   } catch (error) {
