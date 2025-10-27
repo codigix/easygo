@@ -54,7 +54,7 @@ export default function EmailModal({
 
     try {
       const response = await axios.post(
-        `/api/invoices/${invoiceId}/send-email`,
+        `${import.meta.env.VITE_API_URL}/api/invoices/${invoiceId}/send-email`,
         {
           invoiceId,
           recipientEmail,
