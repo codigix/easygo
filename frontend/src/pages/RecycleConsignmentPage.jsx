@@ -18,7 +18,7 @@ export default function RecycleConsignmentPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/bookings/recycle/list`,
+        `${import.meta.env.VITE_API_URL}/bookings/recycle/list`,
         {
           params: {
             page: currentPage,
@@ -57,7 +57,7 @@ export default function RecycleConsignmentPage() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/bookings/${id}`,
+        `${import.meta.env.VITE_API_URL}/bookings/${id}`,
         { status: "booked" },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -18,7 +18,7 @@ export default function RecycleInvoicePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/invoices/recycle/list`,
+        `${import.meta.env.VITE_API_URL}/invoices/recycle/list`,
         {
           params: {
             page: currentPage,
@@ -57,7 +57,7 @@ export default function RecycleInvoicePage() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/invoices/${id}`,
+        `${import.meta.env.VITE_API_URL}/invoices/${id}`,
         { status: "draft" },
         { headers: { Authorization: `Bearer ${token}` } }
       );

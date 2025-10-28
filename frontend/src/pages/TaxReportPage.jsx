@@ -28,7 +28,7 @@ export default function TaxReportPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/reports/tax-report`,
+        `${import.meta.env.VITE_API_URL}/reports/tax-report`,
         {
           params: filters,
           headers: { Authorization: `Bearer ${token}` },

@@ -74,7 +74,7 @@ export function ChatSidebar({ isOpen, onClose }) {
       const token = localStorage.getItem("token");
 
       const url = new URL(
-        `${import.meta.env.VITE_API_URL}/api/invoices/${invoiceId}/download`
+        `${import.meta.env.VITE_API_URL}/invoices/${invoiceId}/download`
       );
       if (consignmentNo) {
         url.searchParams.append("consignmentNo", consignmentNo);

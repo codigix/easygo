@@ -42,7 +42,7 @@ export default function GenerateInvoiceWithoutGSTPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/bookings/filter?customer_id=${
+        `${import.meta.env.VITE_API_URL}/bookings/filter?customer_id=${
           formData.customer_id
         }&from_date=${formData.period_from}&to_date=${formData.period_to}`,
         {
@@ -94,7 +94,7 @@ export default function GenerateInvoiceWithoutGSTPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/invoices/generate-without-gst`,
+        `${import.meta.env.VITE_API_URL}/invoices/generate-without-gst`,
         {
           method: "POST",
           headers: {

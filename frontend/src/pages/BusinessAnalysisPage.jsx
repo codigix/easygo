@@ -31,7 +31,7 @@ export default function BusinessAnalysisPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/reports/business-analysis`,
+        `${import.meta.env.VITE_API_URL}/reports/business-analysis`,
         {
           params: filters,
           headers: { Authorization: `Bearer ${token}` },

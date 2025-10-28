@@ -29,7 +29,7 @@ export default function DailyReportPage() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/reports/daily-report`,
+        `${import.meta.env.VITE_API_URL}/reports/daily-report`,
         {
           params: {
             date,
@@ -63,7 +63,7 @@ export default function DailyReportPage() {
   const handleExportToExcel = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/reports/daily-report/export`,
+        `${import.meta.env.VITE_API_URL}/reports/daily-report/export`,
         {
           params: {
             date,

@@ -36,7 +36,7 @@ export default function SettingsPage() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/settings`,
+        `${import.meta.env.VITE_API_URL}/settings`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -59,7 +59,7 @@ export default function SettingsPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/settings/columns`,
+        `${import.meta.env.VITE_API_URL}/settings/columns`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -112,13 +112,9 @@ export default function SettingsPage() {
       }
 
       const token = localStorage.getItem("token");
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/settings`,
-        settings,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await axios.post(`${import.meta.env.VITE_API_URL}/settings`, settings, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       setSuccessMessage("Settings saved successfully!");
       setTimeout(() => setSuccessMessage(""), 3000);

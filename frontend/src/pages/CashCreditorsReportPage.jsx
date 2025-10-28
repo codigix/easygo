@@ -38,7 +38,7 @@ export default function CashCreditorsReportPage() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/reports/creditors-report`,
+        `${import.meta.env.VITE_API_URL}/reports/creditors-report`,
         {
           params: {
             fromDate: formData.fromDate,
@@ -78,7 +78,7 @@ export default function CashCreditorsReportPage() {
   const handleExportToExcel = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/reports/creditors-report/export`,
+        `${import.meta.env.VITE_API_URL}/reports/creditors-report/export`,
         {
           params: {
             fromDate: formData.fromDate,

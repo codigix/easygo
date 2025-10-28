@@ -27,7 +27,7 @@ export default function SaleReportBeforeInvoicePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/reports/sale-before-invoice`,
+        `${import.meta.env.VITE_API_URL}/reports/sale-before-invoice`,
         {
           params: filters,
           headers: { Authorization: `Bearer ${token}` },

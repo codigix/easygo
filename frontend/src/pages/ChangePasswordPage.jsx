@@ -80,7 +80,7 @@ export default function ChangePasswordPage() {
 
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/change-password`,
+        `${import.meta.env.VITE_API_URL}/auth/change-password`,
         {
           oldPassword: formData.oldPassword,
           newPassword: formData.newPassword,

@@ -23,7 +23,7 @@ export default function CustomerSalesComparisonPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/reports/customer-sales-comparison`,
+        `${import.meta.env.VITE_API_URL}/reports/customer-sales-comparison`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

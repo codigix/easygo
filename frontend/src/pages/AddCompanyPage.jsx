@@ -2,6 +2,64 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+const RATE_ROWS = ["SPECIAL DESTINATION", "METRO", "REST OF INDIA", "PUNE"];
+const DOX_RATE_ROWS = [
+  "Within City",
+  "Within State",
+  "Special Destination",
+  "Metro",
+  "Rest of India",
+  "Pune",
+];
+const DTDC_PLUS_COLUMNS = [
+  "Upto 500gm",
+  "Add 500gm",
+  "10 To 25kg",
+  "25 To 50kg",
+  "50 To 100kg",
+  "Add 100kg",
+];
+const DTDC_PLUS_ROWS = ["City", "Zonal", "Metro", "National", "Regional"];
+const EXPRESS_CARGO_COLUMNS = ["UpTo(50)", "Above(50)"];
+const EXPRESS_CARGO_ROWS = ["SPECIAL DESTINATION", "METRO"];
+const PRIORITY_GEC_COLUMNS = ["Upto (1 Kg)", "Additional (1 Kg)"];
+const PRIORITY_GEC_ROWS = ["SPECIAL DESTINATION", "METRO"];
+const PRIORITY_GEC_SLABS = [2, 3, 4];
+const ECOMMERCE_SLABS = [2, 3, 4];
+
+// ========== SLAB CONFIGURATION WITH DYNAMIC COLUMNS ==========
+const SLAB_CONFIG = {
+  "Slab 2": {
+    columns: ["Upto Kg", "Additional Kg"],
+    count: 2,
+  },
+  "Slab 3": {
+    columns: ["Upto Kg", "Upto Kg", "Additional Kg"],
+    count: 3,
+  },
+  "Slab 4": {
+    columns: ["Upto Kg", "Upto Kg", "Upto Kg", "Additional Kg"],
+    count: 4,
+  },
+};
+
+// Helper function to generate columns based on slab
+const generateColumnsForSlab = (slabName) => {
+  if (typeof slabName === "number") {
+    // For numeric slabs (Priority, E-Commerce): slabNum = total columns
+    const slabNum = slabName;
+    const columns = [];
+    for (let i = 0; i < slabNum - 1; i++) {
+      columns.push(`Upto Kg`);
+    }
+    columns.push("Additional Kg");
+    return columns;
+  } else {
+    // For string slabs
+    return SLAB_CONFIG[slabName]?.columns || ["Upto Kg", "Additional Kg"];
+  }
+};
+
 const AddCompanyPage = () => {
   // Courier company types
   const COURIER_TYPES = [
@@ -23,6 +81,93 @@ const AddCompanyPage = () => {
   const tabScrollRef = useRef(null);
   const fileInputRef = useRef(null);
   const [uploadLoading, setUploadLoading] = useState(false);
+
+  // Separate slab state for each courier type
+  const [slabState, setSlabState] = useState({
+    Dox: "Slab 2",
+    NonDox: { air: "Slab 2", surface: "Slab 2" },
+    "Dtdc PLUS": "Slab 2",
+    "Dtdc PTP": { air: "Slab 2", surface: "Slab 2" },
+    "Express Cargo": "Slab 2",
+    Priority: 2,
+    "E-Commerce": 2,
+  });
+
+  // Helper to initialize table data with correct column count
+  const initializeTableData = (rows, colCount) => {
+    return rows.map(() => Array(colCount).fill(""));
+  };
+
+  // DOX table data state - DYNAMIC COLUMNS BY SLAB
+  const [doxTableData, setDoxTableData] = useState({
+    "Slab 2": DOX_RATE_ROWS.map(() => ["", ""]), // 2 columns
+    "Slab 3": DOX_RATE_ROWS.map(() => ["", "", ""]), // 3 columns
+    "Slab 4": DOX_RATE_ROWS.map(() => ["", "", "", ""]), // 4 columns
+  });
+
+  // DTDC PLUS table data state - DYNAMIC COLUMNS BY SLAB
+  const [dtdcPlusTableData, setDtdcPlusTableData] = useState({
+    "Slab 2": DTDC_PLUS_ROWS.map(() => Array(2).fill("")), // 2 columns
+    "Slab 3": DTDC_PLUS_ROWS.map(() => Array(3).fill("")), // 3 columns
+    "Slab 4": DTDC_PLUS_ROWS.map(() => Array(4).fill("")), // 4 columns
+  });
+
+  // DTDC PTP table data state - DYNAMIC COLUMNS BY SLAB (two tables)
+  const [dtdcPtpTableData, setDtdcPtpTableData] = useState({
+    "Slab 2": {
+      ptp: DTDC_PLUS_ROWS.map(() => Array(2).fill("")), // 2 columns
+      ptp2: DTDC_PLUS_ROWS.map(() => Array(2).fill("")), // 2 columns
+    },
+    "Slab 3": {
+      ptp: DTDC_PLUS_ROWS.map(() => Array(3).fill("")), // 3 columns
+      ptp2: DTDC_PLUS_ROWS.map(() => Array(3).fill("")), // 3 columns
+    },
+    "Slab 4": {
+      ptp: DTDC_PLUS_ROWS.map(() => Array(4).fill("")), // 4 columns
+      ptp2: DTDC_PLUS_ROWS.map(() => Array(4).fill("")), // 4 columns
+    },
+  });
+
+  // Express Cargo table data state - DYNAMIC COLUMNS BY SLAB
+  const [expressCargoTableData, setExpressCargoTableData] = useState({
+    "Slab 2": EXPRESS_CARGO_ROWS.map(() => Array(2).fill("")), // 2 columns
+    "Slab 3": EXPRESS_CARGO_ROWS.map(() => Array(3).fill("")), // 3 columns
+    "Slab 4": EXPRESS_CARGO_ROWS.map(() => Array(4).fill("")), // 4 columns
+  });
+
+  // Priority GEC table data state - DYNAMIC COLUMNS BY SLAB
+  const [priorityGecTableData, setPriorityGecTableData] = useState({
+    2: PRIORITY_GEC_ROWS.map(() => Array(2).fill("")), // Slab 2: 1 Upto + 1 Additional = 2
+    3: PRIORITY_GEC_ROWS.map(() => Array(3).fill("")), // Slab 3: 2 Upto + 1 Additional = 3
+    4: PRIORITY_GEC_ROWS.map(() => Array(4).fill("")), // Slab 4: 3 Upto + 1 Additional = 4
+  });
+
+  // E-Commerce table data state
+  const [ecommerceTableData, setEcommerceTableData] = useState([
+    { city: "PUNE", upto: "1", additional: "1" },
+  ]);
+
+  // E-Commerce weight ranges state
+  const [ecommerceWeightRanges, setEcommerceWeightRanges] = useState({
+    upto: "1",
+    additional: "1",
+  });
+
+  // NonDox (Air & Surface) table data state - DYNAMIC COLUMNS BY SLAB
+  const [nonDoxTableData, setNonDoxTableData] = useState({
+    "Slab 2": {
+      air: RATE_ROWS.map(() => Array(2).fill("")), // 2 columns
+      surface: RATE_ROWS.map(() => Array(2).fill("")), // 2 columns
+    },
+    "Slab 3": {
+      air: RATE_ROWS.map(() => Array(3).fill("")), // 3 columns
+      surface: RATE_ROWS.map(() => Array(3).fill("")), // 3 columns
+    },
+    "Slab 4": {
+      air: RATE_ROWS.map(() => Array(4).fill("")), // 4 columns
+      surface: RATE_ROWS.map(() => Array(4).fill("")), // 4 columns
+    },
+  });
 
   const [formData, setFormData] = useState({
     company_id: "",
@@ -61,7 +206,7 @@ const AddCompanyPage = () => {
       setFetchLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/rates/company`,
+        `${import.meta.env.VITE_API_URL}/rates/company`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -107,7 +252,7 @@ const AddCompanyPage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/rates/company`,
+        `${import.meta.env.VITE_API_URL}/rates/company`,
         { ...formData, courier_type: activeTab },
         {
           headers: {
@@ -186,7 +331,7 @@ const AddCompanyPage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/rates/company/import-excel`,
+        `${import.meta.env.VITE_API_URL}/rates/company/import-excel`,
         formDataToSend,
         {
           headers: {
@@ -609,92 +754,875 @@ const AddCompanyPage = () => {
                 </button>
               </div>
             </form>
-          ) : (
-            // Show company data for selected courier type
-            <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-blue-900 font-semibold">
-                  📋 Companies for {activeTab}
-                </p>
-                <p className="text-blue-700 text-sm mt-1">
-                  Manage rate master data for this courier company
-                </p>
-              </div>
+          ) : activeTab === "Dox" ? (
+            // ========== DOX UI - DYNAMIC COLUMNS BY SLAB ==========
+            <div className="w-full">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-700 mb-6">
+                  {activeTab} Rate Configuration
+                </h2>
 
-              {fetchLoading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <p className="text-gray-600 mt-2">Loading companies...</p>
+                {/* Slab Selection */}
+                <div className="flex flex-wrap gap-4 mb-6">
+                  {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                    <label
+                      key={slab}
+                      className="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded"
+                    >
+                      <input
+                        type="radio"
+                        name="doxSlab"
+                        value={slab}
+                        checked={slabState.Dox === slab}
+                        onChange={() =>
+                          setSlabState((prev) => ({ ...prev, Dox: slab }))
+                        }
+                        className="w-4 h-4 accent-blue-600"
+                      />
+                      <span className="font-medium">{slab}</span>
+                    </label>
+                  ))}
                 </div>
-              ) : companies.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-100 border-b border-gray-300">
+
+                {/* Rate Table with Dynamic Columns */}
+                <div className="overflow-x-auto mb-6">
+                  <table className="w-full border border-gray-300 text-sm text-center">
+                    <thead className="bg-blue-50">
                       <tr>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                          Company ID
+                        <th className="border px-4 py-2 text-left font-semibold">
+                          Destination
                         </th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                          Company Name
+                        {SLAB_CONFIG[slabState.Dox]?.columns.map(
+                          (column, idx) => (
+                            <th
+                              key={idx}
+                              className="border px-4 py-2 font-semibold"
+                            >
+                              {column}
+                            </th>
+                          )
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {DOX_RATE_ROWS.map((row, rowIdx) => (
+                        <tr key={row} className="hover:bg-gray-50">
+                          <td className="border px-4 py-2 text-left font-medium">
+                            {row}
+                          </td>
+                          {doxTableData[slabState.Dox][rowIdx]?.map(
+                            (value, colIdx) => (
+                              <td key={colIdx} className="border px-2 py-2">
+                                <input
+                                  type="number"
+                                  value={value}
+                                  onChange={(e) => {
+                                    const newData = JSON.parse(
+                                      JSON.stringify(doxTableData)
+                                    );
+                                    newData[slabState.Dox][rowIdx][colIdx] =
+                                      e.target.value;
+                                    setDoxTableData(newData);
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-full border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                />
+                              </td>
+                            )
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
+                  <p className="text-sm text-blue-800">
+                    ℹ️ {slabState.Dox} has{" "}
+                    <strong>{SLAB_CONFIG[slabState.Dox]?.count} columns</strong>
+                    . Click on different slabs to see different column counts.
+                  </p>
+                </div>
+
+                {/* Save Button */}
+                <div className="flex justify-end">
+                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
+                    Save Rates
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "Dtdc PLUS" ? (
+            // ========== DTDC PLUS UI ==========
+            <div className="w-full">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-700 mb-6">
+                  {activeTab} Rate Configuration
+                </h2>
+
+                {/* Slab Selection */}
+                <div className="flex flex-wrap gap-4 mb-6">
+                  {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                    <label
+                      key={slab}
+                      className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="dtdcPlusSlab"
+                        value={slab}
+                        checked={slabState["Dtdc PLUS"] === slab}
+                        onChange={() =>
+                          setSlabState((prev) => ({
+                            ...prev,
+                            "Dtdc PLUS": slab,
+                          }))
+                        }
+                        className="w-4 h-4 accent-blue-600"
+                      />
+                      <span className="font-medium">{slab}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {/* Rate Table with Dynamic Columns */}
+                <div className="overflow-x-auto mb-6">
+                  <table className="w-full border border-gray-300 text-sm text-center">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="border px-4 py-2 text-left">Zone</th>
+                        {generateColumnsForSlab(slabState["Dtdc PLUS"]).map(
+                          (col, idx) => (
+                            <th key={idx} className="border px-4 py-2">
+                              {col}
+                            </th>
+                          )
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {DTDC_PLUS_ROWS.map((row, rIndex) => (
+                        <tr key={row} className="hover:bg-gray-50">
+                          <td className="border px-4 py-2 text-left font-medium">
+                            {row}
+                          </td>
+                          {dtdcPlusTableData[slabState["Dtdc PLUS"]]?.[
+                            rIndex
+                          ]?.map((value, cIndex) => (
+                            <td key={cIndex} className="border px-2 py-2">
+                              <input
+                                type="number"
+                                value={value}
+                                onChange={(e) => {
+                                  const updated = JSON.parse(
+                                    JSON.stringify(dtdcPlusTableData)
+                                  );
+                                  updated[slabState["Dtdc PLUS"]][rIndex][
+                                    cIndex
+                                  ] = e.target.value;
+                                  setDtdcPlusTableData(updated);
+                                }}
+                                placeholder="0.00"
+                                className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
+                  <p className="text-sm text-blue-800">
+                    ℹ️ {slabState["Dtdc PLUS"]} has{" "}
+                    <strong>
+                      {generateColumnsForSlab(slabState["Dtdc PLUS"]).length}{" "}
+                      columns
+                    </strong>
+                    . Click on different slabs to see different column counts.
+                  </p>
+                </div>
+
+                {/* Save Button */}
+                <div className="flex justify-end">
+                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
+                    Save Rates
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "Dtdc PTP" ? (
+            // ========== DTDC PTP UI - TWO TABLES ==========
+            <div className="w-full">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-8">
+                <h2 className="text-lg font-semibold text-gray-700">
+                  {activeTab} Rate Configuration
+                </h2>
+
+                {/* Slab Selection */}
+                <div className="flex flex-wrap gap-4">
+                  {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                    <label
+                      key={slab}
+                      className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="dtdcPtpSlab"
+                        value={slab}
+                        checked={slabState["Dtdc PTP"]?.air === slab}
+                        onChange={() =>
+                          setSlabState((prev) => ({
+                            ...prev,
+                            "Dtdc PTP": {
+                              ...prev["Dtdc PTP"],
+                              air: slab,
+                            },
+                          }))
+                        }
+                        className="w-4 h-4 accent-blue-600"
+                      />
+                      <span className="font-medium">{slab}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {/* PTP Table 1 */}
+                <div>
+                  <h3 className="text-base font-semibold text-gray-700 mb-4">
+                    PTP
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border border-gray-300 text-sm text-center">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="border px-4 py-2 text-left">Zone</th>
+                          {generateColumnsForSlab(
+                            slabState["Dtdc PTP"]?.air
+                          ).map((col, idx) => (
+                            <th key={idx} className="border px-4 py-2">
+                              {col}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {DTDC_PLUS_ROWS.map((row, rIndex) => (
+                          <tr key={row} className="even:bg-gray-50">
+                            <td className="border px-4 py-2 text-left font-medium">
+                              {row}
+                            </td>
+                            {dtdcPtpTableData[
+                              slabState["Dtdc PTP"]?.air
+                            ]?.ptp?.[rIndex]?.map((value, cIndex) => (
+                              <td key={cIndex} className="border px-2 py-2">
+                                <input
+                                  type="number"
+                                  value={value}
+                                  onChange={(e) => {
+                                    const updated = JSON.parse(
+                                      JSON.stringify(dtdcPtpTableData)
+                                    );
+                                    updated[slabState["Dtdc PTP"]?.air].ptp[
+                                      rIndex
+                                    ][cIndex] = e.target.value;
+                                    setDtdcPtpTableData(updated);
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                />
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* PTP Table 2 */}
+                <div className="pt-4 border-t border-gray-200">
+                  <h3 className="text-base font-semibold text-gray-700 mb-4">
+                    PTP 2
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border border-gray-300 text-sm text-center">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="border px-4 py-2 text-left">Zone</th>
+                          {generateColumnsForSlab(
+                            slabState["Dtdc PTP"]?.air
+                          ).map((col, idx) => (
+                            <th key={idx} className="border px-4 py-2">
+                              {col}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {DTDC_PLUS_ROWS.map((row, rIndex) => (
+                          <tr key={row} className="even:bg-gray-50">
+                            <td className="border px-4 py-2 text-left font-medium">
+                              {row}
+                            </td>
+                            {dtdcPtpTableData[
+                              slabState["Dtdc PTP"]?.air
+                            ]?.ptp2?.[rIndex]?.map((value, cIndex) => (
+                              <td key={cIndex} className="border px-2 py-2">
+                                <input
+                                  type="number"
+                                  value={value}
+                                  onChange={(e) => {
+                                    const updated = JSON.parse(
+                                      JSON.stringify(dtdcPtpTableData)
+                                    );
+                                    updated[slabState["Dtdc PTP"]?.air].ptp2[
+                                      rIndex
+                                    ][cIndex] = e.target.value;
+                                    setDtdcPtpTableData(updated);
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                />
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="flex justify-end pt-4 border-t border-gray-200">
+                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
+                    Save Rates
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "Express Cargo" ? (
+            // ========== EXPRESS CARGO UI ==========
+            <div className="w-full">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-700 mb-6">
+                  {activeTab} Rate Configuration
+                </h2>
+
+                {/* Slab Selection */}
+                <div className="flex flex-wrap gap-4 mb-6">
+                  {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                    <label
+                      key={slab}
+                      className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="expressCargoSlab"
+                        value={slab}
+                        checked={slabState["Express Cargo"] === slab}
+                        onChange={() =>
+                          setSlabState((prev) => ({
+                            ...prev,
+                            "Express Cargo": slab,
+                          }))
+                        }
+                        className="w-4 h-4 accent-blue-600"
+                      />
+                      <span className="font-medium">{slab}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {/* Rate Table with Dynamic Columns */}
+                <div className="overflow-x-auto mb-6">
+                  <table className="w-full border border-gray-300 text-sm text-center">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="border px-4 py-2 text-left">Zone</th>
+                        {generateColumnsForSlab(slabState["Express Cargo"]).map(
+                          (col, idx) => (
+                            <th key={idx} className="border px-4 py-2">
+                              {col}
+                            </th>
+                          )
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {EXPRESS_CARGO_ROWS.map((row, rIndex) => (
+                        <tr key={row} className="hover:bg-gray-50">
+                          <td className="border px-4 py-2 text-left font-medium">
+                            {row}
+                          </td>
+                          {expressCargoTableData[slabState["Express Cargo"]]?.[
+                            rIndex
+                          ]?.map((value, cIndex) => (
+                            <td key={cIndex} className="border px-2 py-2">
+                              <input
+                                type="number"
+                                value={value}
+                                onChange={(e) => {
+                                  const updated = JSON.parse(
+                                    JSON.stringify(expressCargoTableData)
+                                  );
+                                  updated[slabState["Express Cargo"]][rIndex][
+                                    cIndex
+                                  ] = e.target.value;
+                                  setExpressCargoTableData(updated);
+                                }}
+                                placeholder="0.00"
+                                className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
+                  <p className="text-sm text-blue-800">
+                    ℹ️ {slabState["Express Cargo"]} has{" "}
+                    <strong>
+                      {
+                        generateColumnsForSlab(slabState["Express Cargo"])
+                          .length
+                      }{" "}
+                      columns
+                    </strong>
+                    . Click on different slabs to see different column counts.
+                  </p>
+                </div>
+
+                {/* Save Button */}
+                <div className="flex justify-end">
+                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
+                    Save Rates
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "Priority" ? (
+            // ========== PRIORITY GEC UI ==========
+            <div className="w-full">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-700 mb-6">
+                  {activeTab} - GEC
+                </h2>
+
+                {/* Slab Selection */}
+                <div className="flex flex-wrap gap-4 mb-6">
+                  {PRIORITY_GEC_SLABS.map((slab) => (
+                    <label
+                      key={slab}
+                      className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="priorityGecSlab"
+                        value={slab}
+                        checked={slabState["Priority"] === slab}
+                        onChange={() =>
+                          setSlabState((prev) => ({
+                            ...prev,
+                            Priority: slab,
+                          }))
+                        }
+                        className="w-4 h-4 accent-blue-600"
+                      />
+                      <span className="font-medium">Slab {slab}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {/* Rate Table with Dynamic Columns */}
+                <div className="overflow-x-auto mb-6">
+                  <table className="w-full border border-gray-300 text-sm text-center">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="border px-4 py-2 text-left">Zone</th>
+                        {generateColumnsForSlab(slabState["Priority"]).map(
+                          (col, idx) => (
+                            <th key={idx} className="border px-4 py-2">
+                              {col}
+                            </th>
+                          )
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {PRIORITY_GEC_ROWS.map((row, rIndex) => (
+                        <tr key={row} className="hover:bg-gray-50">
+                          <td className="border px-4 py-2 text-left font-medium">
+                            {row}
+                          </td>
+                          {priorityGecTableData[slabState["Priority"]]?.[
+                            rIndex
+                          ]?.map((value, cIndex) => (
+                            <td key={cIndex} className="border px-2 py-2">
+                              <input
+                                type="number"
+                                value={value}
+                                onChange={(e) => {
+                                  const updated = JSON.parse(
+                                    JSON.stringify(priorityGecTableData)
+                                  );
+                                  updated[slabState["Priority"]][rIndex][
+                                    cIndex
+                                  ] = e.target.value;
+                                  setPriorityGecTableData(updated);
+                                }}
+                                placeholder="0.00"
+                                className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
+                  <p className="text-sm text-blue-800">
+                    ℹ️ Slab {slabState["Priority"]} has{" "}
+                    <strong>
+                      {generateColumnsForSlab(slabState["Priority"]).length}{" "}
+                      columns
+                    </strong>
+                    . Click on different slabs to see different column counts.
+                  </p>
+                </div>
+
+                {/* Save Button */}
+                <div className="flex justify-end">
+                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
+                    Save Rates
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "E-Commerce" ? (
+            // ========== E-COMMERCE PRIORITY 7X UI ==========
+            <div className="w-full">
+              <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-6 max-w-4xl mx-auto">
+                <h2 className="text-lg font-semibold text-center mb-4">
+                  Ecommerce Priority - 7X
+                </h2>
+
+                {/* Slab Selection */}
+                <div className="flex justify-center gap-8 mb-6">
+                  {ECOMMERCE_SLABS.map((slab) => (
+                    <label key={slab} className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="ecommerceSlab"
+                        value={slab}
+                        checked={slabState["E-Commerce"] === slab}
+                        onChange={() =>
+                          setSlabState((prev) => ({
+                            ...prev,
+                            "E-Commerce": slab,
+                          }))
+                        }
+                        className="accent-blue-600 w-4 h-4"
+                      />
+                      <span className="font-medium text-gray-700">
+                        Slab {slab}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto border border-gray-300 rounded-md">
+                  <table className="w-full text-sm text-gray-800">
+                    <thead className="bg-blue-50 text-gray-800">
+                      <tr>
+                        <th className="border border-gray-300 p-2 text-left w-1/3">
+                          Zone / City
                         </th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                          Email
+                        <th className="border border-gray-300 p-2 text-center">
+                          Upto{" "}
+                          <input
+                            type="number"
+                            value={ecommerceWeightRanges.upto}
+                            onChange={(e) =>
+                              setEcommerceWeightRanges((prev) => ({
+                                ...prev,
+                                upto: e.target.value,
+                              }))
+                            }
+                            className="w-14 border border-gray-300 rounded-md text-center mx-1 py-0.5"
+                          />{" "}
+                          Kg
                         </th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                          Phone
-                        </th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                          GST No
-                        </th>
-                        <th className="px-4 py-3 text-center font-semibold text-gray-700">
-                          Status
+                        <th className="border border-gray-300 p-2 text-center">
+                          Additional{" "}
+                          <input
+                            type="number"
+                            value={ecommerceWeightRanges.additional}
+                            onChange={(e) =>
+                              setEcommerceWeightRanges((prev) => ({
+                                ...prev,
+                                additional: e.target.value,
+                              }))
+                            }
+                            className="w-14 border border-gray-300 rounded-md text-center mx-1 py-0.5"
+                          />{" "}
+                          Kg
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {companies.map((company) => (
-                        <tr key={company.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 text-gray-900">
-                            {company.company_id}
+                    <tbody>
+                      {ecommerceTableData.map((row, index) => (
+                        <tr key={index} className="even:bg-gray-50">
+                          <td className="border border-gray-300 p-2 font-medium">
+                            {row.city}
                           </td>
-                          <td className="px-4 py-3 text-gray-900">
-                            {company.company_name}
+                          <td className="border border-gray-300 p-2 text-center">
+                            <input
+                              type="number"
+                              value={row.upto}
+                              onChange={(e) => {
+                                const updated = [...ecommerceTableData];
+                                updated[index].upto = e.target.value;
+                                setEcommerceTableData(updated);
+                              }}
+                              className="w-20 border border-gray-300 rounded-md text-center py-1"
+                            />
                           </td>
-                          <td className="px-4 py-3 text-gray-600">
-                            {company.email}
-                          </td>
-                          <td className="px-4 py-3 text-gray-600">
-                            {company.phone}
-                          </td>
-                          <td className="px-4 py-3 text-gray-600">
-                            {company.gst_no}
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                company.status === "active"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {company.status}
-                            </span>
+                          <td className="border border-gray-300 p-2 text-center">
+                            <input
+                              type="number"
+                              value={row.additional}
+                              onChange={(e) => {
+                                const updated = [...ecommerceTableData];
+                                updated[index].additional = e.target.value;
+                                setEcommerceTableData(updated);
+                              }}
+                              className="w-20 border border-gray-300 rounded-md text-center py-1"
+                            />
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500 mb-2">
-                    No companies found for {activeTab}
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    Switch to "Add Company" tab to create a new company
-                  </p>
+
+                {/* No Data Found */}
+                {ecommerceTableData.length === 0 && (
+                  <div className="text-center text-gray-500 text-sm mt-4">
+                    No Data Found
+                  </div>
+                )}
+
+                {/* Save Button */}
+                <div className="flex justify-end mt-6">
+                  <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
+                    Save
+                  </button>
                 </div>
-              )}
+              </div>
+            </div>
+          ) : (
+            // ========== OTHER COURIER TYPES - AIR & SURFACE SECTIONS ==========
+            <div className="w-full">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm space-y-10">
+                <h2 className="text-lg font-semibold text-gray-700 px-6 pt-6">
+                  {activeTab} Rate Configuration
+                </h2>
+
+                {/* ========== AIR RATE CARGO SECTION ========== */}
+                <section className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                    Air Rate Cargo
+                  </h3>
+
+                  {/* Slab Selection */}
+                  <div className="flex gap-6 mb-6">
+                    {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                      <label
+                        key={slab}
+                        className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                      >
+                        <input
+                          type="radio"
+                          name="airSlab"
+                          value={slab}
+                          checked={slabState[activeTab]?.air === slab}
+                          onChange={() =>
+                            setSlabState((prev) => ({
+                              ...prev,
+                              [activeTab]: {
+                                ...prev[activeTab],
+                                air: slab,
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-blue-600"
+                        />
+                        <span className="font-medium">{slab}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Table with Dynamic Columns */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full border text-sm text-center">
+                      <thead className="bg-blue-50">
+                        <tr>
+                          <th className="border px-4 py-3 text-left font-semibold text-gray-700">
+                            Zone
+                          </th>
+                          {generateColumnsForSlab(
+                            slabState[activeTab]?.air
+                          ).map((col, idx) => (
+                            <th
+                              key={idx}
+                              className="border px-4 py-3 font-semibold text-gray-700"
+                            >
+                              {col}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {RATE_ROWS.map((row, rIndex) => (
+                          <tr key={row} className="hover:bg-gray-50">
+                            <td className="border px-4 py-2 text-left font-medium text-gray-900">
+                              {row}
+                            </td>
+                            {nonDoxTableData[slabState[activeTab]?.air]?.air?.[
+                              rIndex
+                            ]?.map((value, cIndex) => (
+                              <td key={cIndex} className="border px-2 py-2">
+                                <input
+                                  type="number"
+                                  value={value}
+                                  onChange={(e) => {
+                                    const updated = JSON.parse(
+                                      JSON.stringify(nonDoxTableData)
+                                    );
+                                    updated[slabState[activeTab]?.air].air[
+                                      rIndex
+                                    ][cIndex] = e.target.value;
+                                    setNonDoxTableData(updated);
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                />
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                {/* ========== RATE SURFACE CARGO SECTION ========== */}
+                <section className="p-6 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                    Rate Surface Cargo
+                  </h3>
+
+                  {/* Slab Selection */}
+                  <div className="flex gap-6 mb-6">
+                    {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                      <label
+                        key={slab}
+                        className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                      >
+                        <input
+                          type="radio"
+                          name="surfaceSlab"
+                          value={slab}
+                          checked={slabState[activeTab]?.surface === slab}
+                          onChange={() =>
+                            setSlabState((prev) => ({
+                              ...prev,
+                              [activeTab]: {
+                                ...prev[activeTab],
+                                surface: slab,
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-blue-600"
+                        />
+                        <span className="font-medium">{slab}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Table with Dynamic Columns */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full border text-sm text-center">
+                      <thead className="bg-blue-50">
+                        <tr>
+                          <th className="border px-4 py-3 text-left font-semibold text-gray-700">
+                            Zone
+                          </th>
+                          {generateColumnsForSlab(
+                            slabState[activeTab]?.surface
+                          ).map((col, idx) => (
+                            <th
+                              key={idx}
+                              className="border px-4 py-3 font-semibold text-gray-700"
+                            >
+                              {col}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {RATE_ROWS.map((row, rIndex) => (
+                          <tr key={row} className="hover:bg-gray-50">
+                            <td className="border px-4 py-2 text-left font-medium text-gray-900">
+                              {row}
+                            </td>
+                            {nonDoxTableData[
+                              slabState[activeTab]?.surface
+                            ]?.surface?.[rIndex]?.map((value, cIndex) => (
+                              <td key={cIndex} className="border px-2 py-2">
+                                <input
+                                  type="number"
+                                  value={value}
+                                  onChange={(e) => {
+                                    const updated = JSON.parse(
+                                      JSON.stringify(nonDoxTableData)
+                                    );
+                                    updated[
+                                      slabState[activeTab]?.surface
+                                    ].surface[rIndex][cIndex] = e.target.value;
+                                    setNonDoxTableData(updated);
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                />
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                {/* Save Button */}
+                <div className="p-6 border-t border-gray-200 flex justify-end">
+                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
+                    Save Rates
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

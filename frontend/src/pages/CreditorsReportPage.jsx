@@ -30,7 +30,7 @@ export default function CreditorsReportPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/reports/creditors`,
+        `${import.meta.env.VITE_API_URL}/reports/creditors`,
         {
           params: filters,
           headers: { Authorization: `Bearer ${token}` },

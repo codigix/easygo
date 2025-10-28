@@ -19,7 +19,7 @@ export default function UpdateRatePage() {
     try {
       const query = new URLSearchParams(filters).toString();
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/bookings/filter?${query}`,
+        `${import.meta.env.VITE_API_URL}/bookings/filter?${query}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -40,7 +40,7 @@ export default function UpdateRatePage() {
     }
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/bookings/update-rate`,
+        `${import.meta.env.VITE_API_URL}/bookings/update-rate`,
         {
           method: "POST",
           headers: {

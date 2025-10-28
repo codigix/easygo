@@ -45,9 +45,7 @@ export default function GenerateSingleInvoicePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/bookings/consignment/${
-          formData.consignment_no
-        }`,
+        `${import.meta.env.VITE_API_URL}/bookings/consignment/${formData.consignment_no}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -97,7 +95,7 @@ export default function GenerateSingleInvoicePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/invoices/generate-single`,
+        `${import.meta.env.VITE_API_URL}/invoices/generate-single`,
         {
           method: "POST",
           headers: {

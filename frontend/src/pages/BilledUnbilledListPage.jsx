@@ -29,7 +29,7 @@ export default function BilledUnbilledListPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/reports/billed-unbilled`,
+        `${import.meta.env.VITE_API_URL}/reports/billed-unbilled`,
         {
           params: filters,
           headers: { Authorization: `Bearer ${token}` },

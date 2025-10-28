@@ -41,7 +41,7 @@ export default function InvoiceDisplayPage() {
         // Fetch associated bookings
         if (invoiceData.period_from && invoiceData.period_to) {
           const bookingsResponse = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/bookings/filter?customer_id=${
+            `${import.meta.env.VITE_API_URL}/bookings/filter?customer_id=${
               invoiceData.customer_id
             }&from_date=${invoiceData.period_from}&to_date=${
               invoiceData.period_to
