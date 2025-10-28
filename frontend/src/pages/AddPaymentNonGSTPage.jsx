@@ -25,7 +25,9 @@ export default function AddPaymentNonGSTPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/payments/invoice-summary?gst=false`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/payments/invoice-summary?gst=false`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -55,7 +57,9 @@ export default function AddPaymentNonGSTPage() {
       }).toString();
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/payments/invoice-list?${queryParams}`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/payments/invoice-list?${queryParams}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

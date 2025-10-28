@@ -793,7 +793,9 @@ const FranchiseFormPage = () => {
                     {uploadUrls.logo_url ? (
                       <div>
                         <img
-                          src={`http://localhost:5000${uploadUrls.logo_url}`}
+                          src={`${import.meta.env.VITE_API_URL}${
+                            uploadUrls.logo_url
+                          }`}
                           alt="Logo"
                           className="h-16 mx-auto mb-2"
                         />
@@ -830,7 +832,9 @@ const FranchiseFormPage = () => {
                     {uploadUrls.stamp_url ? (
                       <div>
                         <img
-                          src={`http://localhost:5000${uploadUrls.stamp_url}`}
+                          src={`${import.meta.env.VITE_API_URL}${
+                            uploadUrls.stamp_url
+                          }`}
                           alt="Stamp"
                           className="h-16 mx-auto mb-2"
                         />
@@ -867,7 +871,9 @@ const FranchiseFormPage = () => {
                     {uploadUrls.qr_code_url ? (
                       <div>
                         <img
-                          src={`http://localhost:5000${uploadUrls.qr_code_url}`}
+                          src={`${import.meta.env.VITE_API_URL}${
+                            uploadUrls.qr_code_url
+                          }`}
                           alt="QR Code"
                           className="h-16 mx-auto mb-2"
                         />

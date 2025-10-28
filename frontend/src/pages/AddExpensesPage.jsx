@@ -42,7 +42,7 @@ export default function AddExpensesPage() {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/expenses`,
+        `${import.meta.env.VITE_API_URL}/api/expenses`,
         {
           ...formData,
           amount: parseFloat(formData.amount),

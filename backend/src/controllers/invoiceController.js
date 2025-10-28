@@ -1087,33 +1087,51 @@ export const sendInvoiceEmail = async (req, res) => {
     const attachments = [];
     let pdfGenerationSuccessful = false;
 
-    // Try to convert HTML to PDF
+    // Try to convert HTML to PDF (with better error handling)
     try {
       const pdfBuffer = await new Promise((resolve, reject) => {
         const options = {
           format: "A4",
           margin: "10mm",
-          timeout: 30000,
+          timeout: 60000, // Extended timeout for production
+          header: { height: "0mm" },
+          footer: { height: "0mm" },
         };
 
-        pdf.create(html, options).toBuffer((err, buffer) => {
-          if (err) reject(err);
-          else resolve(buffer);
-        });
+        try {
+          pdf.create(html, options).toBuffer((err, buffer) => {
+            if (err) {
+              reject(err);
+            } else if (buffer && buffer.length > 0) {
+              resolve(buffer);
+            } else {
+              reject(new Error("PDF buffer is empty"));
+            }
+          });
+        } catch (createError) {
+          reject(createError);
+        }
+
+        // Set a hard timeout to prevent hanging
+        setTimeout(() => {
+          reject(new Error("PDF generation timeout after 65 seconds"));
+        }, 65000);
       });
 
-      attachments.push({
-        filename: filename,
-        content: pdfBuffer,
-        contentType: "application/pdf",
-      });
-      pdfGenerationSuccessful = true;
+      if (pdfBuffer && pdfBuffer.length > 0) {
+        attachments.push({
+          filename: filename,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        });
+        pdfGenerationSuccessful = true;
+      }
     } catch (pdfError) {
       console.warn(
-        "PDF generation failed, sending HTML email instead:",
-        pdfError
+        "PDF generation warning (email will still be sent as HTML):",
+        pdfError.message || String(pdfError)
       );
-      // Continue with sending email without PDF attachment
+      // Continue with sending email without PDF attachment - this is NOT a fatal error
     }
 
     // Prepare email content
@@ -1167,24 +1185,36 @@ export const sendInvoiceEmail = async (req, res) => {
     `;
 
     // Send email with optional PDF attachment
-    await sendEmail({
-      to: recipientEmail,
-      subject:
-        subject ||
-        `Invoice ${invoiceData.invoice_number} from ${franchiseData.company_name}`,
-      html: emailHtml,
-      attachments: attachments,
-    });
+    try {
+      await sendEmail({
+        to: recipientEmail,
+        subject:
+          subject ||
+          `Invoice ${invoiceData.invoice_number} from ${franchiseData.company_name}`,
+        html: emailHtml,
+        attachments: attachments,
+      });
 
-    res.json({
-      success: true,
-      message: `Invoice sent successfully to ${recipientEmail}${
-        !pdfGenerationSuccessful
-          ? " (sent as HTML due to PDF generation issue)"
-          : ""
-      }`,
-      pdfGenerated: pdfGenerationSuccessful,
-    });
+      res.json({
+        success: true,
+        message: `Invoice sent successfully to ${recipientEmail}${
+          !pdfGenerationSuccessful
+            ? " (sent as HTML due to PDF generation issue)"
+            : ""
+        }`,
+        pdfGenerated: pdfGenerationSuccessful,
+      });
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      res.status(500).json({
+        success: false,
+        message: emailError.message || "Failed to send invoice email",
+        details:
+          process.env.NODE_ENV === "development"
+            ? emailError.toString()
+            : undefined,
+      });
+    }
   } catch (error) {
     console.error("Send invoice email error:", error);
     res.status(500).json({

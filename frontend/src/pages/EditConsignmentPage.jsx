@@ -27,7 +27,7 @@ export default function EditConsignmentPage() {
     try {
       const query = new URLSearchParams(filters).toString();
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/bookings/filter?${query}`,
+        `${import.meta.env.VITE_API_URL}/api/bookings/filter?${query}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

@@ -31,7 +31,7 @@ export default function AddPaymentsPage() {
     setTableLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/payments/consignment-report`,
+        `${import.meta.env.VITE_API_URL}/api/payments/consignment-report`,
         {
           params: {
             page: pagination.page,
@@ -84,7 +84,7 @@ export default function AddPaymentsPage() {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/payments`,
+        `${import.meta.env.VITE_API_URL}/api/payments`,
         {
           consignment_number: formData.consignment_number,
           amount: parseFloat(formData.amount),
