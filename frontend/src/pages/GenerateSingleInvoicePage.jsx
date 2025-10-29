@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Info, FileText, Plus } from "lucide-react";
+import { Info, FileText, Plus, AlertCircle } from "lucide-react";
 
 export default function GenerateSingleInvoicePage() {
   const [formData, setFormData] = useState({
@@ -167,445 +167,464 @@ export default function GenerateSingleInvoicePage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <FileText className="h-8 w-8 text-emerald-600" />
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">
-              Generate SINGLE Invoice
-            </h1>
-            <p className="text-sm text-slate-500">
-              Create invoice for single consignment
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl">
+              <FileText className="h-6 w-6 text-emerald-600" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-slate-900">
+                Generate Single Invoice
+              </h1>
+              <p className="text-slate-600">
+                Create invoice for a single consignment
+              </p>
+            </div>
           </div>
-          <Info
-            className="h-5 w-5 text-blue-500 cursor-pointer"
-            title="Generate invoice for one consignment"
-          />
         </div>
-      </div>
 
-      {/* Form Fields */}
-      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Customer Id:
-            </label>
-            <input
-              type="text"
-              name="customer_id"
-              value={formData.customer_id}
-              onChange={handleInputChange}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
-          </div>
+        {/* Form Fields */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+            <div className="h-1 w-1 bg-emerald-600 rounded-full"></div>
+            Invoice Details
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Customer ID *
+              </label>
+              <input
+                type="text"
+                name="customer_id"
+                value={formData.customer_id}
+                onChange={handleInputChange}
+                placeholder="Enter customer ID"
+                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Invoice No:
-            </label>
-            <div className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm bg-gray-100 text-gray-900 flex items-center font-semibold">
-              <span>{generatedInvoiceNumber || "Auto-generated on save"}</span>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Invoice No
+              </label>
+              <div className="w-full rounded-lg border border-emerald-300 px-4 py-2 text-sm bg-emerald-50 text-emerald-700 flex items-center font-semibold">
+                {generatedInvoiceNumber || "Auto-generated"}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Invoice Date
+              </label>
+              <input
+                type="date"
+                name="invoice_date"
+                value={formData.invoice_date}
+                onChange={handleInputChange}
+                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Period From
+              </label>
+              <input
+                type="date"
+                name="period_from"
+                value={formData.period_from}
+                onChange={handleInputChange}
+                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Period To
+              </label>
+              <input
+                type="date"
+                name="period_to"
+                value={formData.period_to}
+                onChange={handleInputChange}
+                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Consignment No *
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  name="consignment_no"
+                  value={formData.consignment_no}
+                  onChange={handleInputChange}
+                  placeholder="Enter consignment"
+                  className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                />
+                <button
+                  onClick={handleAddBooking}
+                  disabled={loading}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium disabled:bg-emerald-300 transition"
+                  title="Add booking"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Invoice Date:
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Address
             </label>
-            <input
-              type="date"
-              name="invoice_date"
-              value={formData.invoice_date}
+            <textarea
+              name="address"
+              value={formData.address}
               onChange={handleInputChange}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              rows="2"
+              placeholder="Enter billing address"
+              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Period From:
-            </label>
-            <input
-              type="date"
-              name="period_from"
-              value={formData.period_from}
-              onChange={handleInputChange}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Period To:
-            </label>
-            <input
-              type="date"
-              name="period_to"
-              value={formData.period_to}
-              onChange={handleInputChange}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              name="consignment_no"
-              value={formData.consignment_no}
-              onChange={handleInputChange}
-              placeholder="Consignment No"
-              className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
-            <button
-              onClick={handleAddBooking}
-              disabled={loading}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Address:
-          </label>
-          <textarea
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-            rows="2"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          />
         </div>
 
         {/* Booking Table */}
-        <div className="overflow-x-auto border rounded-md">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Sr. No
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Consignment No
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Destination
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Weight
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Pincode
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Mode
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Booking
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Insurance
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Bill Amount
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Percentage
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Other Charges
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Risk Surcharge
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
-              {!booking ? (
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-slate-200">
                 <tr>
-                  <td
-                    colSpan="14"
-                    className="px-4 py-8 text-center text-sm text-slate-500"
-                  >
-                    No Data Found
-                  </td>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Sr. No
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Consignment No
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Destination
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Weight
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Pincode
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Mode
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Amount
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Booking
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Insurance
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Bill Amount
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Percentage
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Other Charges
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Risk Surcharge
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700">
+                    Total
+                  </th>
                 </tr>
-              ) : (
-                <tr className="hover:bg-slate-50">
-                  <td className="px-4 py-3 text-sm text-slate-900">1</td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.consignment_no}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.destination || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.char_wt}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.pincode}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.mode}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.amount || 0}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.booking_date}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.insurance || 0}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.bill_amount || 0}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.percentage || 0}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.other_charges || 0}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900">
-                    {booking.risk_surcharge || 0}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-900 font-medium">
-                    {booking.total || 0}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Discount Options */}
-        <div className="mt-6 grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-slate-700">
-              Invoice Discount :
-            </span>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="invoice_discount"
-                checked={formData.invoice_discount}
-                onChange={() =>
-                  setFormData((prev) => ({ ...prev, invoice_discount: true }))
-                }
-                className="text-emerald-600 focus:ring-emerald-500"
-              />
-              <span className="text-sm text-slate-700">Yes</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="invoice_discount"
-                checked={!formData.invoice_discount}
-                onChange={() =>
-                  setFormData((prev) => ({ ...prev, invoice_discount: false }))
-                }
-                className="text-emerald-600 focus:ring-emerald-500"
-              />
-              <span className="text-sm text-slate-700">No</span>
-            </label>
+              </thead>
+              <tbody className="divide-y divide-slate-200 bg-white">
+                {!booking ? (
+                  <tr>
+                    <td
+                      colSpan="14"
+                      className="px-4 py-8 text-center text-sm text-slate-500"
+                    >
+                      No Data Found
+                    </td>
+                  </tr>
+                ) : (
+                  <tr className="hover:bg-slate-50">
+                    <td className="px-4 py-3 text-sm text-slate-900">1</td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.consignment_no}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.destination || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.char_wt}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.pincode}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.mode}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.amount || 0}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.booking_date}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.insurance || 0}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.bill_amount || 0}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.percentage || 0}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.other_charges || 0}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900">
+                      {booking.risk_surcharge || 0}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-900 font-medium">
+                      {booking.total || 0}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-slate-700">
-              Reverse Charge :
-            </span>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="reverse_charge"
-                checked={formData.reverse_charge}
-                onChange={() =>
-                  setFormData((prev) => ({ ...prev, reverse_charge: true }))
-                }
-                className="text-emerald-600 focus:ring-emerald-500"
-              />
-              <span className="text-sm text-slate-700">Yes</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="reverse_charge"
-                checked={!formData.reverse_charge}
-                onChange={() =>
-                  setFormData((prev) => ({ ...prev, reverse_charge: false }))
-                }
-                className="text-emerald-600 focus:ring-emerald-500"
-              />
-              <span className="text-sm text-slate-700">No</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Calculations */}
-        <div className="mt-6 space-y-3">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex justify-between">
-              <span className="text-sm font-medium text-slate-700">Total</span>
-              <span className="text-sm text-slate-900">
-                {calculations.total}
-              </span>
-            </div>
-            <div></div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex justify-between">
+          {/* Discount Options */}
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-slate-700">
-                Fuel/Surcharge Tax(%):
+                Invoice Discount :
               </span>
-              <input
-                type="number"
-                value={calculations.fuel_surcharge_tax_percent}
-                onChange={(e) =>
-                  setCalculations((prev) => ({
-                    ...prev,
-                    fuel_surcharge_tax_percent: e.target.value,
-                  }))
-                }
-                className="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm text-right focus:border-emerald-500 focus:outline-none"
-              />
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="invoice_discount"
+                  checked={formData.invoice_discount}
+                  onChange={() =>
+                    setFormData((prev) => ({ ...prev, invoice_discount: true }))
+                  }
+                  className="text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm text-slate-700">Yes</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="invoice_discount"
+                  checked={!formData.invoice_discount}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      invoice_discount: false,
+                    }))
+                  }
+                  className="text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm text-slate-700">No</span>
+              </label>
             </div>
-            <div></div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex justify-between bg-slate-50 px-3 py-2 rounded">
+            <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-slate-700">
-                SubTotal
+                Reverse Charge :
               </span>
-              <span className="text-sm text-slate-900">
-                {calculations.subtotal}
-              </span>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="reverse_charge"
+                  checked={formData.reverse_charge}
+                  onChange={() =>
+                    setFormData((prev) => ({ ...prev, reverse_charge: true }))
+                  }
+                  className="text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm text-slate-700">Yes</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="reverse_charge"
+                  checked={!formData.reverse_charge}
+                  onChange={() =>
+                    setFormData((prev) => ({ ...prev, reverse_charge: false }))
+                  }
+                  className="text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm text-slate-700">No</span>
+              </label>
             </div>
-            <div></div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex justify-between">
-              <span className="text-sm font-medium text-slate-700">
-                Royalty Charge
-              </span>
-              <input
-                type="number"
-                value={calculations.royalty_charge}
-                onChange={(e) =>
-                  setCalculations((prev) => ({
-                    ...prev,
-                    royalty_charge: parseFloat(e.target.value) || 0,
-                  }))
-                }
-                className="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm text-right focus:border-emerald-500 focus:outline-none"
-              />
+          {/* Calculations */}
+          <div className="mt-6 space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-slate-700">
+                  Total
+                </span>
+                <span className="text-sm text-slate-900">
+                  {calculations.total}
+                </span>
+              </div>
+              <div></div>
             </div>
-            <div></div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-slate-700">
+                  Fuel/Surcharge Tax(%):
+                </span>
+                <input
+                  type="number"
+                  value={calculations.fuel_surcharge_tax_percent}
+                  onChange={(e) =>
+                    setCalculations((prev) => ({
+                      ...prev,
+                      fuel_surcharge_tax_percent: e.target.value,
+                    }))
+                  }
+                  className="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm text-right focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+              <div></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between bg-slate-50 px-3 py-2 rounded">
+                <span className="text-sm font-medium text-slate-700">
+                  SubTotal
+                </span>
+                <span className="text-sm text-slate-900">
+                  {calculations.subtotal}
+                </span>
+              </div>
+              <div></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-slate-700">
+                  Royalty Charge
+                </span>
+                <input
+                  type="number"
+                  value={calculations.royalty_charge}
+                  onChange={(e) =>
+                    setCalculations((prev) => ({
+                      ...prev,
+                      royalty_charge: parseFloat(e.target.value) || 0,
+                    }))
+                  }
+                  className="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm text-right focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+              <div></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-slate-700">
+                  Docket Charge
+                </span>
+                <input
+                  type="number"
+                  value={calculations.docket_charge}
+                  onChange={(e) =>
+                    setCalculations((prev) => ({
+                      ...prev,
+                      docket_charge: parseFloat(e.target.value) || 0,
+                    }))
+                  }
+                  className="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm text-right focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+              <div></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-slate-700">
+                  Other Charge
+                </span>
+                <input
+                  type="number"
+                  value={calculations.other_charge}
+                  onChange={(e) =>
+                    setCalculations((prev) => ({
+                      ...prev,
+                      other_charge: parseFloat(e.target.value) || 0,
+                    }))
+                  }
+                  className="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm text-right focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+              <div></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-slate-700">GST%</span>
+                <input
+                  type="number"
+                  name="gst_percent"
+                  value={formData.gst_percent}
+                  onChange={handleInputChange}
+                  className="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm text-right focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+              <div></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between bg-slate-50 px-3 py-2 rounded">
+                <span className="text-sm font-medium text-slate-700">
+                  Net Amount
+                </span>
+                <span className="text-sm text-slate-900 font-semibold">
+                  {calculations.net_amount}
+                </span>
+              </div>
+              <div></div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex justify-between">
-              <span className="text-sm font-medium text-slate-700">
-                Docket Charge
-              </span>
-              <input
-                type="number"
-                value={calculations.docket_charge}
-                onChange={(e) =>
-                  setCalculations((prev) => ({
-                    ...prev,
-                    docket_charge: parseFloat(e.target.value) || 0,
-                  }))
-                }
-                className="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm text-right focus:border-emerald-500 focus:outline-none"
-              />
-            </div>
-            <div></div>
+          {/* Action Buttons */}
+          <div className="mt-6 flex gap-3 justify-end">
+            <button
+              onClick={handleSendEmail}
+              className="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 font-medium transition"
+            >
+              Email Invoice
+            </button>
+            <button
+              onClick={handleGenerate}
+              disabled={loading || !booking}
+              className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium disabled:bg-emerald-300 transition"
+            >
+              {loading ? "Processing..." : "Generate"}
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={loading || !booking}
+              className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium disabled:bg-teal-300 transition"
+            >
+              {loading ? "Saving..." : "Save"}
+            </button>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex justify-between">
-              <span className="text-sm font-medium text-slate-700">
-                Other Charge
-              </span>
-              <input
-                type="number"
-                value={calculations.other_charge}
-                onChange={(e) =>
-                  setCalculations((prev) => ({
-                    ...prev,
-                    other_charge: parseFloat(e.target.value) || 0,
-                  }))
-                }
-                className="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm text-right focus:border-emerald-500 focus:outline-none"
-              />
-            </div>
-            <div></div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex justify-between">
-              <span className="text-sm font-medium text-slate-700">GST%</span>
-              <input
-                type="number"
-                name="gst_percent"
-                value={formData.gst_percent}
-                onChange={handleInputChange}
-                className="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm text-right focus:border-emerald-500 focus:outline-none"
-              />
-            </div>
-            <div></div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex justify-between bg-slate-50 px-3 py-2 rounded">
-              <span className="text-sm font-medium text-slate-700">
-                Net Amount
-              </span>
-              <span className="text-sm text-slate-900 font-semibold">
-                {calculations.net_amount}
-              </span>
-            </div>
-            <div></div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mt-6 flex gap-3">
-          <button
-            onClick={handleSendEmail}
-            className="rounded-md bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Send Invoice From Email
-          </button>
-          <button
-            onClick={handleGenerate}
-            disabled={loading || !booking}
-            className="rounded-md bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            Generate
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={loading || !booking}
-            className="rounded-md bg-emerald-600 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
-          >
-            Save
-          </button>
         </div>
       </div>
     </div>

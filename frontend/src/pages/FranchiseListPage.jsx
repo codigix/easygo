@@ -62,169 +62,213 @@ const FranchiseListPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Franchisee Management</h1>
-        <Link
-          to="/franchises/create"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Add New Franchisee
-        </Link>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Search</label>
-            <input
-              type="text"
-              placeholder="Search by code, name, email..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPagination({ ...pagination, page: 1 });
-              }}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Status</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPagination({ ...pagination, page: 1 });
-              }}
-              className="w-full border rounded px-3 py-2"
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-8 text-white shadow-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Franchisee Management</h1>
+              <p className="text-emerald-100">
+                Manage all your franchise partners
+              </p>
+            </div>
+            <Link
+              to="/franchises/create"
+              className="bg-white text-emerald-600 px-6 py-3 rounded-lg font-semibold hover:bg-emerald-50 shadow-lg transition-all hover:shadow-xl"
             >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="suspended">Suspended</option>
-            </select>
+              + Add New Franchisee
+            </Link>
           </div>
         </div>
-      </div>
 
-      {/* Franchise List */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        {loading ? (
-          <div className="text-center py-8">Loading...</div>
-        ) : franchises.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No franchises found
+        {/* Filters Card */}
+        <div className="bg-white rounded-2xl shadow-md p-6 border border-emerald-100">
+          <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+            Filter Options
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Search
+              </label>
+              <input
+                type="text"
+                placeholder="Search by code, name, email..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPagination({ ...pagination, page: 1 });
+                }}
+                className="w-full border border-slate-300 rounded-lg px-4 py-3 bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Status
+              </label>
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPagination({ ...pagination, page: 1 });
+                }}
+                className="w-full border border-slate-300 rounded-lg px-4 py-3 bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
+              >
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    FR Code
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Franchisee Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Owner Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Phone
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {franchises.map((franchise) => (
-                  <tr key={franchise.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {franchise.franchise_code}
-                    </td>
-                    <td className="px-6 py-4">{franchise.franchise_name}</td>
-                    <td className="px-6 py-4">{franchise.owner_name}</td>
-                    <td className="px-6 py-4">{franchise.email}</td>
-                    <td className="px-6 py-4">{franchise.phone}</td>
-                    <td className="px-6 py-4">
-                      <select
-                        value={franchise.status}
-                        onChange={(e) =>
-                          handleStatusToggle(franchise.id, e.target.value)
-                        }
-                        className={`px-2 py-1 text-xs rounded ${
-                          franchise.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : franchise.status === "inactive"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="suspended">Suspended</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Link
-                        to={`/franchises/edit/${franchise.id}`}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(franchise.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
+        </div>
+
+        {/* Franchise List Card */}
+        <div className="bg-white rounded-2xl shadow-md border border-emerald-100 overflow-hidden">
+          <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100">
+            <h2 className="text-lg font-semibold text-slate-800">
+              Franchises
+              {franchises.length > 0 && (
+                <span className="text-emerald-600 ml-2">
+                  ({pagination.total})
+                </span>
+              )}
+            </h2>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="text-slate-500">Loading...</div>
+            </div>
+          ) : franchises.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-slate-500">No franchises found</div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-300 bg-gradient-to-r from-slate-50 to-slate-100">
+                    <th className="px-6 py-4 text-left font-semibold text-slate-700">
+                      FR Code
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-700">
+                      Franchisee Name
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-700">
+                      Owner Name
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-700">
+                      Email
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-700">
+                      Phone
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-700">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-700">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {franchises.map((franchise) => (
+                    <tr
+                      key={franchise.id}
+                      className="hover:bg-emerald-50/30 transition-colors"
+                    >
+                      <td className="px-6 py-4 font-medium text-slate-900">
+                        {franchise.franchise_code}
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">
+                        {franchise.franchise_name}
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">
+                        {franchise.owner_name}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">
+                        {franchise.email}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">
+                        {franchise.phone}
+                      </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={franchise.status}
+                          onChange={(e) =>
+                            handleStatusToggle(franchise.id, e.target.value)
+                          }
+                          className={`px-3 py-1 text-xs font-medium rounded-full border-0 cursor-pointer ${
+                            franchise.status === "active"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : franchise.status === "inactive"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          <option value="active">Active</option>
+                          <option value="inactive">Inactive</option>
+                          <option value="suspended">Suspended</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex gap-3">
+                          <Link
+                            to={`/franchises/edit/${franchise.id}`}
+                            className="text-emerald-600 hover:text-emerald-700 font-medium text-sm"
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(franchise.id)}
+                            className="text-red-600 hover:text-red-700 font-medium text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-        {/* Pagination */}
-        {pagination.pages > 1 && (
-          <div className="px-6 py-4 border-t flex justify-between items-center">
-            <div className="text-sm text-gray-500">
-              Showing {franchises.length} of {pagination.total} franchises
+          {/* Pagination */}
+          {pagination.pages > 1 && (
+            <div className="px-6 py-4 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 flex justify-between items-center">
+              <div className="text-sm text-slate-600">
+                Showing {franchises.length} of {pagination.total} franchises
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() =>
+                    setPagination({ ...pagination, page: pagination.page - 1 })
+                  }
+                  disabled={pagination.page === 1}
+                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  ← Previous
+                </button>
+                <span className="px-4 py-2 text-slate-700 font-medium">
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+                <button
+                  onClick={() =>
+                    setPagination({ ...pagination, page: pagination.page + 1 })
+                  }
+                  disabled={pagination.page === pagination.pages}
+                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Next →
+                </button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() =>
-                  setPagination({ ...pagination, page: pagination.page - 1 })
-                }
-                disabled={pagination.page === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="px-3 py-1">
-                Page {pagination.page} of {pagination.pages}
-              </span>
-              <button
-                onClick={() =>
-                  setPagination({ ...pagination, page: pagination.page + 1 })
-                }
-                disabled={pagination.page === pagination.pages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

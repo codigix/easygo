@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../services/api";
+import { Info, Barcode } from "lucide-react";
 
 const StationaryBulkBarcodePage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -84,108 +85,156 @@ const StationaryBulkBarcodePage = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Page Header */}
-        <h1 className="text-2xl font-bold text-gray-800 mb-8">
-          Print Bulk Barcode
-        </h1>
-
-        {/* Main Card */}
-        <div className="bg-white rounded-lg shadow p-12">
-          <div className="space-y-8">
-            {/* File Upload Section */}
-            <div className="flex items-center gap-6">
-              <div className="flex-1">
-                <input
-                  id="fileInput"
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  onChange={handleFileChange}
-                  className="block w-full text-sm text-gray-600
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border file:border-gray-300
-                    file:text-sm file:font-medium
-                    file:bg-gray-50 file:text-gray-700
-                    hover:file:bg-gray-100
-                    cursor-pointer"
-                />
-                {selectedFile && (
-                  <p className="mt-2 text-sm text-green-600">
-                    Selected: {selectedFile.name}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={handleUpload}
-                disabled={!selectedFile || uploading}
-                className="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {uploading ? "Uploading..." : "Upload"}
-              </button>
-              <button
-                onClick={handleExportExcel}
-                className="px-8 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                Export Excel
-              </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl">
+              <Barcode className="h-8 w-8 text-emerald-600" />
             </div>
-
-            {/* Instructions */}
-            <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-              <h3 className="font-semibold text-blue-900 mb-3">
-                📋 Instructions:
-              </h3>
-              <ul className="space-y-2 text-sm text-blue-800">
-                <li>
-                  1. Click <strong>"Export Excel"</strong> to download the
-                  template file
-                </li>
-                <li>
-                  2. Fill in the consignment numbers in the template (one per
-                  row)
-                </li>
-                <li>3. Save the Excel file</li>
-                <li>
-                  4. Click <strong>"Choose File"</strong> and select your filled
-                  Excel file
-                </li>
-                <li>
-                  5. Click <strong>"Upload"</strong> to generate bulk barcodes
-                </li>
-                <li>
-                  6. The barcodes will be automatically generated and ready to
-                  print
-                </li>
-              </ul>
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold text-slate-900">
+                Print Bulk Barcode
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Generate and print barcodes in bulk from an Excel file
+              </p>
             </div>
-
-            {/* File Format Info */}
-            <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-              <h4 className="font-medium text-gray-700 mb-2">
-                Supported File Formats:
-              </h4>
-              <div className="flex gap-4 text-sm text-gray-600">
-                <span className="px-3 py-1 bg-white border border-gray-300 rounded">
-                  .xlsx
-                </span>
-                <span className="px-3 py-1 bg-white border border-gray-300 rounded">
-                  .xls
-                </span>
-                <span className="px-3 py-1 bg-white border border-gray-300 rounded">
-                  .csv
-                </span>
-              </div>
-            </div>
+            <Info
+              className="h-6 w-6 text-emerald-600 cursor-pointer hover:text-emerald-700 transition"
+              title="Generate bulk barcodes"
+            />
           </div>
         </div>
 
-        {/* Additional Info */}
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <p>
-            Need help? Contact support or refer to the user manual for detailed
-            instructions.
-          </p>
+        {/* Upload Section */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm space-y-6">
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+              <div className="h-1 w-1 bg-emerald-600 rounded-full"></div>
+              Upload Excel File
+            </h2>
+
+            {/* File Upload Area */}
+            <div className="relative border-2 border-dashed border-slate-300 rounded-xl p-8 hover:border-emerald-400 hover:bg-emerald-50/30 transition">
+              <input
+                id="fileInput"
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                onChange={handleFileChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              <div className="text-center">
+                <Barcode className="h-12 w-12 text-slate-400 mx-auto mb-3" />
+                <p className="text-sm font-medium text-slate-700">
+                  Click to upload or drag and drop
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  XLS, XLSX or CSV files (Max 10MB)
+                </p>
+              </div>
+            </div>
+
+            {selectedFile && (
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-700">
+                    Selected file:
+                  </p>
+                  <p className="text-sm font-semibold text-emerald-600">
+                    {selectedFile.name}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedFile(null)}
+                  className="text-xs text-red-600 hover:text-red-700 font-medium"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={handleUpload}
+              disabled={!selectedFile || uploading}
+              className="flex-1 px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 transition"
+            >
+              {uploading ? "Uploading..." : "Upload & Generate"}
+            </button>
+            <button
+              onClick={handleExportExcel}
+              className="flex-1 px-6 py-3 bg-slate-200 text-slate-700 font-medium rounded-lg hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-500/20 transition"
+            >
+              Download Template
+            </button>
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 p-8 shadow-sm">
+          <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <div className="h-1 w-1 bg-emerald-600 rounded-full"></div>
+            📋 How It Works
+          </h3>
+          <ol className="space-y-3 text-sm text-slate-700">
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center font-semibold text-xs">
+                1
+              </span>
+              <span>
+                Click <strong>"Download Template"</strong> to get the Excel file
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center font-semibold text-xs">
+                2
+              </span>
+              <span>
+                Fill in the consignment numbers in the template (one per row)
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center font-semibold text-xs">
+                3
+              </span>
+              <span>Save your filled Excel file</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center font-semibold text-xs">
+                4
+              </span>
+              <span>Upload the file using the area above</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center font-semibold text-xs">
+                5
+              </span>
+              <span>Barcodes will be generated and ready to print</span>
+            </li>
+          </ol>
+        </div>
+
+        {/* File Format Info */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+          <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <div className="h-1 w-1 bg-emerald-600 rounded-full"></div>
+            Supported File Formats
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            <span className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-semibold">
+              .xlsx
+            </span>
+            <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
+              .xls
+            </span>
+            <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold">
+              .csv
+            </span>
+          </div>
         </div>
       </div>
     </div>

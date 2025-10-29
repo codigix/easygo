@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
-import { Info, Search } from "lucide-react";
+import { Info, Search, Boxes } from "lucide-react";
 
 const StationaryRemainingPage = () => {
   const [selectedType, setSelectedType] = useState("All");
@@ -110,54 +110,58 @@ const StationaryRemainingPage = () => {
   const totalPages = Math.ceil(filteredConsignments.length / itemsPerPage);
 
   return (
-    <div className="p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Page Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Remaining Stationary
-          </h1>
-          <Info className="w-5 h-5 text-blue-500" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl">
+              <Boxes className="h-8 w-8 text-emerald-600" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold text-slate-900">
+                Remaining Stationary
+              </h1>
+              <p className="text-slate-500 mt-1">
+                View and manage your stationary inventory
+              </p>
+            </div>
+            <Info
+              className="h-6 w-6 text-emerald-600 cursor-pointer hover:text-emerald-700 transition"
+              title="View remaining stationary items"
+            />
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <label className="text-sm font-medium text-gray-700">
-                Select Type<span className="text-red-500">*</span>
+        {/* Filters Section */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-semibold text-slate-700">
+                Filter by Type<span className="text-red-500">*</span>
               </label>
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 border border-slate-300 rounded-lg bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
               >
                 <option value="All">All</option>
                 <option value="DOX">DOX</option>
                 <option value="NONDOX">NONDOX</option>
                 <option value="EXPRESS">EXPRESS</option>
               </select>
-              <button
-                onClick={filterConsignments}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Show
-              </button>
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">
-                Search:
-              </label>
               <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search by start/end no..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 w-64"
+                  className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition w-64"
                 />
-                <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
               </div>
             </div>
           </div>
@@ -166,43 +170,43 @@ const StationaryRemainingPage = () => {
         {/* Main Content with Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Table */}
-          <div className="lg:col-span-3 bg-white rounded-lg shadow">
+          <div className="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
+              <table className="w-full">
                 <thead>
-                  <tr className="bg-blue-50">
-                    <th className="border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700">
+                  <tr className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-slate-200">
+                    <th className="px-4 py-3 text-sm font-semibold text-slate-700 text-left">
                       Receipt Date
                     </th>
-                    <th className="border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700">
+                    <th className="px-4 py-3 text-sm font-semibold text-slate-700 text-left">
                       Expiring in
                     </th>
-                    <th className="border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700">
+                    <th className="px-4 py-3 text-sm font-semibold text-slate-700 text-left">
                       Start No
                     </th>
-                    <th className="border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700">
+                    <th className="px-4 py-3 text-sm font-semibold text-slate-700 text-left">
                       End No
                     </th>
-                    <th className="border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700">
-                      No Of Consignment
+                    <th className="px-4 py-3 text-sm font-semibold text-slate-700 text-center">
+                      Total
                     </th>
-                    <th className="border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700">
+                    <th className="px-4 py-3 text-sm font-semibold text-slate-700 text-center">
                       Used
                     </th>
-                    <th className="border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700">
-                      Remining
+                    <th className="px-4 py-3 text-sm font-semibold text-slate-700 text-center">
+                      Remaining
                     </th>
-                    <th className="border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700">
+                    <th className="px-4 py-3 text-sm font-semibold text-slate-700 text-center">
                       Action
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-200">
                   {loading ? (
                     <tr>
                       <td
                         colSpan="8"
-                        className="border border-gray-300 px-4 py-8 text-center text-gray-500"
+                        className="px-4 py-8 text-center text-slate-500"
                       >
                         Loading...
                       </td>
@@ -211,7 +215,7 @@ const StationaryRemainingPage = () => {
                     <tr>
                       <td
                         colSpan="8"
-                        className="border border-gray-300 px-4 py-8 text-center text-gray-500"
+                        className="px-4 py-8 text-center text-slate-500"
                       >
                         No data found
                       </td>
@@ -222,43 +226,46 @@ const StationaryRemainingPage = () => {
                         item.receipt_date
                       );
                       return (
-                        <tr key={item.id} className="hover:bg-gray-50">
-                          <td className="border border-gray-300 px-4 py-2 text-sm text-center">
+                        <tr
+                          key={item.id}
+                          className="hover:bg-slate-50 transition"
+                        >
+                          <td className="px-4 py-3 text-sm text-slate-900">
                             {new Date(item.receipt_date).toLocaleDateString(
                               "en-GB"
                             )}
                           </td>
                           <td
-                            className={`border border-gray-300 px-4 py-2 text-sm text-center font-medium ${expiringInfo.color}`}
+                            className={`px-4 py-3 text-sm font-medium ${expiringInfo.color}`}
                           >
                             {expiringInfo.text}
                           </td>
-                          <td className="border border-gray-300 px-4 py-2 text-sm text-center">
+                          <td className="px-4 py-3 text-sm text-slate-900">
                             {item.start_no}
                           </td>
-                          <td className="border border-gray-300 px-4 py-2 text-sm text-center">
+                          <td className="px-4 py-3 text-sm text-slate-900">
                             {item.end_no}
                           </td>
-                          <td className="border border-gray-300 px-4 py-2 text-sm text-center">
+                          <td className="px-4 py-3 text-sm text-center text-slate-900 font-medium">
                             {item.total_consignments}
                           </td>
-                          <td className="border border-gray-300 px-4 py-2 text-sm text-center">
+                          <td className="px-4 py-3 text-sm text-center text-slate-900 font-medium">
                             {item.used_consignments}
                           </td>
-                          <td className="border border-gray-300 px-4 py-2 text-sm text-center">
+                          <td className="px-4 py-3 text-sm text-center text-emerald-600 font-semibold">
                             {item.remaining_consignments}
                           </td>
-                          <td className="border border-gray-300 px-4 py-2 text-sm text-center">
+                          <td className="px-4 py-3 text-sm text-center">
                             <div className="flex flex-col gap-1">
                               <button
                                 onClick={() => handleView(item)}
-                                className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                                className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-md hover:bg-emerald-200 transition font-medium"
                               >
                                 View
                               </button>
                               <button
                                 onClick={() => handleDelete(item.id)}
-                                className="px-4 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                                className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition font-medium"
                               >
                                 Delete
                               </button>
@@ -274,11 +281,11 @@ const StationaryRemainingPage = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 py-4">
+              <div className="flex items-center justify-center gap-2 py-4 bg-slate-50 border-t border-slate-200">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 hover:bg-gray-50"
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-white disabled:opacity-50 transition"
                 >
                   ← Previous
                 </button>
@@ -286,10 +293,10 @@ const StationaryRemainingPage = () => {
                   <button
                     key={i + 1}
                     onClick={() => setCurrentPage(i + 1)}
-                    className={`px-4 py-2 border rounded-md ${
+                    className={`px-3 py-2 rounded-lg text-sm transition ${
                       currentPage === i + 1
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "border-gray-300 hover:bg-gray-50"
+                        ? "bg-emerald-600 text-white font-medium"
+                        : "border border-slate-300 text-slate-700 hover:bg-white"
                     }`}
                   >
                     {i + 1}
@@ -300,7 +307,7 @@ const StationaryRemainingPage = () => {
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 hover:bg-gray-50"
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-white disabled:opacity-50 transition"
                 >
                   Next →
                 </button>
@@ -308,18 +315,20 @@ const StationaryRemainingPage = () => {
             )}
 
             {/* Summary */}
-            <div className="grid grid-cols-2 gap-4 p-6 bg-gray-50 border-t">
+            <div className="grid grid-cols-2 gap-4 p-6 bg-gradient-to-r from-emerald-50 to-teal-50 border-t border-slate-200">
               <div className="text-center">
-                <div className="text-sm text-gray-600 mb-1">Days left</div>
-                <div className="text-2xl font-bold text-gray-800">
+                <div className="text-sm font-medium text-slate-600 mb-1">
+                  Days left
+                </div>
+                <div className="text-3xl font-bold text-emerald-600">
                   {summary.daysLeft}
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-sm text-gray-600 mb-1">
-                  No of consignment
+                <div className="text-sm font-medium text-slate-600 mb-1">
+                  Total Consignments
                 </div>
-                <div className="text-2xl font-bold text-gray-800">
+                <div className="text-3xl font-bold text-emerald-600">
                   {summary.totalConsignments}
                 </div>
               </div>
@@ -328,36 +337,49 @@ const StationaryRemainingPage = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-blue-50 rounded-lg shadow p-6">
-              <h3 className="font-bold text-gray-800 mb-4 text-center">
-                Consignment No
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 shadow-sm p-6">
+              <h3 className="font-semibold text-slate-900 mb-4 text-center flex items-center justify-center gap-2">
+                <span className="h-2 w-2 bg-emerald-600 rounded-full"></span>
+                Consignment Details
               </h3>
               {selectedConsignment ? (
-                <div className="space-y-2 text-sm">
-                  <div className="p-3 bg-white rounded">
-                    <span className="font-medium">Start:</span>{" "}
-                    {selectedConsignment.start_no}
+                <div className="space-y-3 text-sm">
+                  <div className="p-3 bg-white rounded-lg border border-emerald-100">
+                    <span className="font-medium text-slate-700">Start:</span>
+                    <div className="text-emerald-600 font-semibold">
+                      {selectedConsignment.start_no}
+                    </div>
                   </div>
-                  <div className="p-3 bg-white rounded">
-                    <span className="font-medium">End:</span>{" "}
-                    {selectedConsignment.end_no}
+                  <div className="p-3 bg-white rounded-lg border border-emerald-100">
+                    <span className="font-medium text-slate-700">End:</span>
+                    <div className="text-emerald-600 font-semibold">
+                      {selectedConsignment.end_no}
+                    </div>
                   </div>
-                  <div className="p-3 bg-white rounded">
-                    <span className="font-medium">Total:</span>{" "}
-                    {selectedConsignment.total_consignments}
+                  <div className="p-3 bg-white rounded-lg border border-emerald-100">
+                    <span className="font-medium text-slate-700">Total:</span>
+                    <div className="text-emerald-600 font-semibold">
+                      {selectedConsignment.total_consignments}
+                    </div>
                   </div>
-                  <div className="p-3 bg-white rounded">
-                    <span className="font-medium">Used:</span>{" "}
-                    {selectedConsignment.used_consignments}
+                  <div className="p-3 bg-white rounded-lg border border-emerald-100">
+                    <span className="font-medium text-slate-700">Used:</span>
+                    <div className="text-slate-900 font-semibold">
+                      {selectedConsignment.used_consignments}
+                    </div>
                   </div>
-                  <div className="p-3 bg-white rounded">
-                    <span className="font-medium">Remaining:</span>{" "}
-                    {selectedConsignment.remaining_consignments}
+                  <div className="p-3 bg-white rounded-lg border border-emerald-100">
+                    <span className="font-medium text-slate-700">
+                      Remaining:
+                    </span>
+                    <div className="text-emerald-600 font-semibold">
+                      {selectedConsignment.remaining_consignments}
+                    </div>
                   </div>
                 </div>
               ) : (
-                <p className="text-center text-gray-600 text-sm">
-                  No Data Found
+                <p className="text-center text-slate-600 text-sm py-4">
+                  Click "View" on a row to see details
                 </p>
               )}
             </div>

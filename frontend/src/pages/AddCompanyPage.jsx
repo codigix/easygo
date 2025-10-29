@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, Building2 } from "lucide-react";
 
 const RATE_ROWS = ["SPECIAL DESTINATION", "METRO", "REST OF INDIA", "PUNE"];
 const DOX_RATE_ROWS = [
@@ -1146,800 +1146,1078 @@ const AddCompanyPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto bg-white rounded-lg shadow">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-6 flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold">Rate Master - Add Company</h1>
-            <p className="text-blue-100 mt-1">
-              Manage courier company rates and charges
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              onChange={handleFileUpload}
-              className="hidden"
-              disabled={uploadLoading}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl">
+                <Building2 className="h-8 w-8 text-emerald-600" />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold text-slate-900">
+                  Add Company Rates
+                </h1>
+                <p className="text-slate-500 mt-1">
+                  Manage courier company rates and charges
+                </p>
+              </div>
+            </div>
+            <Info
+              className="h-6 w-6 text-emerald-600 cursor-pointer hover:text-emerald-700 transition"
+              title="Manage courier company rates"
             />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
+          {/* Tab Navigation with Scroll */}
+          <div className="border-b border-slate-200 px-6 py-0 flex items-center gap-2 bg-gradient-to-r from-slate-50 to-slate-50/50">
             <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadLoading}
-              className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-semibold flex items-center gap-2 whitespace-nowrap"
+              onClick={() => scroll("left")}
+              className="p-2 hover:bg-slate-200 rounded-lg transition text-slate-700"
+              title="Scroll left"
             >
-              {uploadLoading ? "Uploading..." : "📤 Upload From Excel"}
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            <div
+              ref={tabScrollRef}
+              className="flex-1 overflow-x-auto scroll-smooth no-scrollbar"
+              style={{ scrollBehavior: "smooth" }}
+            >
+              <div className="flex gap-1 min-w-min pb-0">
+                {COURIER_TYPES.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-4 py-3 font-medium text-sm whitespace-nowrap transition-all border-b-2 ${
+                      activeTab === tab
+                        ? "border-emerald-600 text-emerald-600 bg-emerald-50"
+                        : "border-transparent text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => scroll("right")}
+              className="p-2 hover:bg-slate-200 rounded-lg transition text-slate-700"
+              title="Scroll right"
+            >
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-        </div>
 
-        {/* Tab Navigation with Scroll */}
-        <div className="border-b border-gray-200 px-6 py-0 flex items-center gap-2 bg-gray-50">
-          <button
-            onClick={() => scroll("left")}
-            className="p-2 hover:bg-gray-200 rounded transition"
-            title="Scroll left"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+          {/* Content Area */}
+          <div className="p-6">
+            {activeTab === "Add Company" ? (
+              // Add Company Form
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {createdCompanyId && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <p className="text-green-900 font-semibold">
+                      ✅ Company Created Successfully!
+                    </p>
+                    <p className="text-green-700 text-sm mt-1">
+                      <strong>{createdCompanyName}</strong> has been created and
+                      is ready for rate configuration. Switch to the courier
+                      type tabs to add rates for different slabs.
+                    </p>
+                  </div>
+                )}
 
-          <div
-            ref={tabScrollRef}
-            className="flex-1 overflow-x-auto scroll-smooth no-scrollbar"
-            style={{ scrollBehavior: "smooth" }}
-          >
-            <div className="flex gap-1 min-w-min pb-0">
-              {COURIER_TYPES.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-3 font-medium text-sm whitespace-nowrap transition-all border-b-2 ${
-                    activeTab === tab
-                      ? "border-blue-600 text-blue-600 bg-blue-50"
-                      : "border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <p className="text-blue-900 font-semibold">
+                    📋 Company Details
+                  </p>
+                  <p className="text-blue-700 text-sm mt-1">
+                    {createdCompanyId
+                      ? "Company information below (read-only). Edit rates in courier type tabs."
+                      : "Add your courier company details below. Fill all required fields marked with *"}
+                  </p>
+                </div>
+
+                {/* Blur overlay for company details after creation */}
+                <div
+                  className={`space-y-6 ${
+                    createdCompanyId ? "opacity-50 pointer-events-none" : ""
                   }`}
                 >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          </div>
+                  {/* Company ID and Company Name */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Company Id <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="company_id"
+                        value={formData.company_id}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter company ID (e.g., DX01)"
+                      />
+                    </div>
 
-          <button
-            onClick={() => scroll("right")}
-            className="p-2 hover:bg-gray-200 rounded transition"
-            title="Scroll right"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Company Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="company_name"
+                        value={formData.company_name}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter company name"
+                      />
+                    </div>
+                  </div>
 
-        {/* Content Area */}
-        <div className="p-6">
-          {activeTab === "Add Company" ? (
-            // Add Company Form
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {createdCompanyId && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                  <p className="text-green-900 font-semibold">
-                    ✅ Company Created Successfully!
-                  </p>
-                  <p className="text-green-700 text-sm mt-1">
-                    <strong>{createdCompanyName}</strong> has been created and
-                    is ready for rate configuration. Switch to the courier type
-                    tabs to add rates for different slabs.
-                  </p>
-                </div>
-              )}
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <p className="text-blue-900 font-semibold">
-                  📋 Company Details
-                </p>
-                <p className="text-blue-700 text-sm mt-1">
-                  {createdCompanyId
-                    ? "Company information below (read-only). Edit rates in courier type tabs."
-                    : "Add your courier company details below. Fill all required fields marked with *"}
-                </p>
-              </div>
-
-              {/* Blur overlay for company details after creation */}
-              <div
-                className={`space-y-6 ${
-                  createdCompanyId ? "opacity-50 pointer-events-none" : ""
-                }`}
-              >
-                {/* Company ID and Company Name */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Company Address */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Company Id <span className="text-red-500">*</span>
+                      Company Address <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      name="company_id"
-                      value={formData.company_id}
+                    <textarea
+                      name="company_address"
+                      value={formData.company_address}
                       onChange={handleChange}
                       required
+                      rows="3"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter company ID (e.g., DX01)"
+                      placeholder="Enter complete company address"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Company Name <span className="text-red-500">*</span>
+                  {/* Phone and Email */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phone Number <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter phone number"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter email address"
+                      />
+                    </div>
+                  </div>
+
+                  {/* GST and Insurance */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        GST No <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="gst_no"
+                        value={formData.gst_no}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter GST number"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Insurance %
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="insurance_percent"
+                        value={formData.insurance_percent}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Minimum Risk Surcharge and Other Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Minimum Risk Surcharge
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="minimum_risk_surcharge"
+                        value={formData.minimum_risk_surcharge}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Other Details
+                      </label>
+                      <input
+                        type="text"
+                        name="other_details"
+                        value={formData.other_details}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Additional details"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Charges */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Topay Charge
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="topay_charge"
+                        value={formData.topay_charge}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        COD Charge
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="cod_charge"
+                        value={formData.cod_charge}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Fuel Surcharges */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Fuel Surcharge %
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="fuel_surcharge_percent"
+                        value={formData.fuel_surcharge_percent}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        GEC Fuel Surcharge %
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="gec_fuel_surcharge_percent"
+                        value={formData.gec_fuel_surcharge_percent}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Royalty and PAN */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Royalty Charges %
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="royalty_charges_percent"
+                        value={formData.royalty_charges_percent}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Pan No
+                      </label>
+                      <input
+                        type="text"
+                        name="pan_no"
+                        value={formData.pan_no}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter PAN number"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Due Days */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Due Days
+                      </label>
+                      <input
+                        type="number"
+                        name="due_days"
+                        value={formData.due_days}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Additional Fields: D, M, E, V, I, N, G, B */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-sm font-medium text-gray-700 mb-4">
+                      Additional Fields
                     </label>
-                    <input
-                      type="text"
-                      name="company_name"
-                      value={formData.company_name}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter company name"
-                    />
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                      {[
+                        { key: "field_d", label: "D" },
+                        { key: "field_m", label: "M" },
+                        { key: "field_e", label: "E" },
+                        { key: "field_v", label: "V" },
+                        { key: "field_i", label: "I" },
+                        { key: "field_n", label: "N" },
+                        { key: "field_g", label: "G" },
+                        { key: "field_b", label: "B" },
+                      ].map(({ key, label }) => (
+                        <div key={key}>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {label}
+                          </label>
+                          <input
+                            type="text"
+                            name={key}
+                            value={formData[key]}
+                            onChange={handleChange}
+                            className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder={label}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Company Address */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Address <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    name="company_address"
-                    value={formData.company_address}
-                    onChange={handleChange}
-                    required
-                    rows="3"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter complete company address"
-                  />
+                {/* Submit Button */}
+                <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+                  {createdCompanyId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCreatedCompanyId(null);
+                        setCreatedCompanyName(null);
+                        setFormData({
+                          company_id: "",
+                          company_name: "",
+                          company_address: "",
+                          phone: "",
+                          email: "",
+                          gst_no: "",
+                          insurance_percent: "",
+                          minimum_risk_surcharge: "",
+                          other_details: "",
+                          topay_charge: "",
+                          cod_charge: "",
+                          fuel_surcharge_percent: "",
+                          gec_fuel_surcharge_percent: "",
+                          royalty_charges_percent: "",
+                          pan_no: "",
+                          due_days: "",
+                          field_d: "",
+                          field_m: "",
+                          field_e: "",
+                          field_v: "",
+                          field_i: "",
+                          field_n: "",
+                          field_g: "",
+                          field_b: "",
+                        });
+                      }}
+                      className="px-8 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium"
+                    >
+                      Add New Company
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={loading || createdCompanyId}
+                    className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                  >
+                    {loading
+                      ? "Saving..."
+                      : createdCompanyId
+                      ? "✅ Company Created"
+                      : "Save Company"}
+                  </button>
                 </div>
-
-                {/* Phone and Email */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter phone number"
-                    />
+              </form>
+            ) : activeTab === "Dox" ? (
+              // ========== DOX UI - DYNAMIC COLUMNS BY SLAB ==========
+              <div className="w-full">
+                {!createdCompanyId && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <p className="text-yellow-900 font-semibold">
+                      ⚠️ No Company Selected
+                    </p>
+                    <p className="text-yellow-700 text-sm mt-1">
+                      Please create a company first in the "Add Company" tab to
+                      configure rates.
+                    </p>
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter email address"
-                    />
+                {createdCompanyId && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <p className="text-green-900 font-semibold">
+                      ✅ Company Selected: {createdCompanyName}
+                    </p>
+                    <p className="text-green-700 text-sm mt-1">
+                      Enter rates below for different slabs and save each slab
+                      independently.
+                    </p>
                   </div>
-                </div>
+                )}
 
-                {/* GST and Insurance */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      GST No <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="gst_no"
-                      value={formData.gst_no}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter GST number"
-                    />
-                  </div>
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                  <h2 className="text-lg font-semibold text-gray-700 mb-6">
+                    {activeTab} Rate Configuration
+                  </h2>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Insurance %
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      name="insurance_percent"
-                      value={formData.insurance_percent}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-
-                {/* Minimum Risk Surcharge and Other Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Minimum Risk Surcharge
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      name="minimum_risk_surcharge"
-                      value={formData.minimum_risk_surcharge}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Other Details
-                    </label>
-                    <input
-                      type="text"
-                      name="other_details"
-                      value={formData.other_details}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Additional details"
-                    />
-                  </div>
-                </div>
-
-                {/* Charges */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Topay Charge
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      name="topay_charge"
-                      value={formData.topay_charge}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      COD Charge
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      name="cod_charge"
-                      value={formData.cod_charge}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-
-                {/* Fuel Surcharges */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fuel Surcharge %
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      name="fuel_surcharge_percent"
-                      value={formData.fuel_surcharge_percent}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      GEC Fuel Surcharge %
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      name="gec_fuel_surcharge_percent"
-                      value={formData.gec_fuel_surcharge_percent}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-
-                {/* Royalty and PAN */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Royalty Charges %
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      name="royalty_charges_percent"
-                      value={formData.royalty_charges_percent}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Pan No
-                    </label>
-                    <input
-                      type="text"
-                      name="pan_no"
-                      value={formData.pan_no}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter PAN number"
-                    />
-                  </div>
-                </div>
-
-                {/* Due Days */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Due Days
-                    </label>
-                    <input
-                      type="number"
-                      name="due_days"
-                      value={formData.due_days}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-
-                {/* Additional Fields: D, M, E, V, I, N, G, B */}
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <label className="block text-sm font-medium text-gray-700 mb-4">
-                    Additional Fields
-                  </label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-                    {[
-                      { key: "field_d", label: "D" },
-                      { key: "field_m", label: "M" },
-                      { key: "field_e", label: "E" },
-                      { key: "field_v", label: "V" },
-                      { key: "field_i", label: "I" },
-                      { key: "field_n", label: "N" },
-                      { key: "field_g", label: "G" },
-                      { key: "field_b", label: "B" },
-                    ].map(({ key, label }) => (
-                      <div key={key}>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                          {label}
-                        </label>
+                  {/* Slab Selection */}
+                  <div className="flex flex-wrap gap-4 mb-6">
+                    {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                      <label
+                        key={slab}
+                        className="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded"
+                      >
                         <input
-                          type="text"
-                          name={key}
-                          value={formData[key]}
-                          onChange={handleChange}
-                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder={label}
+                          type="radio"
+                          name="doxSlab"
+                          value={slab}
+                          checked={slabState.Dox === slab}
+                          onChange={() =>
+                            setSlabState((prev) => ({ ...prev, Dox: slab }))
+                          }
+                          className="w-4 h-4 accent-blue-600"
                         />
-                      </div>
+                        <span className="font-medium">{slab}</span>
+                      </label>
                     ))}
                   </div>
-                </div>
-              </div>
 
-              {/* Submit Button */}
-              <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
-                {createdCompanyId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCreatedCompanyId(null);
-                      setCreatedCompanyName(null);
-                      setFormData({
-                        company_id: "",
-                        company_name: "",
-                        company_address: "",
-                        phone: "",
-                        email: "",
-                        gst_no: "",
-                        insurance_percent: "",
-                        minimum_risk_surcharge: "",
-                        other_details: "",
-                        topay_charge: "",
-                        cod_charge: "",
-                        fuel_surcharge_percent: "",
-                        gec_fuel_surcharge_percent: "",
-                        royalty_charges_percent: "",
-                        pan_no: "",
-                        due_days: "",
-                        field_d: "",
-                        field_m: "",
-                        field_e: "",
-                        field_v: "",
-                        field_i: "",
-                        field_n: "",
-                        field_g: "",
-                        field_b: "",
-                      });
-                    }}
-                    className="px-8 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium"
-                  >
-                    Add New Company
-                  </button>
-                )}
-                <button
-                  type="submit"
-                  disabled={loading || createdCompanyId}
-                  className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
-                >
-                  {loading
-                    ? "Saving..."
-                    : createdCompanyId
-                    ? "✅ Company Created"
-                    : "Save Company"}
-                </button>
-              </div>
-            </form>
-          ) : activeTab === "Dox" ? (
-            // ========== DOX UI - DYNAMIC COLUMNS BY SLAB ==========
-            <div className="w-full">
-              {!createdCompanyId && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                  <p className="text-yellow-900 font-semibold">
-                    ⚠️ No Company Selected
-                  </p>
-                  <p className="text-yellow-700 text-sm mt-1">
-                    Please create a company first in the "Add Company" tab to
-                    configure rates.
-                  </p>
-                </div>
-              )}
+                  {/* Rate Table with Dynamic Columns */}
+                  <div className="overflow-x-auto mb-6">
+                    <table className="w-full border border-gray-300 text-sm text-center">
+                      <thead className="bg-blue-50">
+                        <tr>
+                          <th className="border px-4 py-2 text-left font-semibold">
+                            Destination
+                          </th>
+                          {SLAB_CONFIG[slabState.Dox]?.columns.map(
+                            (column, idx) => (
+                              <th
+                                key={idx}
+                                className="border px-4 py-2 font-semibold"
+                              >
+                                {column}
+                              </th>
+                            )
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {DOX_RATE_ROWS.map((row, rowIdx) => (
+                          <tr key={row} className="hover:bg-gray-50">
+                            <td className="border px-4 py-2 text-left font-medium">
+                              {row}
+                            </td>
+                            {doxTableData[slabState.Dox][rowIdx]?.map(
+                              (value, colIdx) => (
+                                <td key={colIdx} className="border px-2 py-2">
+                                  <input
+                                    type="number"
+                                    value={value}
+                                    onChange={(e) => {
+                                      const newData = JSON.parse(
+                                        JSON.stringify(doxTableData)
+                                      );
+                                      newData[slabState.Dox][rowIdx][colIdx] =
+                                        e.target.value;
+                                      setDoxTableData(newData);
+                                    }}
+                                    placeholder="0.00"
+                                    className="w-full border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  />
+                                </td>
+                              )
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-              {createdCompanyId && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                  <p className="text-green-900 font-semibold">
-                    ✅ Company Selected: {createdCompanyName}
-                  </p>
-                  <p className="text-green-700 text-sm mt-1">
-                    Enter rates below for different slabs and save each slab
-                    independently.
-                  </p>
-                </div>
-              )}
+                  {/* Info Box */}
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
+                    <p className="text-sm text-blue-800">
+                      ℹ️ {slabState.Dox} has{" "}
+                      <strong>
+                        {SLAB_CONFIG[slabState.Dox]?.count} columns
+                      </strong>
+                      . Select a slab and enter rates, then click the save
+                      button for that slab.
+                    </p>
+                  </div>
 
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-gray-700 mb-6">
-                  {activeTab} Rate Configuration
-                </h2>
-
-                {/* Slab Selection */}
-                <div className="flex flex-wrap gap-4 mb-6">
-                  {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
-                    <label
-                      key={slab}
-                      className="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded"
-                    >
-                      <input
-                        type="radio"
-                        name="doxSlab"
-                        value={slab}
-                        checked={slabState.Dox === slab}
-                        onChange={() =>
-                          setSlabState((prev) => ({ ...prev, Dox: slab }))
+                  {/* Save Button for current slab only */}
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={async () => {
+                        if (!createdCompanyId) {
+                          alert("Please create a company first!");
+                          return;
                         }
-                        className="w-4 h-4 accent-blue-600"
-                      />
-                      <span className="font-medium">{slab}</span>
-                    </label>
-                  ))}
+                        try {
+                          setSavingSlabs((prev) => ({
+                            ...prev,
+                            [`Dox-${slabState.Dox}`]: true,
+                          }));
+                          const result = await saveSlabRates(
+                            createdCompanyId,
+                            "Dox",
+                            slabState.Dox
+                          );
+                          alert(
+                            `✅ ${slabState.Dox} saved successfully!\n${result.inserted} rate records added.`
+                          );
+                        } catch (error) {
+                          alert(
+                            `❌ Failed to save ${slabState.Dox}:\n${error.message}`
+                          );
+                        } finally {
+                          setSavingSlabs((prev) => ({
+                            ...prev,
+                            [`Dox-${slabState.Dox}`]: false,
+                          }));
+                        }
+                      }}
+                      disabled={
+                        savingSlabs[`Dox-${slabState.Dox}`] || !createdCompanyId
+                      }
+                      className={`px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors font-medium ${
+                        savingSlabs[`Dox-${slabState.Dox}`]
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : createdCompanyId
+                          ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+                          : "bg-gray-400 text-white cursor-not-allowed"
+                      }`}
+                    >
+                      {savingSlabs[`Dox-${slabState.Dox}`]
+                        ? `Saving ${slabState.Dox}...`
+                        : `Save ${slabState.Dox}`}
+                    </button>
+                  </div>
                 </div>
+              </div>
+            ) : activeTab === "Dtdc PLUS" ? (
+              // ========== DTDC PLUS UI ==========
+              <div className="w-full">
+                {!createdCompanyId && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <p className="text-yellow-900 font-semibold">
+                      ⚠️ No Company Selected
+                    </p>
+                    <p className="text-yellow-700 text-sm mt-1">
+                      Please create a company first in the "Add Company" tab to
+                      configure rates.
+                    </p>
+                  </div>
+                )}
 
-                {/* Rate Table with Dynamic Columns */}
-                <div className="overflow-x-auto mb-6">
-                  <table className="w-full border border-gray-300 text-sm text-center">
-                    <thead className="bg-blue-50">
-                      <tr>
-                        <th className="border px-4 py-2 text-left font-semibold">
-                          Destination
-                        </th>
-                        {SLAB_CONFIG[slabState.Dox]?.columns.map(
-                          (column, idx) => (
-                            <th
-                              key={idx}
-                              className="border px-4 py-2 font-semibold"
-                            >
-                              {column}
-                            </th>
-                          )
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {DOX_RATE_ROWS.map((row, rowIdx) => (
-                        <tr key={row} className="hover:bg-gray-50">
-                          <td className="border px-4 py-2 text-left font-medium">
-                            {row}
-                          </td>
-                          {doxTableData[slabState.Dox][rowIdx]?.map(
-                            (value, colIdx) => (
-                              <td key={colIdx} className="border px-2 py-2">
+                {createdCompanyId && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <p className="text-green-900 font-semibold">
+                      ✅ Company Selected: {createdCompanyName}
+                    </p>
+                    <p className="text-green-700 text-sm mt-1">
+                      Enter rates below for different slabs and save each slab
+                      independently.
+                    </p>
+                  </div>
+                )}
+
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                  <h2 className="text-lg font-semibold text-gray-700 mb-6">
+                    {activeTab} Rate Configuration
+                  </h2>
+
+                  {/* Slab Selection */}
+                  <div className="flex flex-wrap gap-4 mb-6">
+                    {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                      <label
+                        key={slab}
+                        className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                      >
+                        <input
+                          type="radio"
+                          name="dtdcPlusSlab"
+                          value={slab}
+                          checked={slabState["Dtdc PLUS"] === slab}
+                          onChange={() =>
+                            setSlabState((prev) => ({
+                              ...prev,
+                              "Dtdc PLUS": slab,
+                            }))
+                          }
+                          className="w-4 h-4 accent-blue-600"
+                        />
+                        <span className="font-medium">{slab}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Rate Table with Dynamic Columns */}
+                  <div className="overflow-x-auto mb-6">
+                    <table className="w-full border border-gray-300 text-sm text-center">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="border px-4 py-2 text-left">Zone</th>
+                          {generateColumnsForSlab(slabState["Dtdc PLUS"]).map(
+                            (col, idx) => (
+                              <th key={idx} className="border px-4 py-2">
+                                {col}
+                              </th>
+                            )
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {DTDC_PLUS_ROWS.map((row, rIndex) => (
+                          <tr key={row} className="hover:bg-gray-50">
+                            <td className="border px-4 py-2 text-left font-medium">
+                              {row}
+                            </td>
+                            {dtdcPlusTableData[slabState["Dtdc PLUS"]]?.[
+                              rIndex
+                            ]?.map((value, cIndex) => (
+                              <td key={cIndex} className="border px-2 py-2">
                                 <input
                                   type="number"
                                   value={value}
                                   onChange={(e) => {
-                                    const newData = JSON.parse(
-                                      JSON.stringify(doxTableData)
+                                    const updated = JSON.parse(
+                                      JSON.stringify(dtdcPlusTableData)
                                     );
-                                    newData[slabState.Dox][rowIdx][colIdx] =
-                                      e.target.value;
-                                    setDoxTableData(newData);
+                                    updated[slabState["Dtdc PLUS"]][rIndex][
+                                      cIndex
+                                    ] = e.target.value;
+                                    setDtdcPlusTableData(updated);
                                   }}
                                   placeholder="0.00"
-                                  className="w-full border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
                                 />
                               </td>
-                            )
-                          )}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                {/* Info Box */}
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
-                  <p className="text-sm text-blue-800">
-                    ℹ️ {slabState.Dox} has{" "}
-                    <strong>{SLAB_CONFIG[slabState.Dox]?.count} columns</strong>
-                    . Select a slab and enter rates, then click the save button
-                    for that slab.
-                  </p>
-                </div>
+                  {/* Info Box */}
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
+                    <p className="text-sm text-blue-800">
+                      ℹ️ {slabState["Dtdc PLUS"]} has{" "}
+                      <strong>
+                        {generateColumnsForSlab(slabState["Dtdc PLUS"]).length}{" "}
+                        columns
+                      </strong>
+                      . Select a slab and enter rates, then click the save
+                      button for that slab.
+                    </p>
+                  </div>
 
-                {/* Save Button for current slab only */}
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={async () => {
-                      if (!createdCompanyId) {
-                        alert("Please create a company first!");
-                        return;
-                      }
-                      try {
-                        setSavingSlabs((prev) => ({
-                          ...prev,
-                          [`Dox-${slabState.Dox}`]: true,
-                        }));
-                        const result = await saveSlabRates(
-                          createdCompanyId,
-                          "Dox",
-                          slabState.Dox
-                        );
-                        alert(
-                          `✅ ${slabState.Dox} saved successfully!\n${result.inserted} rate records added.`
-                        );
-                      } catch (error) {
-                        alert(
-                          `❌ Failed to save ${slabState.Dox}:\n${error.message}`
-                        );
-                      } finally {
-                        setSavingSlabs((prev) => ({
-                          ...prev,
-                          [`Dox-${slabState.Dox}`]: false,
-                        }));
-                      }
-                    }}
-                    disabled={
-                      savingSlabs[`Dox-${slabState.Dox}`] || !createdCompanyId
-                    }
-                    className={`px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors font-medium ${
-                      savingSlabs[`Dox-${slabState.Dox}`]
-                        ? "bg-gray-400 text-white cursor-not-allowed"
-                        : createdCompanyId
-                        ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
-                        : "bg-gray-400 text-white cursor-not-allowed"
-                    }`}
-                  >
-                    {savingSlabs[`Dox-${slabState.Dox}`]
-                      ? `Saving ${slabState.Dox}...`
-                      : `Save ${slabState.Dox}`}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : activeTab === "Dtdc PLUS" ? (
-            // ========== DTDC PLUS UI ==========
-            <div className="w-full">
-              {!createdCompanyId && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                  <p className="text-yellow-900 font-semibold">
-                    ⚠️ No Company Selected
-                  </p>
-                  <p className="text-yellow-700 text-sm mt-1">
-                    Please create a company first in the "Add Company" tab to
-                    configure rates.
-                  </p>
-                </div>
-              )}
-
-              {createdCompanyId && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                  <p className="text-green-900 font-semibold">
-                    ✅ Company Selected: {createdCompanyName}
-                  </p>
-                  <p className="text-green-700 text-sm mt-1">
-                    Enter rates below for different slabs and save each slab
-                    independently.
-                  </p>
-                </div>
-              )}
-
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-gray-700 mb-6">
-                  {activeTab} Rate Configuration
-                </h2>
-
-                {/* Slab Selection */}
-                <div className="flex flex-wrap gap-4 mb-6">
-                  {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
-                    <label
-                      key={slab}
-                      className="flex items-center gap-2 text-gray-700 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="dtdcPlusSlab"
-                        value={slab}
-                        checked={slabState["Dtdc PLUS"] === slab}
-                        onChange={() =>
-                          setSlabState((prev) => ({
-                            ...prev,
-                            "Dtdc PLUS": slab,
-                          }))
+                  {/* Save Button for current slab only */}
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={async () => {
+                        if (!createdCompanyId) {
+                          alert("Please create a company first!");
+                          return;
                         }
-                        className="w-4 h-4 accent-blue-600"
-                      />
-                      <span className="font-medium">{slab}</span>
-                    </label>
-                  ))}
-                </div>
-
-                {/* Rate Table with Dynamic Columns */}
-                <div className="overflow-x-auto mb-6">
-                  <table className="w-full border border-gray-300 text-sm text-center">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="border px-4 py-2 text-left">Zone</th>
-                        {generateColumnsForSlab(slabState["Dtdc PLUS"]).map(
-                          (col, idx) => (
-                            <th key={idx} className="border px-4 py-2">
-                              {col}
-                            </th>
-                          )
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {DTDC_PLUS_ROWS.map((row, rIndex) => (
-                        <tr key={row} className="hover:bg-gray-50">
-                          <td className="border px-4 py-2 text-left font-medium">
-                            {row}
-                          </td>
-                          {dtdcPlusTableData[slabState["Dtdc PLUS"]]?.[
-                            rIndex
-                          ]?.map((value, cIndex) => (
-                            <td key={cIndex} className="border px-2 py-2">
-                              <input
-                                type="number"
-                                value={value}
-                                onChange={(e) => {
-                                  const updated = JSON.parse(
-                                    JSON.stringify(dtdcPlusTableData)
-                                  );
-                                  updated[slabState["Dtdc PLUS"]][rIndex][
-                                    cIndex
-                                  ] = e.target.value;
-                                  setDtdcPlusTableData(updated);
-                                }}
-                                placeholder="0.00"
-                                className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
-                              />
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Info Box */}
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
-                  <p className="text-sm text-blue-800">
-                    ℹ️ {slabState["Dtdc PLUS"]} has{" "}
-                    <strong>
-                      {generateColumnsForSlab(slabState["Dtdc PLUS"]).length}{" "}
-                      columns
-                    </strong>
-                    . Select a slab and enter rates, then click the save button
-                    for that slab.
-                  </p>
-                </div>
-
-                {/* Save Button for current slab only */}
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={async () => {
-                      if (!createdCompanyId) {
-                        alert("Please create a company first!");
-                        return;
+                        try {
+                          setSavingSlabs((prev) => ({
+                            ...prev,
+                            [`DtdcPLUS-${slabState["Dtdc PLUS"]}`]: true,
+                          }));
+                          const result = await saveSlabRates(
+                            createdCompanyId,
+                            "Dtdc PLUS",
+                            slabState["Dtdc PLUS"]
+                          );
+                          alert(
+                            `✅ ${slabState["Dtdc PLUS"]} saved successfully!\n${result.inserted} rate records added.`
+                          );
+                        } catch (error) {
+                          alert(
+                            `❌ Failed to save ${slabState["Dtdc PLUS"]}:\n${error.message}`
+                          );
+                        } finally {
+                          setSavingSlabs((prev) => ({
+                            ...prev,
+                            [`DtdcPLUS-${slabState["Dtdc PLUS"]}`]: false,
+                          }));
+                        }
+                      }}
+                      disabled={
+                        savingSlabs[`DtdcPLUS-${slabState["Dtdc PLUS"]}`] ||
+                        !createdCompanyId
                       }
-                      try {
-                        setSavingSlabs((prev) => ({
-                          ...prev,
-                          [`DtdcPLUS-${slabState["Dtdc PLUS"]}`]: true,
-                        }));
-                        const result = await saveSlabRates(
-                          createdCompanyId,
-                          "Dtdc PLUS",
-                          slabState["Dtdc PLUS"]
-                        );
-                        alert(
-                          `✅ ${slabState["Dtdc PLUS"]} saved successfully!\n${result.inserted} rate records added.`
-                        );
-                      } catch (error) {
-                        alert(
-                          `❌ Failed to save ${slabState["Dtdc PLUS"]}:\n${error.message}`
-                        );
-                      } finally {
-                        setSavingSlabs((prev) => ({
-                          ...prev,
-                          [`DtdcPLUS-${slabState["Dtdc PLUS"]}`]: false,
-                        }));
-                      }
-                    }}
-                    disabled={
-                      savingSlabs[`DtdcPLUS-${slabState["Dtdc PLUS"]}`] ||
-                      !createdCompanyId
-                    }
-                    className={`px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors font-medium ${
-                      savingSlabs[`DtdcPLUS-${slabState["Dtdc PLUS"]}`]
-                        ? "bg-gray-400 text-white cursor-not-allowed"
-                        : createdCompanyId
-                        ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
-                        : "bg-gray-400 text-white cursor-not-allowed"
-                    }`}
-                  >
-                    {savingSlabs[`DtdcPLUS-${slabState["Dtdc PLUS"]}`]
-                      ? `Saving ${slabState["Dtdc PLUS"]}...`
-                      : `Save ${slabState["Dtdc PLUS"]}`}
-                  </button>
+                      className={`px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors font-medium ${
+                        savingSlabs[`DtdcPLUS-${slabState["Dtdc PLUS"]}`]
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : createdCompanyId
+                          ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+                          : "bg-gray-400 text-white cursor-not-allowed"
+                      }`}
+                    >
+                      {savingSlabs[`DtdcPLUS-${slabState["Dtdc PLUS"]}`]
+                        ? `Saving ${slabState["Dtdc PLUS"]}...`
+                        : `Save ${slabState["Dtdc PLUS"]}`}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : activeTab === "Dtdc PTP" ? (
-            // ========== DTDC PTP UI - TWO TABLES ==========
-            <div className="w-full">
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-8">
-                <div>
+            ) : activeTab === "Dtdc PTP" ? (
+              // ========== DTDC PTP UI - TWO TABLES ==========
+              <div className="w-full">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-8">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-700 mb-6">
+                      {activeTab} Rate Configuration
+                    </h2>
+
+                    {/* Company Selection Indicator */}
+                    <div
+                      className={`p-3 rounded-md mb-6 ${
+                        createdCompanyId
+                          ? "bg-green-50 border border-green-200"
+                          : "bg-yellow-50 border border-yellow-200"
+                      }`}
+                    >
+                      <p
+                        className={`text-sm font-medium ${
+                          createdCompanyId
+                            ? "text-green-800"
+                            : "text-yellow-800"
+                        }`}
+                      >
+                        {createdCompanyId ? (
+                          <>
+                            ✅ Company Selected:{" "}
+                            <strong>{createdCompanyName}</strong>
+                          </>
+                        ) : (
+                          <>⚠️ No Company Selected</>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Slab Selection */}
+                  <div className="flex flex-wrap gap-4">
+                    {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                      <label
+                        key={slab}
+                        className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                      >
+                        <input
+                          type="radio"
+                          name="dtdcPtpSlab"
+                          value={slab}
+                          checked={slabState["Dtdc PTP"]?.air === slab}
+                          onChange={() =>
+                            setSlabState((prev) => ({
+                              ...prev,
+                              "Dtdc PTP": {
+                                ...prev["Dtdc PTP"],
+                                air: slab,
+                              },
+                            }))
+                          }
+                          className="w-4 h-4 accent-blue-600"
+                        />
+                        <span className="font-medium">{slab}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* PTP Table 1 */}
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-700 mb-4">
+                      PTP
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full border border-gray-300 text-sm text-center">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="border px-4 py-2 text-left">Zone</th>
+                            {generateColumnsForSlab(
+                              slabState["Dtdc PTP"]?.air
+                            ).map((col, idx) => (
+                              <th key={idx} className="border px-4 py-2">
+                                {col}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {DTDC_PLUS_ROWS.map((row, rIndex) => (
+                            <tr key={row} className="even:bg-gray-50">
+                              <td className="border px-4 py-2 text-left font-medium">
+                                {row}
+                              </td>
+                              {dtdcPtpTableData[
+                                slabState["Dtdc PTP"]?.air
+                              ]?.ptp?.[rIndex]?.map((value, cIndex) => (
+                                <td key={cIndex} className="border px-2 py-2">
+                                  <input
+                                    type="number"
+                                    value={value}
+                                    onChange={(e) => {
+                                      const updated = JSON.parse(
+                                        JSON.stringify(dtdcPtpTableData)
+                                      );
+                                      updated[slabState["Dtdc PTP"]?.air].ptp[
+                                        rIndex
+                                      ][cIndex] = e.target.value;
+                                      setDtdcPtpTableData(updated);
+                                    }}
+                                    placeholder="0.00"
+                                    className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  />
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* PTP Table 2 */}
+                  <div className="pt-4 border-t border-gray-200">
+                    <h3 className="text-base font-semibold text-gray-700 mb-4">
+                      PTP 2
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full border border-gray-300 text-sm text-center">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="border px-4 py-2 text-left">Zone</th>
+                            {generateColumnsForSlab(
+                              slabState["Dtdc PTP"]?.air
+                            ).map((col, idx) => (
+                              <th key={idx} className="border px-4 py-2">
+                                {col}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {DTDC_PLUS_ROWS.map((row, rIndex) => (
+                            <tr key={row} className="even:bg-gray-50">
+                              <td className="border px-4 py-2 text-left font-medium">
+                                {row}
+                              </td>
+                              {dtdcPtpTableData[
+                                slabState["Dtdc PTP"]?.air
+                              ]?.ptp2?.[rIndex]?.map((value, cIndex) => (
+                                <td key={cIndex} className="border px-2 py-2">
+                                  <input
+                                    type="number"
+                                    value={value}
+                                    onChange={(e) => {
+                                      const updated = JSON.parse(
+                                        JSON.stringify(dtdcPtpTableData)
+                                      );
+                                      updated[slabState["Dtdc PTP"]?.air].ptp2[
+                                        rIndex
+                                      ][cIndex] = e.target.value;
+                                      setDtdcPtpTableData(updated);
+                                    }}
+                                    placeholder="0.00"
+                                    className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  />
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Per-Slab Save Buttons */}
+                  <div className="pt-4 border-t border-gray-200">
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                        PTP Slabs:
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={async () => {
+                            if (!createdCompanyId) {
+                              alert("Please create a company first!");
+                              return;
+                            }
+                            try {
+                              setSavingSlabs((prev) => ({
+                                ...prev,
+                                [`Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`]: true,
+                              }));
+                              await saveSlabRates(
+                                createdCompanyId,
+                                "Dtdc PTP",
+                                slabState["Dtdc PTP"].air,
+                                "ptp"
+                              );
+                              alert(
+                                `✅ ${slabState["Dtdc PTP"].air} (PTP) saved successfully!`
+                              );
+                            } catch (error) {
+                              alert(
+                                `❌ Failed to save ${slabState["Dtdc PTP"].air} (PTP):\n${error.message}`
+                              );
+                            } finally {
+                              setSavingSlabs((prev) => ({
+                                ...prev,
+                                [`Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`]: false,
+                              }));
+                            }
+                          }}
+                          disabled={
+                            !createdCompanyId ||
+                            savingSlabs[
+                              `Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`
+                            ]
+                          }
+                          className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                        >
+                          {savingSlabs[
+                            `Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`
+                          ]
+                            ? `Saving...`
+                            : `Save ${slabState["Dtdc PTP"].air}`}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                        PTP 2 Slabs:
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={async () => {
+                            if (!createdCompanyId) {
+                              alert("Please create a company first!");
+                              return;
+                            }
+                            try {
+                              setSavingSlabs((prev) => ({
+                                ...prev,
+                                [`Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`]: true,
+                              }));
+                              await saveSlabRates(
+                                createdCompanyId,
+                                "Dtdc PTP",
+                                slabState["Dtdc PTP"].surface,
+                                "ptp2"
+                              );
+                              alert(
+                                `✅ ${slabState["Dtdc PTP"].surface} (PTP 2) saved successfully!`
+                              );
+                            } catch (error) {
+                              alert(
+                                `❌ Failed to save ${slabState["Dtdc PTP"].surface} (PTP 2):\n${error.message}`
+                              );
+                            } finally {
+                              setSavingSlabs((prev) => ({
+                                ...prev,
+                                [`Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`]: false,
+                              }));
+                            }
+                          }}
+                          disabled={
+                            !createdCompanyId ||
+                            savingSlabs[
+                              `Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`
+                            ]
+                          }
+                          className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                        >
+                          {savingSlabs[
+                            `Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`
+                          ]
+                            ? `Saving...`
+                            : `Save ${slabState["Dtdc PTP"].surface}`}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : activeTab === "Express Cargo" ? (
+              // ========== EXPRESS CARGO UI ==========
+              <div className="w-full">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
                   <h2 className="text-lg font-semibold text-gray-700 mb-6">
                     {activeTab} Rate Configuration
                   </h2>
@@ -1967,48 +2245,40 @@ const AddCompanyPage = () => {
                       )}
                     </p>
                   </div>
-                </div>
 
-                {/* Slab Selection */}
-                <div className="flex flex-wrap gap-4">
-                  {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
-                    <label
-                      key={slab}
-                      className="flex items-center gap-2 text-gray-700 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="dtdcPtpSlab"
-                        value={slab}
-                        checked={slabState["Dtdc PTP"]?.air === slab}
-                        onChange={() =>
-                          setSlabState((prev) => ({
-                            ...prev,
-                            "Dtdc PTP": {
-                              ...prev["Dtdc PTP"],
-                              air: slab,
-                            },
-                          }))
-                        }
-                        className="w-4 h-4 accent-blue-600"
-                      />
-                      <span className="font-medium">{slab}</span>
-                    </label>
-                  ))}
-                </div>
+                  {/* Slab Selection */}
+                  <div className="flex flex-wrap gap-4 mb-6">
+                    {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                      <label
+                        key={slab}
+                        className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                      >
+                        <input
+                          type="radio"
+                          name="expressCargoSlab"
+                          value={slab}
+                          checked={slabState["Express Cargo"] === slab}
+                          onChange={() =>
+                            setSlabState((prev) => ({
+                              ...prev,
+                              "Express Cargo": slab,
+                            }))
+                          }
+                          className="w-4 h-4 accent-blue-600"
+                        />
+                        <span className="font-medium">{slab}</span>
+                      </label>
+                    ))}
+                  </div>
 
-                {/* PTP Table 1 */}
-                <div>
-                  <h3 className="text-base font-semibold text-gray-700 mb-4">
-                    PTP
-                  </h3>
-                  <div className="overflow-x-auto">
+                  {/* Rate Table with Dynamic Columns */}
+                  <div className="overflow-x-auto mb-6">
                     <table className="w-full border border-gray-300 text-sm text-center">
                       <thead className="bg-gray-100">
                         <tr>
                           <th className="border px-4 py-2 text-left">Zone</th>
                           {generateColumnsForSlab(
-                            slabState["Dtdc PTP"]?.air
+                            slabState["Express Cargo"]
                           ).map((col, idx) => (
                             <th key={idx} className="border px-4 py-2">
                               {col}
@@ -2017,26 +2287,26 @@ const AddCompanyPage = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {DTDC_PLUS_ROWS.map((row, rIndex) => (
-                          <tr key={row} className="even:bg-gray-50">
+                        {EXPRESS_CARGO_ROWS.map((row, rIndex) => (
+                          <tr key={row} className="hover:bg-gray-50">
                             <td className="border px-4 py-2 text-left font-medium">
                               {row}
                             </td>
-                            {dtdcPtpTableData[
-                              slabState["Dtdc PTP"]?.air
-                            ]?.ptp?.[rIndex]?.map((value, cIndex) => (
+                            {expressCargoTableData[
+                              slabState["Express Cargo"]
+                            ]?.[rIndex]?.map((value, cIndex) => (
                               <td key={cIndex} className="border px-2 py-2">
                                 <input
                                   type="number"
                                   value={value}
                                   onChange={(e) => {
                                     const updated = JSON.parse(
-                                      JSON.stringify(dtdcPtpTableData)
+                                      JSON.stringify(expressCargoTableData)
                                     );
-                                    updated[slabState["Dtdc PTP"]?.air].ptp[
-                                      rIndex
-                                    ][cIndex] = e.target.value;
-                                    setDtdcPtpTableData(updated);
+                                    updated[slabState["Express Cargo"]][rIndex][
+                                      cIndex
+                                    ] = e.target.value;
+                                    setExpressCargoTableData(updated);
                                   }}
                                   placeholder="0.00"
                                   className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -2048,694 +2318,82 @@ const AddCompanyPage = () => {
                       </tbody>
                     </table>
                   </div>
-                </div>
 
-                {/* PTP Table 2 */}
-                <div className="pt-4 border-t border-gray-200">
-                  <h3 className="text-base font-semibold text-gray-700 mb-4">
-                    PTP 2
-                  </h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border border-gray-300 text-sm text-center">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="border px-4 py-2 text-left">Zone</th>
-                          {generateColumnsForSlab(
-                            slabState["Dtdc PTP"]?.air
-                          ).map((col, idx) => (
-                            <th key={idx} className="border px-4 py-2">
-                              {col}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {DTDC_PLUS_ROWS.map((row, rIndex) => (
-                          <tr key={row} className="even:bg-gray-50">
-                            <td className="border px-4 py-2 text-left font-medium">
-                              {row}
-                            </td>
-                            {dtdcPtpTableData[
-                              slabState["Dtdc PTP"]?.air
-                            ]?.ptp2?.[rIndex]?.map((value, cIndex) => (
-                              <td key={cIndex} className="border px-2 py-2">
-                                <input
-                                  type="number"
-                                  value={value}
-                                  onChange={(e) => {
-                                    const updated = JSON.parse(
-                                      JSON.stringify(dtdcPtpTableData)
-                                    );
-                                    updated[slabState["Dtdc PTP"]?.air].ptp2[
-                                      rIndex
-                                    ][cIndex] = e.target.value;
-                                    setDtdcPtpTableData(updated);
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                />
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  {/* Info Box */}
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
+                    <p className="text-sm text-blue-800">
+                      ℹ️ {slabState["Express Cargo"]} has{" "}
+                      <strong>
+                        {
+                          generateColumnsForSlab(slabState["Express Cargo"])
+                            .length
+                        }{" "}
+                        columns
+                      </strong>
+                      . Click on different slabs to see different column counts.
+                    </p>
                   </div>
-                </div>
 
-                {/* Per-Slab Save Buttons */}
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                      PTP Slabs:
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={async () => {
-                          if (!createdCompanyId) {
-                            alert("Please create a company first!");
-                            return;
-                          }
-                          try {
-                            setSavingSlabs((prev) => ({
-                              ...prev,
-                              [`Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`]: true,
-                            }));
-                            await saveSlabRates(
-                              createdCompanyId,
-                              "Dtdc PTP",
-                              slabState["Dtdc PTP"].air,
-                              "ptp"
-                            );
-                            alert(
-                              `✅ ${slabState["Dtdc PTP"].air} (PTP) saved successfully!`
-                            );
-                          } catch (error) {
-                            alert(
-                              `❌ Failed to save ${slabState["Dtdc PTP"].air} (PTP):\n${error.message}`
-                            );
-                          } finally {
-                            setSavingSlabs((prev) => ({
-                              ...prev,
-                              [`Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`]: false,
-                            }));
-                          }
-                        }}
-                        disabled={
-                          !createdCompanyId ||
-                          savingSlabs[
-                            `Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`
-                          ]
+                  {/* Save Button for current slab only */}
+                  <div className="flex flex-wrap gap-3 justify-end">
+                    <button
+                      onClick={async () => {
+                        if (!createdCompanyId) {
+                          alert("Please create a company first!");
+                          return;
                         }
-                        className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                      >
-                        {savingSlabs[
-                          `Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`
+                        try {
+                          setSavingSlabs((prev) => ({
+                            ...prev,
+                            [`Express Cargo-${slabState["Express Cargo"]}`]: true,
+                          }));
+                          await saveSlabRates(
+                            createdCompanyId,
+                            "Express Cargo",
+                            slabState["Express Cargo"]
+                          );
+                          alert(
+                            `✅ ${slabState["Express Cargo"]} saved successfully!`
+                          );
+                        } catch (error) {
+                          alert(
+                            `❌ Failed to save ${slabState["Express Cargo"]}:\n${error.message}`
+                          );
+                        } finally {
+                          setSavingSlabs((prev) => ({
+                            ...prev,
+                            [`Express Cargo-${slabState["Express Cargo"]}`]: false,
+                          }));
+                        }
+                      }}
+                      disabled={
+                        !createdCompanyId ||
+                        savingSlabs[
+                          `Express Cargo-${slabState["Express Cargo"]}`
                         ]
-                          ? `Saving...`
-                          : `Save ${slabState["Dtdc PTP"].air}`}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                      PTP 2 Slabs:
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={async () => {
-                          if (!createdCompanyId) {
-                            alert("Please create a company first!");
-                            return;
-                          }
-                          try {
-                            setSavingSlabs((prev) => ({
-                              ...prev,
-                              [`Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`]: true,
-                            }));
-                            await saveSlabRates(
-                              createdCompanyId,
-                              "Dtdc PTP",
-                              slabState["Dtdc PTP"].surface,
-                              "ptp2"
-                            );
-                            alert(
-                              `✅ ${slabState["Dtdc PTP"].surface} (PTP 2) saved successfully!`
-                            );
-                          } catch (error) {
-                            alert(
-                              `❌ Failed to save ${slabState["Dtdc PTP"].surface} (PTP 2):\n${error.message}`
-                            );
-                          } finally {
-                            setSavingSlabs((prev) => ({
-                              ...prev,
-                              [`Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`]: false,
-                            }));
-                          }
-                        }}
-                        disabled={
-                          !createdCompanyId ||
-                          savingSlabs[
-                            `Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`
-                          ]
-                        }
-                        className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                      >
-                        {savingSlabs[
-                          `Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`
-                        ]
-                          ? `Saving...`
-                          : `Save ${slabState["Dtdc PTP"].surface}`}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : activeTab === "Express Cargo" ? (
-            // ========== EXPRESS CARGO UI ==========
-            <div className="w-full">
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-gray-700 mb-6">
-                  {activeTab} Rate Configuration
-                </h2>
-
-                {/* Company Selection Indicator */}
-                <div
-                  className={`p-3 rounded-md mb-6 ${
-                    createdCompanyId
-                      ? "bg-green-50 border border-green-200"
-                      : "bg-yellow-50 border border-yellow-200"
-                  }`}
-                >
-                  <p
-                    className={`text-sm font-medium ${
-                      createdCompanyId ? "text-green-800" : "text-yellow-800"
-                    }`}
-                  >
-                    {createdCompanyId ? (
-                      <>
-                        ✅ Company Selected:{" "}
-                        <strong>{createdCompanyName}</strong>
-                      </>
-                    ) : (
-                      <>⚠️ No Company Selected</>
-                    )}
-                  </p>
-                </div>
-
-                {/* Slab Selection */}
-                <div className="flex flex-wrap gap-4 mb-6">
-                  {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
-                    <label
-                      key={slab}
-                      className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                      }
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium text-sm"
                     >
-                      <input
-                        type="radio"
-                        name="expressCargoSlab"
-                        value={slab}
-                        checked={slabState["Express Cargo"] === slab}
-                        onChange={() =>
-                          setSlabState((prev) => ({
-                            ...prev,
-                            "Express Cargo": slab,
-                          }))
-                        }
-                        className="w-4 h-4 accent-blue-600"
-                      />
-                      <span className="font-medium">{slab}</span>
-                    </label>
-                  ))}
-                </div>
-
-                {/* Rate Table with Dynamic Columns */}
-                <div className="overflow-x-auto mb-6">
-                  <table className="w-full border border-gray-300 text-sm text-center">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="border px-4 py-2 text-left">Zone</th>
-                        {generateColumnsForSlab(slabState["Express Cargo"]).map(
-                          (col, idx) => (
-                            <th key={idx} className="border px-4 py-2">
-                              {col}
-                            </th>
-                          )
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {EXPRESS_CARGO_ROWS.map((row, rIndex) => (
-                        <tr key={row} className="hover:bg-gray-50">
-                          <td className="border px-4 py-2 text-left font-medium">
-                            {row}
-                          </td>
-                          {expressCargoTableData[slabState["Express Cargo"]]?.[
-                            rIndex
-                          ]?.map((value, cIndex) => (
-                            <td key={cIndex} className="border px-2 py-2">
-                              <input
-                                type="number"
-                                value={value}
-                                onChange={(e) => {
-                                  const updated = JSON.parse(
-                                    JSON.stringify(expressCargoTableData)
-                                  );
-                                  updated[slabState["Express Cargo"]][rIndex][
-                                    cIndex
-                                  ] = e.target.value;
-                                  setExpressCargoTableData(updated);
-                                }}
-                                placeholder="0.00"
-                                className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
-                              />
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Info Box */}
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
-                  <p className="text-sm text-blue-800">
-                    ℹ️ {slabState["Express Cargo"]} has{" "}
-                    <strong>
-                      {
-                        generateColumnsForSlab(slabState["Express Cargo"])
-                          .length
-                      }{" "}
-                      columns
-                    </strong>
-                    . Click on different slabs to see different column counts.
-                  </p>
-                </div>
-
-                {/* Save Button for current slab only */}
-                <div className="flex flex-wrap gap-3 justify-end">
-                  <button
-                    onClick={async () => {
-                      if (!createdCompanyId) {
-                        alert("Please create a company first!");
-                        return;
-                      }
-                      try {
-                        setSavingSlabs((prev) => ({
-                          ...prev,
-                          [`Express Cargo-${slabState["Express Cargo"]}`]: true,
-                        }));
-                        await saveSlabRates(
-                          createdCompanyId,
-                          "Express Cargo",
-                          slabState["Express Cargo"]
-                        );
-                        alert(
-                          `✅ ${slabState["Express Cargo"]} saved successfully!`
-                        );
-                      } catch (error) {
-                        alert(
-                          `❌ Failed to save ${slabState["Express Cargo"]}:\n${error.message}`
-                        );
-                      } finally {
-                        setSavingSlabs((prev) => ({
-                          ...prev,
-                          [`Express Cargo-${slabState["Express Cargo"]}`]: false,
-                        }));
-                      }
-                    }}
-                    disabled={
-                      !createdCompanyId ||
-                      savingSlabs[`Express Cargo-${slabState["Express Cargo"]}`]
-                    }
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium text-sm"
-                  >
-                    {savingSlabs[`Express Cargo-${slabState["Express Cargo"]}`]
-                      ? `Saving ${slabState["Express Cargo"]}...`
-                      : `Save ${slabState["Express Cargo"]}`}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : activeTab === "Priority" ? (
-            // ========== PRIORITY GEC UI ==========
-            <div className="w-full">
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-gray-700 mb-6">
-                  {activeTab} - GEC
-                </h2>
-
-                {/* Company Selection Indicator */}
-                <div
-                  className={`p-3 rounded-md mb-6 ${
-                    createdCompanyId
-                      ? "bg-green-50 border border-green-200"
-                      : "bg-yellow-50 border border-yellow-200"
-                  }`}
-                >
-                  <p
-                    className={`text-sm font-medium ${
-                      createdCompanyId ? "text-green-800" : "text-yellow-800"
-                    }`}
-                  >
-                    {createdCompanyId ? (
-                      <>
-                        ✅ Company Selected:{" "}
-                        <strong>{createdCompanyName}</strong>
-                      </>
-                    ) : (
-                      <>⚠️ No Company Selected</>
-                    )}
-                  </p>
-                </div>
-
-                {/* Slab Selection */}
-                <div className="flex flex-wrap gap-4 mb-6">
-                  {PRIORITY_GEC_SLABS.map((slab) => (
-                    <label
-                      key={slab}
-                      className="flex items-center gap-2 text-gray-700 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="priorityGecSlab"
-                        value={slab}
-                        checked={slabState["Priority"] === slab}
-                        onChange={() =>
-                          setSlabState((prev) => ({
-                            ...prev,
-                            Priority: slab,
-                          }))
-                        }
-                        className="w-4 h-4 accent-blue-600"
-                      />
-                      <span className="font-medium">Slab {slab}</span>
-                    </label>
-                  ))}
-                </div>
-
-                {/* Rate Table with Dynamic Columns */}
-                <div className="overflow-x-auto mb-6">
-                  <table className="w-full border border-gray-300 text-sm text-center">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="border px-4 py-2 text-left">Zone</th>
-                        {generateColumnsForSlab(slabState["Priority"]).map(
-                          (col, idx) => (
-                            <th key={idx} className="border px-4 py-2">
-                              {col}
-                            </th>
-                          )
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {PRIORITY_GEC_ROWS.map((row, rIndex) => (
-                        <tr key={row} className="hover:bg-gray-50">
-                          <td className="border px-4 py-2 text-left font-medium">
-                            {row}
-                          </td>
-                          {priorityGecTableData[slabState["Priority"]]?.[
-                            rIndex
-                          ]?.map((value, cIndex) => (
-                            <td key={cIndex} className="border px-2 py-2">
-                              <input
-                                type="number"
-                                value={value}
-                                onChange={(e) => {
-                                  const updated = JSON.parse(
-                                    JSON.stringify(priorityGecTableData)
-                                  );
-                                  updated[slabState["Priority"]][rIndex][
-                                    cIndex
-                                  ] = e.target.value;
-                                  setPriorityGecTableData(updated);
-                                }}
-                                placeholder="0.00"
-                                className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
-                              />
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Info Box */}
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
-                  <p className="text-sm text-blue-800">
-                    ℹ️ Slab {slabState["Priority"]} has{" "}
-                    <strong>
-                      {generateColumnsForSlab(slabState["Priority"]).length}{" "}
-                      columns
-                    </strong>
-                    . Click on different slabs to see different column counts.
-                  </p>
-                </div>
-
-                {/* Save Button for current slab only */}
-                <div className="flex flex-wrap gap-3 justify-end">
-                  <button
-                    onClick={async () => {
-                      if (!createdCompanyId) {
-                        alert("Please create a company first!");
-                        return;
-                      }
-                      try {
-                        setSavingSlabs((prev) => ({
-                          ...prev,
-                          [`Priority-${slabState.Priority}`]: true,
-                        }));
-                        await saveSlabRates(
-                          createdCompanyId,
-                          "Priority",
-                          slabState.Priority
-                        );
-                        alert(
-                          `✅ Slab ${slabState.Priority} saved successfully!`
-                        );
-                      } catch (error) {
-                        alert(
-                          `❌ Failed to save Slab ${slabState.Priority}:\n${error.message}`
-                        );
-                      } finally {
-                        setSavingSlabs((prev) => ({
-                          ...prev,
-                          [`Priority-${slabState.Priority}`]: false,
-                        }));
-                      }
-                    }}
-                    disabled={
-                      !createdCompanyId ||
-                      savingSlabs[`Priority-${slabState.Priority}`]
-                    }
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium text-sm"
-                  >
-                    {savingSlabs[`Priority-${slabState.Priority}`]
-                      ? `Saving Slab ${slabState.Priority}...`
-                      : `Save Slab ${slabState.Priority}`}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : activeTab === "E-Commerce" ? (
-            // ========== E-COMMERCE PRIORITY 7X UI ==========
-            <div className="w-full">
-              <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-6 max-w-4xl mx-auto">
-                <h2 className="text-lg font-semibold text-center mb-4">
-                  Ecommerce Priority - 7X
-                </h2>
-
-                {/* Company Selection Indicator */}
-                <div
-                  className={`p-3 rounded-md mb-6 ${
-                    createdCompanyId
-                      ? "bg-green-50 border border-green-200"
-                      : "bg-yellow-50 border border-yellow-200"
-                  }`}
-                >
-                  <p
-                    className={`text-sm font-medium ${
-                      createdCompanyId ? "text-green-800" : "text-yellow-800"
-                    }`}
-                  >
-                    {createdCompanyId ? (
-                      <>
-                        ✅ Company Selected:{" "}
-                        <strong>{createdCompanyName}</strong>
-                      </>
-                    ) : (
-                      <>⚠️ No Company Selected</>
-                    )}
-                  </p>
-                </div>
-
-                {/* Slab Selection */}
-                <div className="flex justify-center gap-8 mb-6">
-                  {ECOMMERCE_SLABS.map((slab) => (
-                    <label key={slab} className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="ecommerceSlab"
-                        value={slab}
-                        checked={slabState["E-Commerce"] === slab}
-                        onChange={() =>
-                          setSlabState((prev) => ({
-                            ...prev,
-                            "E-Commerce": slab,
-                          }))
-                        }
-                        className="accent-blue-600 w-4 h-4"
-                      />
-                      <span className="font-medium text-gray-700">
-                        Slab {slab}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-
-                {/* Table */}
-                <div className="overflow-x-auto border border-gray-300 rounded-md">
-                  <table className="w-full text-sm text-gray-800">
-                    <thead className="bg-blue-50 text-gray-800">
-                      <tr>
-                        <th className="border border-gray-300 p-2 text-left w-1/3">
-                          Zone / City
-                        </th>
-                        <th className="border border-gray-300 p-2 text-center">
-                          Upto{" "}
-                          <input
-                            type="number"
-                            value={ecommerceWeightRanges.upto}
-                            onChange={(e) =>
-                              setEcommerceWeightRanges((prev) => ({
-                                ...prev,
-                                upto: e.target.value,
-                              }))
-                            }
-                            className="w-14 border border-gray-300 rounded-md text-center mx-1 py-0.5"
-                          />{" "}
-                          Kg
-                        </th>
-                        <th className="border border-gray-300 p-2 text-center">
-                          Additional{" "}
-                          <input
-                            type="number"
-                            value={ecommerceWeightRanges.additional}
-                            onChange={(e) =>
-                              setEcommerceWeightRanges((prev) => ({
-                                ...prev,
-                                additional: e.target.value,
-                              }))
-                            }
-                            className="w-14 border border-gray-300 rounded-md text-center mx-1 py-0.5"
-                          />{" "}
-                          Kg
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ecommerceTableData.map((row, index) => (
-                        <tr key={index} className="even:bg-gray-50">
-                          <td className="border border-gray-300 p-2 font-medium">
-                            {row.city}
-                          </td>
-                          <td className="border border-gray-300 p-2 text-center">
-                            <input
-                              type="number"
-                              value={row.upto}
-                              onChange={(e) => {
-                                const updated = [...ecommerceTableData];
-                                updated[index].upto = e.target.value;
-                                setEcommerceTableData(updated);
-                              }}
-                              className="w-20 border border-gray-300 rounded-md text-center py-1"
-                            />
-                          </td>
-                          <td className="border border-gray-300 p-2 text-center">
-                            <input
-                              type="number"
-                              value={row.additional}
-                              onChange={(e) => {
-                                const updated = [...ecommerceTableData];
-                                updated[index].additional = e.target.value;
-                                setEcommerceTableData(updated);
-                              }}
-                              className="w-20 border border-gray-300 rounded-md text-center py-1"
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* No Data Found */}
-                {ecommerceTableData.length === 0 && (
-                  <div className="text-center text-gray-500 text-sm mt-4">
-                    No Data Found
+                      {savingSlabs[
+                        `Express Cargo-${slabState["Express Cargo"]}`
+                      ]
+                        ? `Saving ${slabState["Express Cargo"]}...`
+                        : `Save ${slabState["Express Cargo"]}`}
+                    </button>
                   </div>
-                )}
-
-                {/* Save Button for current slab only */}
-                <div className="flex flex-wrap gap-3 justify-end mt-6">
-                  <button
-                    onClick={async () => {
-                      if (!createdCompanyId) {
-                        alert("Please create a company first!");
-                        return;
-                      }
-                      try {
-                        setSavingSlabs((prev) => ({
-                          ...prev,
-                          [`E-Commerce-${slabState["E-Commerce"]}`]: true,
-                        }));
-                        await saveSlabRates(
-                          createdCompanyId,
-                          "E-Commerce",
-                          slabState["E-Commerce"]
-                        );
-                        alert(
-                          `✅ Slab ${slabState["E-Commerce"]} saved successfully!`
-                        );
-                      } catch (error) {
-                        alert(
-                          `❌ Failed to save Slab ${slabState["E-Commerce"]}:\n${error.message}`
-                        );
-                      } finally {
-                        setSavingSlabs((prev) => ({
-                          ...prev,
-                          [`E-Commerce-${slabState["E-Commerce"]}`]: false,
-                        }));
-                      }
-                    }}
-                    disabled={
-                      !createdCompanyId ||
-                      savingSlabs[`E-Commerce-${slabState["E-Commerce"]}`]
-                    }
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium text-sm"
-                  >
-                    {savingSlabs[`E-Commerce-${slabState["E-Commerce"]}`]
-                      ? `Saving Slab ${slabState["E-Commerce"]}...`
-                      : `Save Slab ${slabState["E-Commerce"]}`}
-                  </button>
                 </div>
               </div>
-            </div>
-          ) : (
-            // ========== OTHER COURIER TYPES - AIR & SURFACE SECTIONS ==========
-            <div className="w-full">
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm space-y-10">
-                <div className="px-6 pt-6">
+            ) : activeTab === "Priority" ? (
+              // ========== PRIORITY GEC UI ==========
+              <div className="w-full">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
                   <h2 className="text-lg font-semibold text-gray-700 mb-6">
-                    {activeTab} Rate Configuration
+                    {activeTab} - GEC
                   </h2>
 
                   {/* Company Selection Indicator */}
                   <div
-                    className={`p-3 rounded-md ${
+                    className={`p-3 rounded-md mb-6 ${
                       createdCompanyId
                         ? "bg-green-50 border border-green-200"
                         : "bg-yellow-50 border border-yellow-200"
@@ -2756,69 +2414,54 @@ const AddCompanyPage = () => {
                       )}
                     </p>
                   </div>
-                </div>
-
-                {/* ========== AIR RATE CARGO SECTION ========== */}
-                <section className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                    Air Rate Cargo
-                  </h3>
 
                   {/* Slab Selection */}
-                  <div className="flex gap-6 mb-6">
-                    {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                  <div className="flex flex-wrap gap-4 mb-6">
+                    {PRIORITY_GEC_SLABS.map((slab) => (
                       <label
                         key={slab}
                         className="flex items-center gap-2 text-gray-700 cursor-pointer"
                       >
                         <input
                           type="radio"
-                          name="airSlab"
+                          name="priorityGecSlab"
                           value={slab}
-                          checked={slabState[activeTab]?.air === slab}
+                          checked={slabState["Priority"] === slab}
                           onChange={() =>
                             setSlabState((prev) => ({
                               ...prev,
-                              [activeTab]: {
-                                ...prev[activeTab],
-                                air: slab,
-                              },
+                              Priority: slab,
                             }))
                           }
                           className="w-4 h-4 accent-blue-600"
                         />
-                        <span className="font-medium">{slab}</span>
+                        <span className="font-medium">Slab {slab}</span>
                       </label>
                     ))}
                   </div>
 
-                  {/* Table with Dynamic Columns */}
-                  <div className="overflow-x-auto">
-                    <table className="w-full border text-sm text-center">
-                      <thead className="bg-blue-50">
+                  {/* Rate Table with Dynamic Columns */}
+                  <div className="overflow-x-auto mb-6">
+                    <table className="w-full border border-gray-300 text-sm text-center">
+                      <thead className="bg-gray-100">
                         <tr>
-                          <th className="border px-4 py-3 text-left font-semibold text-gray-700">
-                            Zone
-                          </th>
-                          {generateColumnsForSlab(
-                            slabState[activeTab]?.air
-                          ).map((col, idx) => (
-                            <th
-                              key={idx}
-                              className="border px-4 py-3 font-semibold text-gray-700"
-                            >
-                              {col}
-                            </th>
-                          ))}
+                          <th className="border px-4 py-2 text-left">Zone</th>
+                          {generateColumnsForSlab(slabState["Priority"]).map(
+                            (col, idx) => (
+                              <th key={idx} className="border px-4 py-2">
+                                {col}
+                              </th>
+                            )
+                          )}
                         </tr>
                       </thead>
                       <tbody>
-                        {RATE_ROWS.map((row, rIndex) => (
+                        {PRIORITY_GEC_ROWS.map((row, rIndex) => (
                           <tr key={row} className="hover:bg-gray-50">
-                            <td className="border px-4 py-2 text-left font-medium text-gray-900">
+                            <td className="border px-4 py-2 text-left font-medium">
                               {row}
                             </td>
-                            {nonDoxTableData[slabState[activeTab]?.air]?.air?.[
+                            {priorityGecTableData[slabState["Priority"]]?.[
                               rIndex
                             ]?.map((value, cIndex) => (
                               <td key={cIndex} className="border px-2 py-2">
@@ -2827,12 +2470,12 @@ const AddCompanyPage = () => {
                                   value={value}
                                   onChange={(e) => {
                                     const updated = JSON.parse(
-                                      JSON.stringify(nonDoxTableData)
+                                      JSON.stringify(priorityGecTableData)
                                     );
-                                    updated[slabState[activeTab]?.air].air[
-                                      rIndex
-                                    ][cIndex] = e.target.value;
-                                    setNonDoxTableData(updated);
+                                    updated[slabState["Priority"]][rIndex][
+                                      cIndex
+                                    ] = e.target.value;
+                                    setPriorityGecTableData(updated);
                                   }}
                                   placeholder="0.00"
                                   className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -2844,207 +2487,573 @@ const AddCompanyPage = () => {
                       </tbody>
                     </table>
                   </div>
-                </section>
 
-                {/* ========== RATE SURFACE CARGO SECTION ========== */}
-                <section className="p-6 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                    Rate Surface Cargo
-                  </h3>
+                  {/* Info Box */}
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
+                    <p className="text-sm text-blue-800">
+                      ℹ️ Slab {slabState["Priority"]} has{" "}
+                      <strong>
+                        {generateColumnsForSlab(slabState["Priority"]).length}{" "}
+                        columns
+                      </strong>
+                      . Click on different slabs to see different column counts.
+                    </p>
+                  </div>
+
+                  {/* Save Button for current slab only */}
+                  <div className="flex flex-wrap gap-3 justify-end">
+                    <button
+                      onClick={async () => {
+                        if (!createdCompanyId) {
+                          alert("Please create a company first!");
+                          return;
+                        }
+                        try {
+                          setSavingSlabs((prev) => ({
+                            ...prev,
+                            [`Priority-${slabState.Priority}`]: true,
+                          }));
+                          await saveSlabRates(
+                            createdCompanyId,
+                            "Priority",
+                            slabState.Priority
+                          );
+                          alert(
+                            `✅ Slab ${slabState.Priority} saved successfully!`
+                          );
+                        } catch (error) {
+                          alert(
+                            `❌ Failed to save Slab ${slabState.Priority}:\n${error.message}`
+                          );
+                        } finally {
+                          setSavingSlabs((prev) => ({
+                            ...prev,
+                            [`Priority-${slabState.Priority}`]: false,
+                          }));
+                        }
+                      }}
+                      disabled={
+                        !createdCompanyId ||
+                        savingSlabs[`Priority-${slabState.Priority}`]
+                      }
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium text-sm"
+                    >
+                      {savingSlabs[`Priority-${slabState.Priority}`]
+                        ? `Saving Slab ${slabState.Priority}...`
+                        : `Save Slab ${slabState.Priority}`}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : activeTab === "E-Commerce" ? (
+              // ========== E-COMMERCE PRIORITY 7X UI ==========
+              <div className="w-full">
+                <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-6 max-w-4xl mx-auto">
+                  <h2 className="text-lg font-semibold text-center mb-4">
+                    Ecommerce Priority - 7X
+                  </h2>
+
+                  {/* Company Selection Indicator */}
+                  <div
+                    className={`p-3 rounded-md mb-6 ${
+                      createdCompanyId
+                        ? "bg-green-50 border border-green-200"
+                        : "bg-yellow-50 border border-yellow-200"
+                    }`}
+                  >
+                    <p
+                      className={`text-sm font-medium ${
+                        createdCompanyId ? "text-green-800" : "text-yellow-800"
+                      }`}
+                    >
+                      {createdCompanyId ? (
+                        <>
+                          ✅ Company Selected:{" "}
+                          <strong>{createdCompanyName}</strong>
+                        </>
+                      ) : (
+                        <>⚠️ No Company Selected</>
+                      )}
+                    </p>
+                  </div>
 
                   {/* Slab Selection */}
-                  <div className="flex gap-6 mb-6">
-                    {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
-                      <label
-                        key={slab}
-                        className="flex items-center gap-2 text-gray-700 cursor-pointer"
-                      >
+                  <div className="flex justify-center gap-8 mb-6">
+                    {ECOMMERCE_SLABS.map((slab) => (
+                      <label key={slab} className="flex items-center gap-2">
                         <input
                           type="radio"
-                          name="surfaceSlab"
+                          name="ecommerceSlab"
                           value={slab}
-                          checked={slabState[activeTab]?.surface === slab}
+                          checked={slabState["E-Commerce"] === slab}
                           onChange={() =>
                             setSlabState((prev) => ({
                               ...prev,
-                              [activeTab]: {
-                                ...prev[activeTab],
-                                surface: slab,
-                              },
+                              "E-Commerce": slab,
                             }))
                           }
-                          className="w-4 h-4 accent-blue-600"
+                          className="accent-blue-600 w-4 h-4"
                         />
-                        <span className="font-medium">{slab}</span>
+                        <span className="font-medium text-gray-700">
+                          Slab {slab}
+                        </span>
                       </label>
                     ))}
                   </div>
 
-                  {/* Table with Dynamic Columns */}
-                  <div className="overflow-x-auto">
-                    <table className="w-full border text-sm text-center">
-                      <thead className="bg-blue-50">
+                  {/* Table */}
+                  <div className="overflow-x-auto border border-gray-300 rounded-md">
+                    <table className="w-full text-sm text-gray-800">
+                      <thead className="bg-blue-50 text-gray-800">
                         <tr>
-                          <th className="border px-4 py-3 text-left font-semibold text-gray-700">
-                            Zone
+                          <th className="border border-gray-300 p-2 text-left w-1/3">
+                            Zone / City
                           </th>
-                          {generateColumnsForSlab(
-                            slabState[activeTab]?.surface
-                          ).map((col, idx) => (
-                            <th
-                              key={idx}
-                              className="border px-4 py-3 font-semibold text-gray-700"
-                            >
-                              {col}
-                            </th>
-                          ))}
+                          <th className="border border-gray-300 p-2 text-center">
+                            Upto{" "}
+                            <input
+                              type="number"
+                              value={ecommerceWeightRanges.upto}
+                              onChange={(e) =>
+                                setEcommerceWeightRanges((prev) => ({
+                                  ...prev,
+                                  upto: e.target.value,
+                                }))
+                              }
+                              className="w-14 border border-gray-300 rounded-md text-center mx-1 py-0.5"
+                            />{" "}
+                            Kg
+                          </th>
+                          <th className="border border-gray-300 p-2 text-center">
+                            Additional{" "}
+                            <input
+                              type="number"
+                              value={ecommerceWeightRanges.additional}
+                              onChange={(e) =>
+                                setEcommerceWeightRanges((prev) => ({
+                                  ...prev,
+                                  additional: e.target.value,
+                                }))
+                              }
+                              className="w-14 border border-gray-300 rounded-md text-center mx-1 py-0.5"
+                            />{" "}
+                            Kg
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {RATE_ROWS.map((row, rIndex) => (
-                          <tr key={row} className="hover:bg-gray-50">
-                            <td className="border px-4 py-2 text-left font-medium text-gray-900">
-                              {row}
+                        {ecommerceTableData.map((row, index) => (
+                          <tr key={index} className="even:bg-gray-50">
+                            <td className="border border-gray-300 p-2 font-medium">
+                              {row.city}
                             </td>
-                            {nonDoxTableData[
-                              slabState[activeTab]?.surface
-                            ]?.surface?.[rIndex]?.map((value, cIndex) => (
-                              <td key={cIndex} className="border px-2 py-2">
-                                <input
-                                  type="number"
-                                  value={value}
-                                  onChange={(e) => {
-                                    const updated = JSON.parse(
-                                      JSON.stringify(nonDoxTableData)
-                                    );
-                                    updated[
-                                      slabState[activeTab]?.surface
-                                    ].surface[rIndex][cIndex] = e.target.value;
-                                    setNonDoxTableData(updated);
-                                  }}
-                                  placeholder="0.00"
-                                  className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                />
-                              </td>
-                            ))}
+                            <td className="border border-gray-300 p-2 text-center">
+                              <input
+                                type="number"
+                                value={row.upto}
+                                onChange={(e) => {
+                                  const updated = [...ecommerceTableData];
+                                  updated[index].upto = e.target.value;
+                                  setEcommerceTableData(updated);
+                                }}
+                                className="w-20 border border-gray-300 rounded-md text-center py-1"
+                              />
+                            </td>
+                            <td className="border border-gray-300 p-2 text-center">
+                              <input
+                                type="number"
+                                value={row.additional}
+                                onChange={(e) => {
+                                  const updated = [...ecommerceTableData];
+                                  updated[index].additional = e.target.value;
+                                  setEcommerceTableData(updated);
+                                }}
+                                className="w-20 border border-gray-300 rounded-md text-center py-1"
+                              />
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                </section>
 
-                {/* Per-Slab Save Buttons */}
-                <div className="p-6 border-t border-gray-200">
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                      Air Rate Cargo Slabs:
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={async () => {
-                          if (!createdCompanyId) {
-                            alert("Please create a company first!");
-                            return;
-                          }
-                          try {
-                            setSavingSlabs((prev) => ({
-                              ...prev,
-                              [`${activeTab}-air-${slabState[activeTab].air}`]: true,
-                            }));
-                            await saveSlabRates(
-                              createdCompanyId,
-                              activeTab,
-                              slabState[activeTab].air,
-                              "air"
-                            );
-                            alert(
-                              `✅ ${slabState[activeTab].air} (Air) saved successfully!`
-                            );
-                          } catch (error) {
-                            alert(
-                              `❌ Failed to save ${slabState[activeTab].air} (Air):\n${error.message}`
-                            );
-                          } finally {
-                            setSavingSlabs((prev) => ({
-                              ...prev,
-                              [`${activeTab}-air-${slabState[activeTab].air}`]: false,
-                            }));
-                          }
-                        }}
-                        disabled={
-                          !createdCompanyId ||
-                          savingSlabs[
-                            `${activeTab}-air-${slabState[activeTab].air}`
-                          ]
+                  {/* No Data Found */}
+                  {ecommerceTableData.length === 0 && (
+                    <div className="text-center text-gray-500 text-sm mt-4">
+                      No Data Found
+                    </div>
+                  )}
+
+                  {/* Save Button for current slab only */}
+                  <div className="flex flex-wrap gap-3 justify-end mt-6">
+                    <button
+                      onClick={async () => {
+                        if (!createdCompanyId) {
+                          alert("Please create a company first!");
+                          return;
                         }
-                        className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                        try {
+                          setSavingSlabs((prev) => ({
+                            ...prev,
+                            [`E-Commerce-${slabState["E-Commerce"]}`]: true,
+                          }));
+                          await saveSlabRates(
+                            createdCompanyId,
+                            "E-Commerce",
+                            slabState["E-Commerce"]
+                          );
+                          alert(
+                            `✅ Slab ${slabState["E-Commerce"]} saved successfully!`
+                          );
+                        } catch (error) {
+                          alert(
+                            `❌ Failed to save Slab ${slabState["E-Commerce"]}:\n${error.message}`
+                          );
+                        } finally {
+                          setSavingSlabs((prev) => ({
+                            ...prev,
+                            [`E-Commerce-${slabState["E-Commerce"]}`]: false,
+                          }));
+                        }
+                      }}
+                      disabled={
+                        !createdCompanyId ||
+                        savingSlabs[`E-Commerce-${slabState["E-Commerce"]}`]
+                      }
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium text-sm"
+                    >
+                      {savingSlabs[`E-Commerce-${slabState["E-Commerce"]}`]
+                        ? `Saving Slab ${slabState["E-Commerce"]}...`
+                        : `Save Slab ${slabState["E-Commerce"]}`}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // ========== OTHER COURIER TYPES - AIR & SURFACE SECTIONS ==========
+              <div className="w-full">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm space-y-10">
+                  <div className="px-6 pt-6">
+                    <h2 className="text-lg font-semibold text-gray-700 mb-6">
+                      {activeTab} Rate Configuration
+                    </h2>
+
+                    {/* Company Selection Indicator */}
+                    <div
+                      className={`p-3 rounded-md ${
+                        createdCompanyId
+                          ? "bg-green-50 border border-green-200"
+                          : "bg-yellow-50 border border-yellow-200"
+                      }`}
+                    >
+                      <p
+                        className={`text-sm font-medium ${
+                          createdCompanyId
+                            ? "text-green-800"
+                            : "text-yellow-800"
+                        }`}
                       >
-                        {savingSlabs[
-                          `${activeTab}-air-${slabState[activeTab].air}`
-                        ]
-                          ? `Saving...`
-                          : `Save ${slabState[activeTab].air}`}
-                      </button>
+                        {createdCompanyId ? (
+                          <>
+                            ✅ Company Selected:{" "}
+                            <strong>{createdCompanyName}</strong>
+                          </>
+                        ) : (
+                          <>⚠️ No Company Selected</>
+                        )}
+                      </p>
                     </div>
                   </div>
 
-                  <div>
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                      Rate Surface Cargo Slabs:
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={async () => {
-                          if (!createdCompanyId) {
-                            alert("Please create a company first!");
-                            return;
+                  {/* ========== AIR RATE CARGO SECTION ========== */}
+                  <section className="p-6">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                      Air Rate Cargo
+                    </h3>
+
+                    {/* Slab Selection */}
+                    <div className="flex gap-6 mb-6">
+                      {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                        <label
+                          key={slab}
+                          className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                        >
+                          <input
+                            type="radio"
+                            name="airSlab"
+                            value={slab}
+                            checked={slabState[activeTab]?.air === slab}
+                            onChange={() =>
+                              setSlabState((prev) => ({
+                                ...prev,
+                                [activeTab]: {
+                                  ...prev[activeTab],
+                                  air: slab,
+                                },
+                              }))
+                            }
+                            className="w-4 h-4 accent-blue-600"
+                          />
+                          <span className="font-medium">{slab}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    {/* Table with Dynamic Columns */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full border text-sm text-center">
+                        <thead className="bg-blue-50">
+                          <tr>
+                            <th className="border px-4 py-3 text-left font-semibold text-gray-700">
+                              Zone
+                            </th>
+                            {generateColumnsForSlab(
+                              slabState[activeTab]?.air
+                            ).map((col, idx) => (
+                              <th
+                                key={idx}
+                                className="border px-4 py-3 font-semibold text-gray-700"
+                              >
+                                {col}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {RATE_ROWS.map((row, rIndex) => (
+                            <tr key={row} className="hover:bg-gray-50">
+                              <td className="border px-4 py-2 text-left font-medium text-gray-900">
+                                {row}
+                              </td>
+                              {nonDoxTableData[
+                                slabState[activeTab]?.air
+                              ]?.air?.[rIndex]?.map((value, cIndex) => (
+                                <td key={cIndex} className="border px-2 py-2">
+                                  <input
+                                    type="number"
+                                    value={value}
+                                    onChange={(e) => {
+                                      const updated = JSON.parse(
+                                        JSON.stringify(nonDoxTableData)
+                                      );
+                                      updated[slabState[activeTab]?.air].air[
+                                        rIndex
+                                      ][cIndex] = e.target.value;
+                                      setNonDoxTableData(updated);
+                                    }}
+                                    placeholder="0.00"
+                                    className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  />
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+
+                  {/* ========== RATE SURFACE CARGO SECTION ========== */}
+                  <section className="p-6 border-t border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                      Rate Surface Cargo
+                    </h3>
+
+                    {/* Slab Selection */}
+                    <div className="flex gap-6 mb-6">
+                      {["Slab 2", "Slab 3", "Slab 4"].map((slab) => (
+                        <label
+                          key={slab}
+                          className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                        >
+                          <input
+                            type="radio"
+                            name="surfaceSlab"
+                            value={slab}
+                            checked={slabState[activeTab]?.surface === slab}
+                            onChange={() =>
+                              setSlabState((prev) => ({
+                                ...prev,
+                                [activeTab]: {
+                                  ...prev[activeTab],
+                                  surface: slab,
+                                },
+                              }))
+                            }
+                            className="w-4 h-4 accent-blue-600"
+                          />
+                          <span className="font-medium">{slab}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    {/* Table with Dynamic Columns */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full border text-sm text-center">
+                        <thead className="bg-blue-50">
+                          <tr>
+                            <th className="border px-4 py-3 text-left font-semibold text-gray-700">
+                              Zone
+                            </th>
+                            {generateColumnsForSlab(
+                              slabState[activeTab]?.surface
+                            ).map((col, idx) => (
+                              <th
+                                key={idx}
+                                className="border px-4 py-3 font-semibold text-gray-700"
+                              >
+                                {col}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {RATE_ROWS.map((row, rIndex) => (
+                            <tr key={row} className="hover:bg-gray-50">
+                              <td className="border px-4 py-2 text-left font-medium text-gray-900">
+                                {row}
+                              </td>
+                              {nonDoxTableData[
+                                slabState[activeTab]?.surface
+                              ]?.surface?.[rIndex]?.map((value, cIndex) => (
+                                <td key={cIndex} className="border px-2 py-2">
+                                  <input
+                                    type="number"
+                                    value={value}
+                                    onChange={(e) => {
+                                      const updated = JSON.parse(
+                                        JSON.stringify(nonDoxTableData)
+                                      );
+                                      updated[
+                                        slabState[activeTab]?.surface
+                                      ].surface[rIndex][cIndex] =
+                                        e.target.value;
+                                      setNonDoxTableData(updated);
+                                    }}
+                                    placeholder="0.00"
+                                    className="w-20 border rounded-md px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  />
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+
+                  {/* Per-Slab Save Buttons */}
+                  <div className="p-6 border-t border-gray-200">
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                        Air Rate Cargo Slabs:
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={async () => {
+                            if (!createdCompanyId) {
+                              alert("Please create a company first!");
+                              return;
+                            }
+                            try {
+                              setSavingSlabs((prev) => ({
+                                ...prev,
+                                [`${activeTab}-air-${slabState[activeTab].air}`]: true,
+                              }));
+                              await saveSlabRates(
+                                createdCompanyId,
+                                activeTab,
+                                slabState[activeTab].air,
+                                "air"
+                              );
+                              alert(
+                                `✅ ${slabState[activeTab].air} (Air) saved successfully!`
+                              );
+                            } catch (error) {
+                              alert(
+                                `❌ Failed to save ${slabState[activeTab].air} (Air):\n${error.message}`
+                              );
+                            } finally {
+                              setSavingSlabs((prev) => ({
+                                ...prev,
+                                [`${activeTab}-air-${slabState[activeTab].air}`]: false,
+                              }));
+                            }
+                          }}
+                          disabled={
+                            !createdCompanyId ||
+                            savingSlabs[
+                              `${activeTab}-air-${slabState[activeTab].air}`
+                            ]
                           }
-                          try {
-                            setSavingSlabs((prev) => ({
-                              ...prev,
-                              [`${activeTab}-surface-${slabState[activeTab].surface}`]: true,
-                            }));
-                            await saveSlabRates(
-                              createdCompanyId,
-                              activeTab,
-                              slabState[activeTab].surface,
-                              "surface"
-                            );
-                            alert(
-                              `✅ ${slabState[activeTab].surface} (Surface) saved successfully!`
-                            );
-                          } catch (error) {
-                            alert(
-                              `❌ Failed to save ${slabState[activeTab].surface} (Surface):\n${error.message}`
-                            );
-                          } finally {
-                            setSavingSlabs((prev) => ({
-                              ...prev,
-                              [`${activeTab}-surface-${slabState[activeTab].surface}`]: false,
-                            }));
+                          className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                        >
+                          {savingSlabs[
+                            `${activeTab}-air-${slabState[activeTab].air}`
+                          ]
+                            ? `Saving...`
+                            : `Save ${slabState[activeTab].air}`}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                        Rate Surface Cargo Slabs:
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={async () => {
+                            if (!createdCompanyId) {
+                              alert("Please create a company first!");
+                              return;
+                            }
+                            try {
+                              setSavingSlabs((prev) => ({
+                                ...prev,
+                                [`${activeTab}-surface-${slabState[activeTab].surface}`]: true,
+                              }));
+                              await saveSlabRates(
+                                createdCompanyId,
+                                activeTab,
+                                slabState[activeTab].surface,
+                                "surface"
+                              );
+                              alert(
+                                `✅ ${slabState[activeTab].surface} (Surface) saved successfully!`
+                              );
+                            } catch (error) {
+                              alert(
+                                `❌ Failed to save ${slabState[activeTab].surface} (Surface):\n${error.message}`
+                              );
+                            } finally {
+                              setSavingSlabs((prev) => ({
+                                ...prev,
+                                [`${activeTab}-surface-${slabState[activeTab].surface}`]: false,
+                              }));
+                            }
+                          }}
+                          disabled={
+                            !createdCompanyId ||
+                            savingSlabs[
+                              `${activeTab}-surface-${slabState[activeTab].surface}`
+                            ]
                           }
-                        }}
-                        disabled={
-                          !createdCompanyId ||
-                          savingSlabs[
+                          className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                        >
+                          {savingSlabs[
                             `${activeTab}-surface-${slabState[activeTab].surface}`
                           ]
-                        }
-                        className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                      >
-                        {savingSlabs[
-                          `${activeTab}-surface-${slabState[activeTab].surface}`
-                        ]
-                          ? `Saving...`
-                          : `Save ${slabState[activeTab].surface}`}
-                      </button>
+                            ? `Saving...`
+                            : `Save ${slabState[activeTab].surface}`}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

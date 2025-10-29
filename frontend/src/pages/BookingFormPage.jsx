@@ -135,18 +135,26 @@ const BookingFormPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Create Consignment/Booking</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">
+            Create Consignment/Booking
+          </h1>
+          <p className="text-slate-600">
+            Fill in all required details to create a new booking
+          </p>
+        </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-lg shadow p-6"
+          className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm"
         >
           {/* Booking Information */}
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-4 border-b pb-2">
-              Booking Information
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4 pb-3 border-b border-slate-200">
+              📅 Booking Information
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -158,7 +166,7 @@ const BookingFormPage = () => {
                   name="booking_number"
                   value={formData.booking_number}
                   readOnly
-                  className="w-full border rounded px-3 py-2 bg-gray-50"
+                  className="w-full border border-slate-200 rounded-lg px-4 py-2 bg-slate-50 text-slate-700"
                 />
               </div>
 
@@ -171,7 +179,7 @@ const BookingFormPage = () => {
                   name="consignment_number"
                   value={formData.consignment_number}
                   readOnly
-                  className="w-full border rounded px-3 py-2 bg-gray-50"
+                  className="w-full border border-slate-200 rounded-lg px-4 py-2 bg-slate-50 text-slate-700"
                 />
               </div>
 
@@ -185,16 +193,16 @@ const BookingFormPage = () => {
                   value={formData.booking_date}
                   onChange={handleChange}
                   required
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
             </div>
           </div>
 
           {/* Sender Details */}
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-4 border-b pb-2">
-              Sender Details
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4 pb-3 border-b border-slate-200">
+              👤 Sender Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -207,7 +215,7 @@ const BookingFormPage = () => {
                   value={formData.sender_name}
                   onChange={handleChange}
                   required
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
 
@@ -221,7 +229,7 @@ const BookingFormPage = () => {
                   value={formData.sender_phone}
                   onChange={handleChange}
                   required
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
 
@@ -234,7 +242,7 @@ const BookingFormPage = () => {
                   value={formData.sender_address}
                   onChange={handleChange}
                   rows="2"
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
 
@@ -277,9 +285,9 @@ const BookingFormPage = () => {
           </div>
 
           {/* Receiver Details */}
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-4 border-b pb-2">
-              Receiver Details
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4 pb-3 border-b border-slate-200">
+              📍 Receiver Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -362,9 +370,9 @@ const BookingFormPage = () => {
           </div>
 
           {/* Package Details */}
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-4 border-b pb-2">
-              Package Details
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4 pb-3 border-b border-slate-200">
+              📦 Package Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>

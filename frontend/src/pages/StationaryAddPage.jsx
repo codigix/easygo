@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../services/api";
-import { Info } from "lucide-react";
+import { Info, Package } from "lucide-react";
 
 const StationaryAddPage = () => {
   const [formData, setFormData] = useState({
@@ -81,125 +81,130 @@ const StationaryAddPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Page Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Add Stationary</h1>
-          <Info className="w-5 h-5 text-blue-500" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl">
+              <Package className="h-8 w-8 text-emerald-600" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold text-slate-900">
+                Add Stationary
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Add new stationary consignment items to your inventory
+              </p>
+            </div>
+            <Info
+              className="h-6 w-6 text-emerald-600 cursor-pointer hover:text-emerald-700 transition"
+              title="Add stationary consignments"
+            />
+          </div>
         </div>
 
-        {/* Form */}
-        <div className="bg-white rounded-lg shadow p-8">
+        {/* Form Card */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
           <form onSubmit={(e) => handleSubmit(e, false)}>
             <div className="space-y-6">
               {/* Receipt Date */}
-              <div className="flex items-center gap-6">
-                <label className="w-48 text-sm font-medium text-gray-700">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Receipt Date<span className="text-red-500">*</span>
                 </label>
-                <div className="flex-1 relative">
-                  <input
-                    type="date"
-                    name="receipt_date"
-                    value={formData.receipt_date}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  />
-                </div>
+                <input
+                  type="date"
+                  name="receipt_date"
+                  value={formData.receipt_date}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm bg-white focus:bg-slate-50 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
+                />
               </div>
 
               {/* Start No */}
-              <div className="flex items-center gap-6">
-                <label className="w-48 text-sm font-medium text-gray-700">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Start No<span className="text-red-500">*</span>
                 </label>
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    name="start_no"
-                    value={formData.start_no}
-                    onChange={handleChange}
-                    required
-                    placeholder="P0001"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  />
-                </div>
+                <input
+                  type="text"
+                  name="start_no"
+                  value={formData.start_no}
+                  onChange={handleChange}
+                  required
+                  placeholder="P0001"
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm bg-white focus:bg-slate-50 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
+                />
               </div>
 
               {/* End No */}
-              <div className="flex items-center gap-6">
-                <label className="w-48 text-sm font-medium text-gray-700">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   End No<span className="text-red-500">*</span>
                 </label>
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    name="end_no"
-                    value={formData.end_no}
-                    onChange={handleChange}
-                    required
-                    placeholder="P0100"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  />
-                </div>
+                <input
+                  type="text"
+                  name="end_no"
+                  value={formData.end_no}
+                  onChange={handleChange}
+                  required
+                  placeholder="P0100"
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm bg-white focus:bg-slate-50 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
+                />
               </div>
 
               {/* No of Leafs */}
-              <div className="flex items-center gap-6">
-                <label className="w-48 text-sm font-medium text-gray-700">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   No of Leafs
                 </label>
-                <div className="flex-1">
-                  <input
-                    type="number"
-                    name="no_of_leafs"
-                    value={formData.no_of_leafs}
-                    onChange={handleChange}
-                    placeholder="0"
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  />
-                </div>
+                <input
+                  type="number"
+                  name="no_of_leafs"
+                  value={formData.no_of_leafs}
+                  onChange={handleChange}
+                  placeholder="0"
+                  min="0"
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm bg-white focus:bg-slate-50 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
+                />
               </div>
 
               {/* No of Books */}
-              <div className="flex items-center gap-6">
-                <label className="w-48 text-sm font-medium text-gray-700">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   No of Books
                 </label>
-                <div className="flex-1">
-                  <input
-                    type="number"
-                    name="no_of_books"
-                    value={formData.no_of_books}
-                    onChange={handleChange}
-                    placeholder="0"
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  />
-                </div>
+                <input
+                  type="number"
+                  name="no_of_books"
+                  value={formData.no_of_books}
+                  onChange={handleChange}
+                  placeholder="0"
+                  min="0"
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm bg-white focus:bg-slate-50 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
+                />
               </div>
 
               {/* Total Consignments Display */}
               {formData.start_no && formData.end_no && (
-                <div className="flex items-center gap-6 bg-blue-50 p-4 rounded-md">
-                  <label className="w-48 text-sm font-medium text-blue-700">
-                    Total Consignments:
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 p-6">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Total Consignments
                   </label>
-                  <div className="flex-1 text-lg font-bold text-blue-700">
+                  <div className="text-3xl font-bold text-emerald-600">
                     {calculateConsignments()}
                   </div>
                 </div>
               )}
 
               {/* Buttons */}
-              <div className="flex gap-4 pt-4">
+              <div className="flex gap-3 pt-6">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  className="flex-1 px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 transition"
                 >
                   {loading ? "Saving..." : "Save"}
                 </button>
@@ -207,7 +212,7 @@ const StationaryAddPage = () => {
                   type="button"
                   onClick={(e) => handleSubmit(e, true)}
                   disabled={loading}
-                  className="px-8 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                  className="flex-1 px-6 py-3 bg-slate-600 text-white font-medium rounded-lg hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500/20 disabled:opacity-50 transition"
                 >
                   Save & Print
                 </button>

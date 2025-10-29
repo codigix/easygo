@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Info, Edit3, Search } from "lucide-react";
 
 const EditCompanyPage = () => {
   const [companies, setCompanies] = useState([]);
@@ -227,152 +228,162 @@ const EditCompanyPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Edit Company RateMaster
-          </h1>
-          <button
-            onClick={() => navigate("/ratemaster/add-company")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Add Company
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl">
+                <Edit3 className="h-8 w-8 text-emerald-600" />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold text-slate-900">
+                  Edit Company Rates
+                </h1>
+                <p className="text-slate-500 mt-1">
+                  Manage and edit courier company information
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Info
+                className="h-6 w-6 text-emerald-600 cursor-pointer hover:text-emerald-700 transition"
+                title="Edit company information"
+              />
+              <button
+                onClick={() => navigate("/ratemaster/add-company")}
+                className="px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
+              >
+                + Add Company
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Controls */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-600">Show</label>
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex justify-between items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-semibold text-slate-700">Show</label>
             <select
               value={recordsPerPage}
               onChange={(e) => {
                 setRecordsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-slate-300 rounded-lg bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span className="text-sm text-gray-600">records per page</span>
+            <span className="text-sm font-medium text-slate-700">
+              records per page
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-600">Search:</label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search..."
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search company..."
+                className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
+              />
+            </div>
           </div>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-slate-200">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                     Sr No
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Option
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                     Company Id
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                     Company Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                     Phone
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                     Email
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Company Address
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    Address
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Print
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                     Action
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-slate-200">
                 {currentRecords.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="10"
-                      className="px-6 py-4 text-center text-gray-500"
+                      colSpan="8"
+                      className="px-6 py-8 text-center text-slate-500 font-medium"
                     >
                       No companies found
                     </td>
                   </tr>
                 ) : (
                   currentRecords.map((company, index) => (
-                    <tr key={company.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <tr
+                      key={company.id}
+                      className="hover:bg-slate-50 transition"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-medium">
                         {indexOfFirstRecord + index + 1}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 text-xs font-semibold rounded ${
+                          className={`px-3 py-1 text-xs font-semibold rounded-full ${
                             company.status === "active"
-                              ? "text-green-800 bg-green-100"
-                              : "text-red-800 bg-red-100"
+                              ? "text-emerald-700 bg-emerald-100"
+                              : "text-red-700 bg-red-100"
                           }`}
                         >
                           {company.status === "active" ? "Active" : "Inactive"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-medium">
+                        {company.company_id || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-medium">
+                        {company.company_name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {company.phone || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {company.email || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-700 max-w-xs truncate">
+                        {company.company_address || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap flex gap-2">
                         <button
                           onClick={() => handleEdit(company)}
-                          className="px-4 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                          className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-md hover:bg-emerald-200 transition font-medium"
                         >
                           Edit
                         </button>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {company.company_id || "N/A"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {company.company_name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {company.phone || "N/A"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {company.email || "N/A"}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
-                        {company.company_address || "N/A"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handlePrint(company)}
-                          className="px-4 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-                        >
-                          Print
-                        </button>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => handleDelete(company.id)}
-                          className="px-4 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                          className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition font-medium"
                         >
                           Delete
                         </button>
@@ -385,8 +396,8 @@ const EditCompanyPage = () => {
           </div>
 
           {/* Pagination */}
-          <div className="bg-gray-50 px-6 py-3 flex justify-between items-center border-t">
-            <div className="text-sm text-gray-600">
+          <div className="bg-gradient-to-r from-slate-50 to-slate-50/50 px-6 py-4 flex justify-between items-center border-t border-slate-200">
+            <div className="text-sm font-medium text-slate-700">
               Showing {indexOfFirstRecord + 1} to{" "}
               {Math.min(indexOfLastRecord, filteredCompanies.length)} of{" "}
               {filteredCompanies.length} entries
@@ -395,7 +406,7 @@ const EditCompanyPage = () => {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 border border-slate-300 bg-white rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 transition"
               >
                 ← Previous
               </button>
@@ -404,10 +415,10 @@ const EditCompanyPage = () => {
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 border rounded-md ${
+                    className={`px-3 py-2 border rounded-lg text-sm transition ${
                       currentPage === page
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white border-gray-300 hover:bg-gray-50"
+                        ? "bg-emerald-600 text-white border-emerald-600 font-medium"
+                        : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
                     }`}
                   >
                     {page}
@@ -419,7 +430,7 @@ const EditCompanyPage = () => {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 border border-slate-300 bg-white rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 transition"
               >
                 Next →
               </button>
