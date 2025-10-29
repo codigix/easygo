@@ -81,6 +81,9 @@ const AddCompanyPage = () => {
   const tabScrollRef = useRef(null);
   const fileInputRef = useRef(null);
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [createdCompanyId, setCreatedCompanyId] = useState(null);
+  const [createdCompanyName, setCreatedCompanyName] = useState(null);
+  const [savingSlabs, setSavingSlabs] = useState({});
 
   // Separate slab state for each courier type
   const [slabState, setSlabState] = useState({
@@ -200,6 +203,200 @@ const AddCompanyPage = () => {
   useEffect(() => {
     fetchCompanies();
   }, []);
+
+  // Auto-populate Dox slab data from previous slab
+  useEffect(() => {
+    if (createdCompanyId && slabState.Dox) {
+      const currentSlab = slabState.Dox;
+      const slabs = ["Slab 2", "Slab 3", "Slab 4"];
+      const currentIndex = slabs.indexOf(currentSlab);
+
+      if (currentIndex > 0) {
+        const prevSlab = slabs[currentIndex - 1];
+        const prevData = doxTableData[prevSlab];
+        const prevSlabColumnCount = SLAB_CONFIG[prevSlab]?.count || 2;
+        const currentSlabColumnCount = SLAB_CONFIG[currentSlab]?.count || 2;
+
+        if (
+          prevData &&
+          (!doxTableData[currentSlab] ||
+            doxTableData[currentSlab].some((row) => row.every((v) => !v)))
+        ) {
+          setDoxTableData((prev) => ({
+            ...prev,
+            [currentSlab]: prevData.map((row) => [
+              // Copy all "Upto Kg" columns (all but last) from previous slab
+              ...row.slice(0, -1),
+              // Add empty "Upto Kg" columns for new slab
+              ...Array(currentSlabColumnCount - prevSlabColumnCount).fill(""),
+              // Keep "Additional Kg" as the last column
+              row[row.length - 1],
+            ]),
+          }));
+        }
+      }
+    }
+  }, [slabState.Dox, createdCompanyId]);
+
+  // Auto-populate Dtdc PLUS slab data from previous slab
+  useEffect(() => {
+    if (createdCompanyId && slabState["Dtdc PLUS"]) {
+      const currentSlab = slabState["Dtdc PLUS"];
+      const slabs = ["Slab 2", "Slab 3", "Slab 4"];
+      const currentIndex = slabs.indexOf(currentSlab);
+
+      if (currentIndex > 0) {
+        const prevSlab = slabs[currentIndex - 1];
+        const prevData = dtdcPlusTableData[prevSlab];
+        const prevSlabColumnCount = SLAB_CONFIG[prevSlab]?.count || 2;
+        const currentSlabColumnCount = SLAB_CONFIG[currentSlab]?.count || 2;
+
+        if (
+          prevData &&
+          (!dtdcPlusTableData[currentSlab] ||
+            dtdcPlusTableData[currentSlab].some((row) => row.every((v) => !v)))
+        ) {
+          setDtdcPlusTableData((prev) => ({
+            ...prev,
+            [currentSlab]: prevData.map((row) => [
+              // Copy all "Upto Kg" columns (all but last) from previous slab
+              ...row.slice(0, -1),
+              // Add empty "Upto Kg" columns for new slab
+              ...Array(currentSlabColumnCount - prevSlabColumnCount).fill(""),
+              // Keep "Additional Kg" as the last column
+              row[row.length - 1],
+            ]),
+          }));
+        }
+      }
+    }
+  }, [slabState["Dtdc PLUS"], createdCompanyId]);
+
+  // Auto-populate Dtdc PTP slab data from previous slab
+  useEffect(() => {
+    if (createdCompanyId && slabState["Dtdc PTP"]?.air) {
+      const currentSlab = slabState["Dtdc PTP"].air;
+      const slabs = ["Slab 2", "Slab 3", "Slab 4"];
+      const currentIndex = slabs.indexOf(currentSlab);
+
+      if (currentIndex > 0) {
+        const prevSlab = slabs[currentIndex - 1];
+        const prevData = dtdcPtpTableData[prevSlab];
+        const prevSlabColumnCount = SLAB_CONFIG[prevSlab]?.count || 2;
+        const currentSlabColumnCount = SLAB_CONFIG[currentSlab]?.count || 2;
+
+        if (prevData) {
+          setDtdcPtpTableData((prev) => ({
+            ...prev,
+            [currentSlab]: {
+              ptp:
+                prev[currentSlab]?.ptp?.some((row) => row.every((v) => !v)) ||
+                !prev[currentSlab]
+                  ? prevData.ptp.map((row) => [
+                      // Copy all "Upto Kg" columns (all but last) from previous slab
+                      ...row.slice(0, -1),
+                      // Add empty "Upto Kg" columns for new slab
+                      ...Array(
+                        currentSlabColumnCount - prevSlabColumnCount
+                      ).fill(""),
+                      // Keep "Additional Kg" as the last column
+                      row[row.length - 1],
+                    ])
+                  : prev[currentSlab].ptp,
+              ptp2:
+                prev[currentSlab]?.ptp2?.some((row) => row.every((v) => !v)) ||
+                !prev[currentSlab]
+                  ? prevData.ptp2.map((row) => [
+                      // Copy all "Upto Kg" columns (all but last) from previous slab
+                      ...row.slice(0, -1),
+                      // Add empty "Upto Kg" columns for new slab
+                      ...Array(
+                        currentSlabColumnCount - prevSlabColumnCount
+                      ).fill(""),
+                      // Keep "Additional Kg" as the last column
+                      row[row.length - 1],
+                    ])
+                  : prev[currentSlab].ptp2,
+            },
+          }));
+        }
+      }
+    }
+  }, [slabState["Dtdc PTP"]?.air, createdCompanyId]);
+
+  // Auto-populate Express Cargo slab data from previous slab
+  useEffect(() => {
+    if (createdCompanyId && slabState["Express Cargo"]) {
+      const currentSlab = slabState["Express Cargo"];
+      const slabs = ["Slab 2", "Slab 3", "Slab 4"];
+      const currentIndex = slabs.indexOf(currentSlab);
+
+      if (currentIndex > 0) {
+        const prevSlab = slabs[currentIndex - 1];
+        const prevData = expressCargoTableData[prevSlab];
+        const prevSlabColumnCount = SLAB_CONFIG[prevSlab]?.count || 2;
+        const currentSlabColumnCount = SLAB_CONFIG[currentSlab]?.count || 2;
+
+        if (
+          prevData &&
+          (!expressCargoTableData[currentSlab] ||
+            expressCargoTableData[currentSlab].some((row) =>
+              row.every((v) => !v)
+            ))
+        ) {
+          setExpressCargoTableData((prev) => ({
+            ...prev,
+            [currentSlab]: prevData.map((row) => [
+              // Copy all "Upto Kg" columns (all but last) from previous slab
+              ...row.slice(0, -1),
+              // Add empty "Upto Kg" columns for new slab
+              ...Array(currentSlabColumnCount - prevSlabColumnCount).fill(""),
+              // Keep "Additional Kg" as the last column
+              row[row.length - 1],
+            ]),
+          }));
+        }
+      }
+    }
+  }, [slabState["Express Cargo"], createdCompanyId]);
+
+  // Auto-populate Priority slab data from previous slab
+  useEffect(() => {
+    if (createdCompanyId && slabState.Priority) {
+      const currentSlab = slabState.Priority;
+      const slabs = [2, 3, 4];
+      const currentIndex = slabs.indexOf(currentSlab);
+
+      if (currentIndex > 0) {
+        const prevSlab = slabs[currentIndex - 1];
+        const prevData = priorityGecTableData[prevSlab];
+        const prevSlabColumnCount = prevSlab; // Numeric slab = column count
+        const currentSlabColumnCount = currentSlab; // Numeric slab = column count
+
+        if (
+          prevData &&
+          (!priorityGecTableData[currentSlab] ||
+            priorityGecTableData[currentSlab].some((row) =>
+              row.every((v) => !v)
+            ))
+        ) {
+          setPriorityGecTableData((prev) => ({
+            ...prev,
+            [currentSlab]: prevData.map((row) => [
+              // Copy all "Upto Kg" columns (all but last) from previous slab
+              ...row.slice(0, -1),
+              // Add empty "Upto Kg" columns for new slab
+              ...Array(currentSlabColumnCount - prevSlabColumnCount).fill(""),
+              // Keep "Additional Kg" as the last column
+              row[row.length - 1],
+            ]),
+          }));
+        }
+      }
+    }
+  }, [slabState.Priority, createdCompanyId]);
+
+  // Note: E-Commerce uses a different structure (flat array), no auto-population needed
 
   const fetchCompanies = async () => {
     try {
@@ -557,6 +754,168 @@ const AddCompanyPage = () => {
   };
 
   // Save courier rates to database
+  // Save rates for a specific slab
+  const saveSlabRates = async (
+    companyId,
+    courierType,
+    slabType,
+    subType = null
+  ) => {
+    console.log(
+      `💾 Saving ${courierType} ${slabType} rates for company ${companyId}`
+    );
+
+    let slabRatesData = [];
+    let rowsToProcess = [];
+    let dataSource = null;
+
+    // Determine which data source and rows to use based on courier type
+    if (courierType === "Dox") {
+      dataSource = doxTableData[slabType];
+      rowsToProcess = DOX_RATE_ROWS;
+    } else if (courierType === "NonDox") {
+      dataSource = nonDoxTableData[slabType]?.[subType];
+      rowsToProcess = RATE_ROWS;
+    } else if (courierType === "Dtdc PLUS") {
+      dataSource = dtdcPlusTableData[slabType];
+      rowsToProcess = DTDC_PLUS_ROWS;
+    } else if (courierType === "Dtdc PTP") {
+      dataSource = dtdcPtpTableData[slabType]?.[subType];
+      rowsToProcess = DTDC_PLUS_ROWS;
+    } else if (courierType === "Express Cargo") {
+      dataSource = expressCargoTableData[slabType];
+      rowsToProcess = EXPRESS_CARGO_ROWS;
+    } else if (courierType === "Priority") {
+      dataSource = priorityGecTableData[slabType];
+      rowsToProcess = PRIORITY_GEC_ROWS;
+    } else if (courierType === "E-Commerce") {
+      // Handle E-Commerce specially - it's a flat structure
+      if (Array.isArray(ecommerceTableData)) {
+        ecommerceTableData.forEach((cityData) => {
+          if (!cityData.city) return;
+          const uptoVal = parseFloat(cityData.upto) || 0;
+          const additionalVal = parseFloat(cityData.additional) || 0;
+
+          if (uptoVal > 0 || additionalVal > 0) {
+            slabRatesData.push({
+              courier_type: "E-Commerce",
+              row_name: cityData.city,
+              slab_type: `Slab ${slabType}`,
+              rates: {
+                rate_1: uptoVal.toString(),
+                rate_2: additionalVal.toString(),
+              },
+            });
+          }
+        });
+
+        if (slabRatesData.length === 0) {
+          throw new Error(
+            `No valid rates entered for E-Commerce Slab ${slabType}. Please enter at least one positive rate value.`
+          );
+        }
+
+        try {
+          const token = localStorage.getItem("token");
+          const response = await axios.post(
+            `${import.meta.env.VITE_API_URL}/rates/courier`,
+            {
+              company_id: companyId,
+              rates_data: slabRatesData,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          console.log("✅ Slab rates saved:", response.data);
+          return {
+            success: true,
+            inserted: response.data.data?.inserted || 0,
+          };
+        } catch (error) {
+          console.error("❌ Error saving slab rates:", error);
+          throw error;
+        }
+      }
+    }
+
+    if (!dataSource && courierType !== "E-Commerce") {
+      throw new Error(`No data found for ${courierType} ${slabType}`);
+    }
+
+    // Format rates data for this slab only (for non-E-Commerce types)
+    if (courierType !== "E-Commerce" && Array.isArray(dataSource)) {
+      dataSource.forEach((rowData, rowIndex) => {
+        const rowName = rowsToProcess[rowIndex];
+        const rates = {};
+        const hasValidData = rowData.some((val) => val && val !== "");
+
+        rowData.forEach((value, colIndex) => {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            rates[`rate_${colIndex + 1}`] = numValue.toString();
+          } else if (value && value !== "") {
+            rates[`rate_${colIndex + 1}`] = "0";
+          } else {
+            rates[`rate_${colIndex + 1}`] = "";
+          }
+        });
+
+        const hasPositiveRate = Object.values(rates).some((val) => {
+          const numVal = parseFloat(val);
+          return !isNaN(numVal) && numVal > 0;
+        });
+
+        if (hasValidData && hasPositiveRate) {
+          slabRatesData.push({
+            courier_type: courierType,
+            row_name: rowName,
+            slab_type:
+              courierType === "Priority" ? `Slab ${slabType}` : slabType,
+            rates,
+            ...(subType && { sub_type: subType }),
+          });
+        }
+      });
+    }
+
+    if (slabRatesData.length === 0) {
+      throw new Error(
+        `No valid rates entered for ${courierType} ${slabType}. Please enter at least one positive rate value.`
+      );
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/rates/courier`,
+        {
+          company_id: companyId,
+          rates_data: slabRatesData,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("✅ Slab rates saved:", response.data);
+      return {
+        success: true,
+        inserted: response.data.data?.inserted || 0,
+      };
+    } catch (error) {
+      console.error("❌ Error saving slab rates:", error);
+      throw error;
+    }
+  };
+
   const saveCourierRates = async (companyId, ratesData) => {
     try {
       const token = localStorage.getItem("token");
@@ -693,121 +1052,20 @@ const AddCompanyPage = () => {
       console.log("✅ Company created:", response.data);
       if (response.data.success) {
         const companyId = response.data.data.id;
+        const companyName = formData.company_name;
         console.log("📌 Company ID:", companyId);
 
-        // Format and save courier rates
-        try {
-          console.log("🔄 Formatting rate data...");
-          const ratesData = formatRatesData(companyId);
-          console.log(
-            "✅ Rate data formatted, total records:",
-            ratesData.length
-          );
+        // Store company ID and name to keep form visible
+        setCreatedCompanyId(companyId);
+        setCreatedCompanyName(companyName);
 
-          if (ratesData.length === 0) {
-            console.warn(
-              "⚠️ No rates were formatted. Checking if any data was entered..."
-            );
-            // Check if ANY rate tables have data
-            const hasAnyData =
-              Object.values(doxTableData).some((slab) =>
-                slab.some((row) => row.some((cell) => cell))
-              ) ||
-              Object.values(nonDoxTableData).some(
-                (slab) =>
-                  (slab.air &&
-                    slab.air.some((row) => row.some((cell) => cell))) ||
-                  (slab.surface &&
-                    slab.surface.some((row) => row.some((cell) => cell)))
-              ) ||
-              Object.values(dtdcPlusTableData).some((slab) =>
-                slab.some((row) => row.some((cell) => cell))
-              ) ||
-              Object.values(dtdcPtpTableData).some(
-                (slab) =>
-                  (slab.ptp &&
-                    slab.ptp.some((row) => row.some((cell) => cell))) ||
-                  (slab.ptp2 &&
-                    slab.ptp2.some((row) => row.some((cell) => cell)))
-              ) ||
-              Object.values(expressCargoTableData).some((slab) =>
-                slab.some((row) => row.some((cell) => cell))
-              ) ||
-              Object.values(priorityGecTableData).some((slab) =>
-                slab.some((row) => row.some((cell) => cell))
-              ) ||
-              ecommerceTableData.some((row) => row.upto || row.additional);
+        // Show success message
+        alert(
+          `✅ Company created successfully!\n\n${companyName} is now ready to add rates.\n\nSwitch to courier type tabs to add rates for different slabs.`
+        );
 
-            if (!hasAnyData) {
-              alert(
-                "Company created successfully!\n\n⚠️ Note: No rates were entered. You can add rates later by editing this company or using the Rate Master section."
-              );
-            } else {
-              alert(
-                "Company created successfully!\n\n⚠️ Warning: Rate tables were filled but validation failed. This usually happens when:\n• Rates are entered as 0 or negative values\n• Required fields are left empty\n\nPlease review and try again."
-              );
-            }
-          } else {
-            const result = await saveCourierRates(companyId, ratesData);
-            let successMsg = `✅ Company created successfully!\n✅ ${result.inserted} rate records added.`;
-            if (result.warnings && result.warnings.length > 0) {
-              successMsg += `\n\n⚠️ ${
-                result.warnings.length
-              } warnings:\n${result.warnings.slice(0, 2).join("\n")}`;
-              if (result.warnings.length > 2) {
-                successMsg += `\n... and ${result.warnings.length - 2} more`;
-              }
-            }
-            alert(successMsg);
-          }
-        } catch (rateError) {
-          console.error("Rate saving error:", rateError);
-          console.error("Rate error details:", {
-            message: rateError.message,
-            status: rateError.status,
-            errors: rateError.errors,
-          });
-
-          const errorMsg = rateError.message || "Failed to save rates";
-          const fullMessage =
-            rateError.errors && rateError.errors.length > 0
-              ? `${errorMsg}\n\nDetails:\n${rateError.errors
-                  .slice(0, 3)
-                  .join("\n")}`
-              : errorMsg;
-
-          alert(
-            `Company created successfully!\n\n❌ Rate saving failed:\n${fullMessage}\n\nYou can add rates later using the Rate Master section.`
-          );
-        }
-
-        // Reset form
-        setFormData({
-          company_id: "",
-          company_name: "",
-          company_address: "",
-          phone: "",
-          email: "",
-          gst_no: "",
-          insurance_percent: "",
-          minimum_risk_surcharge: "",
-          other_details: "",
-          topay_charge: "",
-          cod_charge: "",
-          fuel_surcharge_percent: "",
-          gec_fuel_surcharge_percent: "",
-          royalty_charges_percent: "",
-          pan_no: "",
-          due_days: "",
-          field_d: "",
-          field_m: "",
-          field_e: "",
-          field_v: "",
-          field_i: "",
-          field_n: "",
-          field_g: "",
-          field_b: "",
-        });
+        // DO NOT reset form - keep it visible with blur effect
+        // DO NOT save rates automatically - let users save per slab
         fetchCompanies();
       }
     } catch (error) {
@@ -963,325 +1221,412 @@ const AddCompanyPage = () => {
           {activeTab === "Add Company" ? (
             // Add Company Form
             <form onSubmit={handleSubmit} className="space-y-6">
+              {createdCompanyId && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                  <p className="text-green-900 font-semibold">
+                    ✅ Company Created Successfully!
+                  </p>
+                  <p className="text-green-700 text-sm mt-1">
+                    <strong>{createdCompanyName}</strong> has been created and
+                    is ready for rate configuration. Switch to the courier type
+                    tabs to add rates for different slabs.
+                  </p>
+                </div>
+              )}
+
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <p className="text-blue-900 font-semibold">
-                  📋 First Of All Add Company
+                  📋 Company Details
                 </p>
                 <p className="text-blue-700 text-sm mt-1">
-                  Add your courier company details below. Fill all required
-                  fields marked with *
+                  {createdCompanyId
+                    ? "Company information below (read-only). Edit rates in courier type tabs."
+                    : "Add your courier company details below. Fill all required fields marked with *"}
                 </p>
               </div>
 
-              {/* Company ID and Company Name */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Blur overlay for company details after creation */}
+              <div
+                className={`space-y-6 ${
+                  createdCompanyId ? "opacity-50 pointer-events-none" : ""
+                }`}
+              >
+                {/* Company ID and Company Name */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Company Id <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="company_id"
+                      value={formData.company_id}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter company ID (e.g., DX01)"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Company Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="company_name"
+                      value={formData.company_name}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter company name"
+                    />
+                  </div>
+                </div>
+
+                {/* Company Address */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Id <span className="text-red-500">*</span>
+                    Company Address <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="company_id"
-                    value={formData.company_id}
+                  <textarea
+                    name="company_address"
+                    value={formData.company_address}
                     onChange={handleChange}
                     required
+                    rows="3"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter company ID (e.g., DX01)"
+                    placeholder="Enter complete company address"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Name <span className="text-red-500">*</span>
+                {/* Phone and Email */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter email address"
+                    />
+                  </div>
+                </div>
+
+                {/* GST and Insurance */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      GST No <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="gst_no"
+                      value={formData.gst_no}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter GST number"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Insurance %
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="insurance_percent"
+                      value={formData.insurance_percent}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                {/* Minimum Risk Surcharge and Other Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Minimum Risk Surcharge
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="minimum_risk_surcharge"
+                      value={formData.minimum_risk_surcharge}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Other Details
+                    </label>
+                    <input
+                      type="text"
+                      name="other_details"
+                      value={formData.other_details}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Additional details"
+                    />
+                  </div>
+                </div>
+
+                {/* Charges */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Topay Charge
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="topay_charge"
+                      value={formData.topay_charge}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      COD Charge
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="cod_charge"
+                      value={formData.cod_charge}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                {/* Fuel Surcharges */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Fuel Surcharge %
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="fuel_surcharge_percent"
+                      value={formData.fuel_surcharge_percent}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      GEC Fuel Surcharge %
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="gec_fuel_surcharge_percent"
+                      value={formData.gec_fuel_surcharge_percent}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                {/* Royalty and PAN */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Royalty Charges %
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="royalty_charges_percent"
+                      value={formData.royalty_charges_percent}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Pan No
+                    </label>
+                    <input
+                      type="text"
+                      name="pan_no"
+                      value={formData.pan_no}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter PAN number"
+                    />
+                  </div>
+                </div>
+
+                {/* Due Days */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Due Days
+                    </label>
+                    <input
+                      type="number"
+                      name="due_days"
+                      value={formData.due_days}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                {/* Additional Fields: D, M, E, V, I, N, G, B */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <label className="block text-sm font-medium text-gray-700 mb-4">
+                    Additional Fields
                   </label>
-                  <input
-                    type="text"
-                    name="company_name"
-                    value={formData.company_name}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter company name"
-                  />
-                </div>
-              </div>
-
-              {/* Company Address */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Company Address <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  name="company_address"
-                  value={formData.company_address}
-                  onChange={handleChange}
-                  required
-                  rows="3"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter complete company address"
-                />
-              </div>
-
-              {/* Phone and Email */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter phone number"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter email address"
-                  />
-                </div>
-              </div>
-
-              {/* GST and Insurance */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    GST No <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="gst_no"
-                    value={formData.gst_no}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter GST number"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Insurance %
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="insurance_percent"
-                    value={formData.insurance_percent}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-
-              {/* Minimum Risk Surcharge and Other Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Minimum Risk Surcharge
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="minimum_risk_surcharge"
-                    value={formData.minimum_risk_surcharge}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Other Details
-                  </label>
-                  <input
-                    type="text"
-                    name="other_details"
-                    value={formData.other_details}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Additional details"
-                  />
-                </div>
-              </div>
-
-              {/* Charges */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Topay Charge
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="topay_charge"
-                    value={formData.topay_charge}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    COD Charge
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="cod_charge"
-                    value={formData.cod_charge}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-
-              {/* Fuel Surcharges */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Fuel Surcharge %
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="fuel_surcharge_percent"
-                    value={formData.fuel_surcharge_percent}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    GEC Fuel Surcharge %
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="gec_fuel_surcharge_percent"
-                    value={formData.gec_fuel_surcharge_percent}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-
-              {/* Royalty and PAN */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Royalty Charges %
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="royalty_charges_percent"
-                    value={formData.royalty_charges_percent}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Pan No
-                  </label>
-                  <input
-                    type="text"
-                    name="pan_no"
-                    value={formData.pan_no}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter PAN number"
-                  />
-                </div>
-              </div>
-
-              {/* Due Days */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Due Days
-                  </label>
-                  <input
-                    type="number"
-                    name="due_days"
-                    value={formData.due_days}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
-              {/* Additional Fields: D, M, E, V, I, N, G, B */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <label className="block text-sm font-medium text-gray-700 mb-4">
-                  Additional Fields
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-                  {[
-                    { key: "field_d", label: "D" },
-                    { key: "field_m", label: "M" },
-                    { key: "field_e", label: "E" },
-                    { key: "field_v", label: "V" },
-                    { key: "field_i", label: "I" },
-                    { key: "field_n", label: "N" },
-                    { key: "field_g", label: "G" },
-                    { key: "field_b", label: "B" },
-                  ].map(({ key, label }) => (
-                    <div key={key}>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
-                        {label}
-                      </label>
-                      <input
-                        type="text"
-                        name={key}
-                        value={formData[key]}
-                        onChange={handleChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder={label}
-                      />
-                    </div>
-                  ))}
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                    {[
+                      { key: "field_d", label: "D" },
+                      { key: "field_m", label: "M" },
+                      { key: "field_e", label: "E" },
+                      { key: "field_v", label: "V" },
+                      { key: "field_i", label: "I" },
+                      { key: "field_n", label: "N" },
+                      { key: "field_g", label: "G" },
+                      { key: "field_b", label: "B" },
+                    ].map(({ key, label }) => (
+                      <div key={key}>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          {label}
+                        </label>
+                        <input
+                          type="text"
+                          name={key}
+                          value={formData[key]}
+                          onChange={handleChange}
+                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder={label}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Submit Button */}
-              <div className="flex justify-end pt-6 border-t border-gray-200">
+              <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+                {createdCompanyId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCreatedCompanyId(null);
+                      setCreatedCompanyName(null);
+                      setFormData({
+                        company_id: "",
+                        company_name: "",
+                        company_address: "",
+                        phone: "",
+                        email: "",
+                        gst_no: "",
+                        insurance_percent: "",
+                        minimum_risk_surcharge: "",
+                        other_details: "",
+                        topay_charge: "",
+                        cod_charge: "",
+                        fuel_surcharge_percent: "",
+                        gec_fuel_surcharge_percent: "",
+                        royalty_charges_percent: "",
+                        pan_no: "",
+                        due_days: "",
+                        field_d: "",
+                        field_m: "",
+                        field_e: "",
+                        field_v: "",
+                        field_i: "",
+                        field_n: "",
+                        field_g: "",
+                        field_b: "",
+                      });
+                    }}
+                    className="px-8 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium"
+                  >
+                    Add New Company
+                  </button>
+                )}
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || createdCompanyId}
                   className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
                 >
-                  {loading ? "Saving..." : "Save Company"}
+                  {loading
+                    ? "Saving..."
+                    : createdCompanyId
+                    ? "✅ Company Created"
+                    : "Save Company"}
                 </button>
               </div>
             </form>
           ) : activeTab === "Dox" ? (
             // ========== DOX UI - DYNAMIC COLUMNS BY SLAB ==========
             <div className="w-full">
+              {!createdCompanyId && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                  <p className="text-yellow-900 font-semibold">
+                    ⚠️ No Company Selected
+                  </p>
+                  <p className="text-yellow-700 text-sm mt-1">
+                    Please create a company first in the "Add Company" tab to
+                    configure rates.
+                  </p>
+                </div>
+              )}
+
+              {createdCompanyId && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                  <p className="text-green-900 font-semibold">
+                    ✅ Company Selected: {createdCompanyName}
+                  </p>
+                  <p className="text-green-700 text-sm mt-1">
+                    Enter rates below for different slabs and save each slab
+                    independently.
+                  </p>
+                </div>
+              )}
+
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
                 <h2 className="text-lg font-semibold text-gray-700 mb-6">
                   {activeTab} Rate Configuration
@@ -1366,14 +1711,57 @@ const AddCompanyPage = () => {
                   <p className="text-sm text-blue-800">
                     ℹ️ {slabState.Dox} has{" "}
                     <strong>{SLAB_CONFIG[slabState.Dox]?.count} columns</strong>
-                    . Click on different slabs to see different column counts.
+                    . Select a slab and enter rates, then click the save button
+                    for that slab.
                   </p>
                 </div>
 
-                {/* Save Button */}
-                <div className="flex justify-end">
-                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
-                    Save Rates
+                {/* Save Button for current slab only */}
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={async () => {
+                      if (!createdCompanyId) {
+                        alert("Please create a company first!");
+                        return;
+                      }
+                      try {
+                        setSavingSlabs((prev) => ({
+                          ...prev,
+                          [`Dox-${slabState.Dox}`]: true,
+                        }));
+                        const result = await saveSlabRates(
+                          createdCompanyId,
+                          "Dox",
+                          slabState.Dox
+                        );
+                        alert(
+                          `✅ ${slabState.Dox} saved successfully!\n${result.inserted} rate records added.`
+                        );
+                      } catch (error) {
+                        alert(
+                          `❌ Failed to save ${slabState.Dox}:\n${error.message}`
+                        );
+                      } finally {
+                        setSavingSlabs((prev) => ({
+                          ...prev,
+                          [`Dox-${slabState.Dox}`]: false,
+                        }));
+                      }
+                    }}
+                    disabled={
+                      savingSlabs[`Dox-${slabState.Dox}`] || !createdCompanyId
+                    }
+                    className={`px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors font-medium ${
+                      savingSlabs[`Dox-${slabState.Dox}`]
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : createdCompanyId
+                        ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+                        : "bg-gray-400 text-white cursor-not-allowed"
+                    }`}
+                  >
+                    {savingSlabs[`Dox-${slabState.Dox}`]
+                      ? `Saving ${slabState.Dox}...`
+                      : `Save ${slabState.Dox}`}
                   </button>
                 </div>
               </div>
@@ -1381,6 +1769,30 @@ const AddCompanyPage = () => {
           ) : activeTab === "Dtdc PLUS" ? (
             // ========== DTDC PLUS UI ==========
             <div className="w-full">
+              {!createdCompanyId && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                  <p className="text-yellow-900 font-semibold">
+                    ⚠️ No Company Selected
+                  </p>
+                  <p className="text-yellow-700 text-sm mt-1">
+                    Please create a company first in the "Add Company" tab to
+                    configure rates.
+                  </p>
+                </div>
+              )}
+
+              {createdCompanyId && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                  <p className="text-green-900 font-semibold">
+                    ✅ Company Selected: {createdCompanyName}
+                  </p>
+                  <p className="text-green-700 text-sm mt-1">
+                    Enter rates below for different slabs and save each slab
+                    independently.
+                  </p>
+                </div>
+              )}
+
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
                 <h2 className="text-lg font-semibold text-gray-700 mb-6">
                   {activeTab} Rate Configuration
@@ -1467,14 +1879,58 @@ const AddCompanyPage = () => {
                       {generateColumnsForSlab(slabState["Dtdc PLUS"]).length}{" "}
                       columns
                     </strong>
-                    . Click on different slabs to see different column counts.
+                    . Select a slab and enter rates, then click the save button
+                    for that slab.
                   </p>
                 </div>
 
-                {/* Save Button */}
-                <div className="flex justify-end">
-                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
-                    Save Rates
+                {/* Save Button for current slab only */}
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={async () => {
+                      if (!createdCompanyId) {
+                        alert("Please create a company first!");
+                        return;
+                      }
+                      try {
+                        setSavingSlabs((prev) => ({
+                          ...prev,
+                          [`DtdcPLUS-${slabState["Dtdc PLUS"]}`]: true,
+                        }));
+                        const result = await saveSlabRates(
+                          createdCompanyId,
+                          "Dtdc PLUS",
+                          slabState["Dtdc PLUS"]
+                        );
+                        alert(
+                          `✅ ${slabState["Dtdc PLUS"]} saved successfully!\n${result.inserted} rate records added.`
+                        );
+                      } catch (error) {
+                        alert(
+                          `❌ Failed to save ${slabState["Dtdc PLUS"]}:\n${error.message}`
+                        );
+                      } finally {
+                        setSavingSlabs((prev) => ({
+                          ...prev,
+                          [`DtdcPLUS-${slabState["Dtdc PLUS"]}`]: false,
+                        }));
+                      }
+                    }}
+                    disabled={
+                      savingSlabs[`DtdcPLUS-${slabState["Dtdc PLUS"]}`] ||
+                      !createdCompanyId
+                    }
+                    className={`px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors font-medium ${
+                      savingSlabs[`DtdcPLUS-${slabState["Dtdc PLUS"]}`]
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : createdCompanyId
+                        ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+                        : "bg-gray-400 text-white cursor-not-allowed"
+                    }`}
+                  >
+                    {savingSlabs[`DtdcPLUS-${slabState["Dtdc PLUS"]}`]
+                      ? `Saving ${slabState["Dtdc PLUS"]}...`
+                      : `Save ${slabState["Dtdc PLUS"]}`}
                   </button>
                 </div>
               </div>
@@ -1483,9 +1939,35 @@ const AddCompanyPage = () => {
             // ========== DTDC PTP UI - TWO TABLES ==========
             <div className="w-full">
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-8">
-                <h2 className="text-lg font-semibold text-gray-700">
-                  {activeTab} Rate Configuration
-                </h2>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-700 mb-6">
+                    {activeTab} Rate Configuration
+                  </h2>
+
+                  {/* Company Selection Indicator */}
+                  <div
+                    className={`p-3 rounded-md mb-6 ${
+                      createdCompanyId
+                        ? "bg-green-50 border border-green-200"
+                        : "bg-yellow-50 border border-yellow-200"
+                    }`}
+                  >
+                    <p
+                      className={`text-sm font-medium ${
+                        createdCompanyId ? "text-green-800" : "text-yellow-800"
+                      }`}
+                    >
+                      {createdCompanyId ? (
+                        <>
+                          ✅ Company Selected:{" "}
+                          <strong>{createdCompanyName}</strong>
+                        </>
+                      ) : (
+                        <>⚠️ No Company Selected</>
+                      )}
+                    </p>
+                  </div>
+                </div>
 
                 {/* Slab Selection */}
                 <div className="flex flex-wrap gap-4">
@@ -1621,11 +2103,113 @@ const AddCompanyPage = () => {
                   </div>
                 </div>
 
-                {/* Save Button */}
-                <div className="flex justify-end pt-4 border-t border-gray-200">
-                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
-                    Save Rates
-                  </button>
+                {/* Per-Slab Save Buttons */}
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                      PTP Slabs:
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={async () => {
+                          if (!createdCompanyId) {
+                            alert("Please create a company first!");
+                            return;
+                          }
+                          try {
+                            setSavingSlabs((prev) => ({
+                              ...prev,
+                              [`Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`]: true,
+                            }));
+                            await saveSlabRates(
+                              createdCompanyId,
+                              "Dtdc PTP",
+                              slabState["Dtdc PTP"].air,
+                              "ptp"
+                            );
+                            alert(
+                              `✅ ${slabState["Dtdc PTP"].air} (PTP) saved successfully!`
+                            );
+                          } catch (error) {
+                            alert(
+                              `❌ Failed to save ${slabState["Dtdc PTP"].air} (PTP):\n${error.message}`
+                            );
+                          } finally {
+                            setSavingSlabs((prev) => ({
+                              ...prev,
+                              [`Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`]: false,
+                            }));
+                          }
+                        }}
+                        disabled={
+                          !createdCompanyId ||
+                          savingSlabs[
+                            `Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`
+                          ]
+                        }
+                        className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                      >
+                        {savingSlabs[
+                          `Dtdc PTP-ptp-${slabState["Dtdc PTP"].air}`
+                        ]
+                          ? `Saving...`
+                          : `Save ${slabState["Dtdc PTP"].air}`}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                      PTP 2 Slabs:
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={async () => {
+                          if (!createdCompanyId) {
+                            alert("Please create a company first!");
+                            return;
+                          }
+                          try {
+                            setSavingSlabs((prev) => ({
+                              ...prev,
+                              [`Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`]: true,
+                            }));
+                            await saveSlabRates(
+                              createdCompanyId,
+                              "Dtdc PTP",
+                              slabState["Dtdc PTP"].surface,
+                              "ptp2"
+                            );
+                            alert(
+                              `✅ ${slabState["Dtdc PTP"].surface} (PTP 2) saved successfully!`
+                            );
+                          } catch (error) {
+                            alert(
+                              `❌ Failed to save ${slabState["Dtdc PTP"].surface} (PTP 2):\n${error.message}`
+                            );
+                          } finally {
+                            setSavingSlabs((prev) => ({
+                              ...prev,
+                              [`Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`]: false,
+                            }));
+                          }
+                        }}
+                        disabled={
+                          !createdCompanyId ||
+                          savingSlabs[
+                            `Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`
+                          ]
+                        }
+                        className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                      >
+                        {savingSlabs[
+                          `Dtdc PTP-ptp2-${slabState["Dtdc PTP"].surface}`
+                        ]
+                          ? `Saving...`
+                          : `Save ${slabState["Dtdc PTP"].surface}`}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1636,6 +2220,30 @@ const AddCompanyPage = () => {
                 <h2 className="text-lg font-semibold text-gray-700 mb-6">
                   {activeTab} Rate Configuration
                 </h2>
+
+                {/* Company Selection Indicator */}
+                <div
+                  className={`p-3 rounded-md mb-6 ${
+                    createdCompanyId
+                      ? "bg-green-50 border border-green-200"
+                      : "bg-yellow-50 border border-yellow-200"
+                  }`}
+                >
+                  <p
+                    className={`text-sm font-medium ${
+                      createdCompanyId ? "text-green-800" : "text-yellow-800"
+                    }`}
+                  >
+                    {createdCompanyId ? (
+                      <>
+                        ✅ Company Selected:{" "}
+                        <strong>{createdCompanyName}</strong>
+                      </>
+                    ) : (
+                      <>⚠️ No Company Selected</>
+                    )}
+                  </p>
+                </div>
 
                 {/* Slab Selection */}
                 <div className="flex flex-wrap gap-4 mb-6">
@@ -1725,10 +2333,47 @@ const AddCompanyPage = () => {
                   </p>
                 </div>
 
-                {/* Save Button */}
-                <div className="flex justify-end">
-                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
-                    Save Rates
+                {/* Save Button for current slab only */}
+                <div className="flex flex-wrap gap-3 justify-end">
+                  <button
+                    onClick={async () => {
+                      if (!createdCompanyId) {
+                        alert("Please create a company first!");
+                        return;
+                      }
+                      try {
+                        setSavingSlabs((prev) => ({
+                          ...prev,
+                          [`Express Cargo-${slabState["Express Cargo"]}`]: true,
+                        }));
+                        await saveSlabRates(
+                          createdCompanyId,
+                          "Express Cargo",
+                          slabState["Express Cargo"]
+                        );
+                        alert(
+                          `✅ ${slabState["Express Cargo"]} saved successfully!`
+                        );
+                      } catch (error) {
+                        alert(
+                          `❌ Failed to save ${slabState["Express Cargo"]}:\n${error.message}`
+                        );
+                      } finally {
+                        setSavingSlabs((prev) => ({
+                          ...prev,
+                          [`Express Cargo-${slabState["Express Cargo"]}`]: false,
+                        }));
+                      }
+                    }}
+                    disabled={
+                      !createdCompanyId ||
+                      savingSlabs[`Express Cargo-${slabState["Express Cargo"]}`]
+                    }
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium text-sm"
+                  >
+                    {savingSlabs[`Express Cargo-${slabState["Express Cargo"]}`]
+                      ? `Saving ${slabState["Express Cargo"]}...`
+                      : `Save ${slabState["Express Cargo"]}`}
                   </button>
                 </div>
               </div>
@@ -1740,6 +2385,30 @@ const AddCompanyPage = () => {
                 <h2 className="text-lg font-semibold text-gray-700 mb-6">
                   {activeTab} - GEC
                 </h2>
+
+                {/* Company Selection Indicator */}
+                <div
+                  className={`p-3 rounded-md mb-6 ${
+                    createdCompanyId
+                      ? "bg-green-50 border border-green-200"
+                      : "bg-yellow-50 border border-yellow-200"
+                  }`}
+                >
+                  <p
+                    className={`text-sm font-medium ${
+                      createdCompanyId ? "text-green-800" : "text-yellow-800"
+                    }`}
+                  >
+                    {createdCompanyId ? (
+                      <>
+                        ✅ Company Selected:{" "}
+                        <strong>{createdCompanyName}</strong>
+                      </>
+                    ) : (
+                      <>⚠️ No Company Selected</>
+                    )}
+                  </p>
+                </div>
 
                 {/* Slab Selection */}
                 <div className="flex flex-wrap gap-4 mb-6">
@@ -1826,10 +2495,47 @@ const AddCompanyPage = () => {
                   </p>
                 </div>
 
-                {/* Save Button */}
-                <div className="flex justify-end">
-                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
-                    Save Rates
+                {/* Save Button for current slab only */}
+                <div className="flex flex-wrap gap-3 justify-end">
+                  <button
+                    onClick={async () => {
+                      if (!createdCompanyId) {
+                        alert("Please create a company first!");
+                        return;
+                      }
+                      try {
+                        setSavingSlabs((prev) => ({
+                          ...prev,
+                          [`Priority-${slabState.Priority}`]: true,
+                        }));
+                        await saveSlabRates(
+                          createdCompanyId,
+                          "Priority",
+                          slabState.Priority
+                        );
+                        alert(
+                          `✅ Slab ${slabState.Priority} saved successfully!`
+                        );
+                      } catch (error) {
+                        alert(
+                          `❌ Failed to save Slab ${slabState.Priority}:\n${error.message}`
+                        );
+                      } finally {
+                        setSavingSlabs((prev) => ({
+                          ...prev,
+                          [`Priority-${slabState.Priority}`]: false,
+                        }));
+                      }
+                    }}
+                    disabled={
+                      !createdCompanyId ||
+                      savingSlabs[`Priority-${slabState.Priority}`]
+                    }
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium text-sm"
+                  >
+                    {savingSlabs[`Priority-${slabState.Priority}`]
+                      ? `Saving Slab ${slabState.Priority}...`
+                      : `Save Slab ${slabState.Priority}`}
                   </button>
                 </div>
               </div>
@@ -1841,6 +2547,30 @@ const AddCompanyPage = () => {
                 <h2 className="text-lg font-semibold text-center mb-4">
                   Ecommerce Priority - 7X
                 </h2>
+
+                {/* Company Selection Indicator */}
+                <div
+                  className={`p-3 rounded-md mb-6 ${
+                    createdCompanyId
+                      ? "bg-green-50 border border-green-200"
+                      : "bg-yellow-50 border border-yellow-200"
+                  }`}
+                >
+                  <p
+                    className={`text-sm font-medium ${
+                      createdCompanyId ? "text-green-800" : "text-yellow-800"
+                    }`}
+                  >
+                    {createdCompanyId ? (
+                      <>
+                        ✅ Company Selected:{" "}
+                        <strong>{createdCompanyName}</strong>
+                      </>
+                    ) : (
+                      <>⚠️ No Company Selected</>
+                    )}
+                  </p>
+                </div>
 
                 {/* Slab Selection */}
                 <div className="flex justify-center gap-8 mb-6">
@@ -1949,10 +2679,47 @@ const AddCompanyPage = () => {
                   </div>
                 )}
 
-                {/* Save Button */}
-                <div className="flex justify-end mt-6">
-                  <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
-                    Save
+                {/* Save Button for current slab only */}
+                <div className="flex flex-wrap gap-3 justify-end mt-6">
+                  <button
+                    onClick={async () => {
+                      if (!createdCompanyId) {
+                        alert("Please create a company first!");
+                        return;
+                      }
+                      try {
+                        setSavingSlabs((prev) => ({
+                          ...prev,
+                          [`E-Commerce-${slabState["E-Commerce"]}`]: true,
+                        }));
+                        await saveSlabRates(
+                          createdCompanyId,
+                          "E-Commerce",
+                          slabState["E-Commerce"]
+                        );
+                        alert(
+                          `✅ Slab ${slabState["E-Commerce"]} saved successfully!`
+                        );
+                      } catch (error) {
+                        alert(
+                          `❌ Failed to save Slab ${slabState["E-Commerce"]}:\n${error.message}`
+                        );
+                      } finally {
+                        setSavingSlabs((prev) => ({
+                          ...prev,
+                          [`E-Commerce-${slabState["E-Commerce"]}`]: false,
+                        }));
+                      }
+                    }}
+                    disabled={
+                      !createdCompanyId ||
+                      savingSlabs[`E-Commerce-${slabState["E-Commerce"]}`]
+                    }
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium text-sm"
+                  >
+                    {savingSlabs[`E-Commerce-${slabState["E-Commerce"]}`]
+                      ? `Saving Slab ${slabState["E-Commerce"]}...`
+                      : `Save Slab ${slabState["E-Commerce"]}`}
                   </button>
                 </div>
               </div>
@@ -1961,9 +2728,35 @@ const AddCompanyPage = () => {
             // ========== OTHER COURIER TYPES - AIR & SURFACE SECTIONS ==========
             <div className="w-full">
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm space-y-10">
-                <h2 className="text-lg font-semibold text-gray-700 px-6 pt-6">
-                  {activeTab} Rate Configuration
-                </h2>
+                <div className="px-6 pt-6">
+                  <h2 className="text-lg font-semibold text-gray-700 mb-6">
+                    {activeTab} Rate Configuration
+                  </h2>
+
+                  {/* Company Selection Indicator */}
+                  <div
+                    className={`p-3 rounded-md ${
+                      createdCompanyId
+                        ? "bg-green-50 border border-green-200"
+                        : "bg-yellow-50 border border-yellow-200"
+                    }`}
+                  >
+                    <p
+                      className={`text-sm font-medium ${
+                        createdCompanyId ? "text-green-800" : "text-yellow-800"
+                      }`}
+                    >
+                      {createdCompanyId ? (
+                        <>
+                          ✅ Company Selected:{" "}
+                          <strong>{createdCompanyName}</strong>
+                        </>
+                      ) : (
+                        <>⚠️ No Company Selected</>
+                      )}
+                    </p>
+                  </div>
+                </div>
 
                 {/* ========== AIR RATE CARGO SECTION ========== */}
                 <section className="p-6">
@@ -2141,11 +2934,113 @@ const AddCompanyPage = () => {
                   </div>
                 </section>
 
-                {/* Save Button */}
-                <div className="p-6 border-t border-gray-200 flex justify-end">
-                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
-                    Save Rates
-                  </button>
+                {/* Per-Slab Save Buttons */}
+                <div className="p-6 border-t border-gray-200">
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                      Air Rate Cargo Slabs:
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={async () => {
+                          if (!createdCompanyId) {
+                            alert("Please create a company first!");
+                            return;
+                          }
+                          try {
+                            setSavingSlabs((prev) => ({
+                              ...prev,
+                              [`${activeTab}-air-${slabState[activeTab].air}`]: true,
+                            }));
+                            await saveSlabRates(
+                              createdCompanyId,
+                              activeTab,
+                              slabState[activeTab].air,
+                              "air"
+                            );
+                            alert(
+                              `✅ ${slabState[activeTab].air} (Air) saved successfully!`
+                            );
+                          } catch (error) {
+                            alert(
+                              `❌ Failed to save ${slabState[activeTab].air} (Air):\n${error.message}`
+                            );
+                          } finally {
+                            setSavingSlabs((prev) => ({
+                              ...prev,
+                              [`${activeTab}-air-${slabState[activeTab].air}`]: false,
+                            }));
+                          }
+                        }}
+                        disabled={
+                          !createdCompanyId ||
+                          savingSlabs[
+                            `${activeTab}-air-${slabState[activeTab].air}`
+                          ]
+                        }
+                        className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                      >
+                        {savingSlabs[
+                          `${activeTab}-air-${slabState[activeTab].air}`
+                        ]
+                          ? `Saving...`
+                          : `Save ${slabState[activeTab].air}`}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                      Rate Surface Cargo Slabs:
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={async () => {
+                          if (!createdCompanyId) {
+                            alert("Please create a company first!");
+                            return;
+                          }
+                          try {
+                            setSavingSlabs((prev) => ({
+                              ...prev,
+                              [`${activeTab}-surface-${slabState[activeTab].surface}`]: true,
+                            }));
+                            await saveSlabRates(
+                              createdCompanyId,
+                              activeTab,
+                              slabState[activeTab].surface,
+                              "surface"
+                            );
+                            alert(
+                              `✅ ${slabState[activeTab].surface} (Surface) saved successfully!`
+                            );
+                          } catch (error) {
+                            alert(
+                              `❌ Failed to save ${slabState[activeTab].surface} (Surface):\n${error.message}`
+                            );
+                          } finally {
+                            setSavingSlabs((prev) => ({
+                              ...prev,
+                              [`${activeTab}-surface-${slabState[activeTab].surface}`]: false,
+                            }));
+                          }
+                        }}
+                        disabled={
+                          !createdCompanyId ||
+                          savingSlabs[
+                            `${activeTab}-surface-${slabState[activeTab].surface}`
+                          ]
+                        }
+                        className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                      >
+                        {savingSlabs[
+                          `${activeTab}-surface-${slabState[activeTab].surface}`
+                        ]
+                          ? `Saving...`
+                          : `Save ${slabState[activeTab].surface}`}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
