@@ -17,6 +17,7 @@ export default function GenerateSingleInvoicePage() {
 
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [generatedInvoiceNumber, setGeneratedInvoiceNumber] = useState("");
   const [calculations, setCalculations] = useState({
     total: 0,
     fuel_surcharge_tax_percent: 0,
@@ -45,7 +46,9 @@ export default function GenerateSingleInvoicePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/bookings/consignment/${formData.consignment_no}`,
+        `${import.meta.env.VITE_API_URL}/bookings/consignment/${
+          formData.consignment_no
+        }`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -94,6 +97,9 @@ export default function GenerateSingleInvoicePage() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
+      // Remove invoice_no from request as it's auto-generated on the backend
+      const { invoice_no, ...formDataWithoutInvoiceNo } = formData;
+
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/invoices/generate-single`,
         {
@@ -103,7 +109,7 @@ export default function GenerateSingleInvoicePage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            ...formData,
+            ...formDataWithoutInvoiceNo,
             booking_id: booking.id,
             ...calculations,
           }),
@@ -112,6 +118,11 @@ export default function GenerateSingleInvoicePage() {
 
       const data = await response.json();
       if (data.success) {
+        // Extract and store generated invoice number
+        const invoiceNumber = data.data?.invoice_number;
+        if (invoiceNumber) {
+          setGeneratedInvoiceNumber(invoiceNumber);
+        }
         alert("Invoice generated successfully!");
         // Reset form
         setFormData({
@@ -196,13 +207,9 @@ export default function GenerateSingleInvoicePage() {
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Invoice No:
             </label>
-            <input
-              type="text"
-              name="invoice_no"
-              value={formData.invoice_no}
-              onChange={handleInputChange}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
+            <div className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm bg-gray-100 text-gray-900 flex items-center font-semibold">
+              <span>{generatedInvoiceNumber || "Auto-generated on save"}</span>
+            </div>
           </div>
 
           <div>

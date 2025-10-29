@@ -34,6 +34,7 @@ export default function GenerateInvoicePage() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [currentInvoice, setCurrentInvoice] = useState(null);
   const [customerEmail, setCustomerEmail] = useState("");
+  const [generatedInvoiceNumber, setGeneratedInvoiceNumber] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -166,6 +167,9 @@ export default function GenerateInvoicePage() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
+      // Remove invoice_no from request as it's auto-generated on the backend
+      const { invoice_no, ...formDataWithoutInvoiceNo } = formData;
+
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/invoices/generate`,
         {
@@ -175,7 +179,7 @@ export default function GenerateInvoicePage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            ...formData,
+            ...formDataWithoutInvoiceNo,
             bookings: bookings.map((b) => b.id),
             ...calculations,
           }),
@@ -189,6 +193,9 @@ export default function GenerateInvoicePage() {
           data.data || {};
 
         if (invoiceId && invoiceNumber) {
+          // Store generated invoice number for display
+          setGeneratedInvoiceNumber(invoiceNumber);
+
           // Fetch customer email
           const email = await fetchCustomerEmail(formData.customer_id);
 
@@ -199,7 +206,7 @@ export default function GenerateInvoicePage() {
           // Show email modal immediately after invoice generation
           setShowEmailModal(true);
 
-          // Reset form after showing modal
+          // Reset form after showing modal (but keep the generated invoice number)
           setFormData({
             customer_id: "",
             consignment_no: "",
@@ -312,13 +319,9 @@ export default function GenerateInvoicePage() {
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Invoice No:
             </label>
-            <input
-              type="text"
-              name="invoice_no"
-              value={formData.invoice_no}
-              onChange={handleInputChange}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
+            <div className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm bg-gray-100 text-gray-900 flex items-center font-semibold">
+              <span>{generatedInvoiceNumber || "Auto-generated on save"}</span>
+            </div>
           </div>
 
           <div>

@@ -7,7 +7,11 @@ const FranchiseFormPage = () => {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
 
-  const [activeTab, setActiveTab] = useState("franchisee");
+  const [currentStep, setCurrentStep] = useState(1); // 1: Franchisee, 2: Sectors, 3: Upload
+  const [stepCompleted, setStepCompleted] = useState({
+    franchisee: false,
+    sectors: false,
+  }); // Track which steps are completed
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     franchise_code: "",
@@ -71,6 +75,9 @@ const FranchiseFormPage = () => {
     if (isEdit) {
       fetchFranchise();
       fetchSectors();
+      // Mark franchisee as completed when editing existing
+      setStepCompleted({ franchisee: true, sectors: true });
+      setCurrentStep(2); // Start at sectors step for existing franchises
     }
   }, [id]);
 
@@ -116,11 +123,14 @@ const FranchiseFormPage = () => {
     try {
       if (isEdit) {
         await api.put(`/franchises/${id}`, formData);
-        alert("Franchise updated successfully");
+        setStepCompleted({ ...stepCompleted, franchisee: true });
+        setCurrentStep(2); // Auto move to Sectors step
+        alert("✅ Franchisee saved successfully! Moving to sectors...");
       } else {
         const response = await api.post("/franchises", formData);
         const newId = response.data.data.id;
-        alert("Franchise created successfully");
+        setStepCompleted({ ...stepCompleted, franchisee: true });
+        alert("✅ Franchisee created successfully! Moving to sectors...");
         navigate(`/franchises/edit/${newId}`);
       }
     } catch (error) {
@@ -169,7 +179,9 @@ const FranchiseFormPage = () => {
     setLoading(true);
     try {
       await api.post(`/sectors/franchise/${id}`, { sectors });
-      alert("Sectors saved successfully");
+      setStepCompleted({ ...stepCompleted, sectors: true });
+      setCurrentStep(3); // Auto move to Upload step
+      alert("✅ Sectors saved successfully! Moving to upload...");
       fetchSectors();
     } catch (error) {
       console.error("Error saving sectors:", error);
@@ -244,61 +256,94 @@ const FranchiseFormPage = () => {
           {isEdit ? "Edit Franchisee" : "Add New Franchisee"}
         </h1>
 
-        {/* Tabs */}
-        <div className="mb-6 border-b border-gray-200">
-          <nav className="flex space-x-4">
-            <button
-              onClick={() => setActiveTab("franchisee")}
-              className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                activeTab === "franchisee"
-                  ? "border-emerald-500 text-emerald-600"
-                  : "border-transparent text-gray-600 hover:text-gray-800"
+        {/* Step Indicator */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            {/* Step 1 */}
+            <div className="flex flex-col items-center flex-1">
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white mb-2 transition-all ${
+                  currentStep >= 1 ? "bg-emerald-600" : "bg-gray-300"
+                }`}
+              >
+                {stepCompleted.franchisee ? "✓" : "1"}
+              </div>
+              <p className="text-sm font-medium text-gray-700">
+                Franchisee Info
+              </p>
+            </div>
+
+            {/* Arrow 1 */}
+            <div
+              className={`flex-1 h-1 mx-2 mb-6 transition-all ${
+                stepCompleted.franchisee ? "bg-emerald-600" : "bg-gray-300"
               }`}
-            >
-              Edit Franchisee
-            </button>
-            <button
-              onClick={() => setActiveTab("sectors")}
-              className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                activeTab === "sectors"
-                  ? "border-emerald-500 text-emerald-600"
-                  : "border-transparent text-gray-600 hover:text-gray-800"
-              } ${!isEdit ? "opacity-40 cursor-not-allowed" : ""}`}
-              disabled={!isEdit}
-              title={!isEdit ? "Save franchise first to enable this tab" : ""}
-            >
-              Edit Sectors {!isEdit && "🔒"}
-            </button>
-            <button
-              onClick={() => setActiveTab("upload")}
-              className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                activeTab === "upload"
-                  ? "border-emerald-500 text-emerald-600"
-                  : "border-transparent text-gray-600 hover:text-gray-800"
-              } ${!isEdit ? "opacity-40 cursor-not-allowed" : ""}`}
-              disabled={!isEdit}
-              title={!isEdit ? "Save franchise first to enable this tab" : ""}
-            >
-              Upload {!isEdit && "🔒"}
-            </button>
-          </nav>
+            ></div>
+
+            {/* Step 2 */}
+            <div className="flex flex-col items-center flex-1">
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white mb-2 transition-all ${
+                  currentStep >= 2 ? "bg-emerald-600" : "bg-gray-300"
+                }`}
+              >
+                {stepCompleted.sectors ? "✓" : "2"}
+              </div>
+              <p className="text-sm font-medium text-gray-700">Sectors</p>
+            </div>
+
+            {/* Arrow 2 */}
+            <div
+              className={`flex-1 h-1 mx-2 mb-6 transition-all ${
+                currentStep >= 3 ? "bg-emerald-600" : "bg-gray-300"
+              }`}
+            ></div>
+
+            {/* Step 3 */}
+            <div className="flex flex-col items-center flex-1">
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white mb-2 transition-all ${
+                  currentStep >= 3 ? "bg-emerald-600" : "bg-gray-300"
+                }`}
+              >
+                3
+              </div>
+              <p className="text-sm font-medium text-gray-700">Upload Files</p>
+            </div>
+          </div>
         </div>
 
-        {/* Help Text for disabled tabs */}
-        {!isEdit && (
-          <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800">
-              <strong>ℹ️ Note:</strong> Please save the franchise information
-              first to unlock the "Edit Sectors" and "Upload" tabs.
+        {/* Info Message */}
+        {currentStep === 1 && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>📝 Step 1 of 3:</strong> Fill in the franchisee
+              information and click Save to proceed to sectors.
+            </p>
+          </div>
+        )}
+        {currentStep === 2 && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>📝 Step 2 of 3:</strong> Add sectors for this franchisee
+              and click Save to proceed to uploads.
+            </p>
+          </div>
+        )}
+        {currentStep === 3 && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>📝 Step 3 of 3:</strong> Upload logo, stamp, and QR code
+              for this franchisee.
             </p>
           </div>
         )}
 
-        {/* Tab Content */}
+        {/* Step Content */}
         <div className="bg-white rounded-lg shadow p-6">
-          {/* Franchisee Tab */}
-          {activeTab === "franchisee" && (
-            <form onSubmit={handleSubmit}>
+          {/* Step 1: Franchisee */}
+          {currentStep === 1 && (
+            <form id="franchisee-form" onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">
@@ -551,29 +596,51 @@ const FranchiseFormPage = () => {
                   </select>
                 </div>
               </div>
-
-              <div className="mt-6 flex justify-end gap-4">
-                <button
-                  type="button"
-                  onClick={() => navigate("/franchises")}
-                  className="px-6 py-2 border rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"
-                >
-                  {loading ? "Saving..." : isEdit ? "Update" : "Create"}
-                </button>
-              </div>
             </form>
           )}
 
-          {/* Sectors Tab */}
-          {activeTab === "sectors" && (
+          {/* Step 2: Sectors */}
+          {currentStep === 2 && (
             <div>
+              {/* Display Franchisee Data (Read-only) */}
+              <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 opacity-60">
+                <h3 className="text-lg font-semibold mb-4 text-gray-600">
+                  📋 Franchisee Info (Read-only)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600 font-medium">Code:</p>
+                    <p className="text-gray-800">{formData.franchise_code}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Name:</p>
+                    <p className="text-gray-800">{formData.franchise_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Owner:</p>
+                    <p className="text-gray-800">{formData.owner_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Email:</p>
+                    <p className="text-gray-800">{formData.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Service Area:</p>
+                    <p className="text-gray-800">
+                      {formData.service_area || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Account Name:</p>
+                    <p className="text-gray-800">
+                      {formData.account_name || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <hr className="my-6" />
+              <h3 className="text-lg font-semibold mb-4">Add Sectors</h3>
               <div className="mb-4">
                 <p className="text-sm text-gray-600 mb-4">
                   <strong>Note:</strong> Arrange the Priority based on the
@@ -752,23 +819,77 @@ const FranchiseFormPage = () => {
                   onClick={addSector}
                   className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
-                  Add New
-                </button>
-                <button
-                  type="button"
-                  onClick={saveSectors}
-                  disabled={loading}
-                  className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-                >
-                  {loading ? "Saving..." : "Save"}
+                  + Add New Sector
                 </button>
               </div>
             </div>
           )}
 
-          {/* Upload Tab */}
-          {activeTab === "upload" && (
+          {/* Step 3: Upload */}
+          {currentStep === 3 && (
             <div>
+              {/* Display Franchisee Data (Read-only) */}
+              <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 opacity-60">
+                <h3 className="text-lg font-semibold mb-4 text-gray-600">
+                  📋 Franchisee Info (Read-only)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600 font-medium">Code:</p>
+                    <p className="text-gray-800">{formData.franchise_code}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Name:</p>
+                    <p className="text-gray-800">{formData.franchise_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Owner:</p>
+                    <p className="text-gray-800">{formData.owner_name}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Display Sectors Data (Read-only) */}
+              {sectors.length > 0 && (
+                <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 opacity-60">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-600">
+                    📍 Sectors (Read-only)
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border">
+                      <thead className="bg-gray-200">
+                        <tr>
+                          <th className="border px-2 py-1">Sector</th>
+                          <th className="border px-2 py-1">Services</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sectors.map((sector, idx) => (
+                          <tr key={idx}>
+                            <td className="border px-2 py-1 font-medium">
+                              {sector.sector_name}
+                            </td>
+                            <td className="border px-2 py-1 text-xs">
+                              {[
+                                sector.dox && "DOX",
+                                sector.nondox_air && "NONDOX Air",
+                                sector.nondox_sur && "NONDOX Sur",
+                                sector.express_cargo && "Express",
+                                sector.priority && "Priority",
+                              ]
+                                .filter(Boolean)
+                                .join(", ")}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              <hr className="my-6" />
+              <h3 className="text-lg font-semibold mb-4">Upload Files</h3>
               <p className="text-sm text-red-600 mb-6">
                 <strong>Note:</strong> It will appear on invoice & image must be
                 .png or .jpg or .jpeg format
@@ -894,6 +1015,61 @@ const FranchiseFormPage = () => {
               </div>
             </div>
           )}
+
+          {/* Navigation Buttons */}
+          <div className="mt-8 flex justify-between gap-4">
+            <div>
+              {currentStep > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(currentStep - 1)}
+                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  ← Previous
+                </button>
+              )}
+            </div>
+            <div className="flex gap-4">
+              {currentStep <= 2 && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/franchises")}
+                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              )}
+              {currentStep === 1 && (
+                <button
+                  type="submit"
+                  form="franchisee-form"
+                  disabled={loading}
+                  className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  {loading ? "Saving..." : "Save & Next →"}
+                </button>
+              )}
+              {currentStep === 2 && (
+                <button
+                  type="button"
+                  onClick={saveSectors}
+                  disabled={loading}
+                  className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  {loading ? "Saving..." : "Save & Next →"}
+                </button>
+              )}
+              {currentStep === 3 && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/franchises")}
+                  className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                >
+                  ✓ Complete & Exit
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
