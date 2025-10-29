@@ -229,10 +229,414 @@ const AddCompanyPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Helper function to format rate tables into database format
+  const formatRatesData = (companyId) => {
+    const ratesData = [];
+    let skippedCount = 0;
+
+    // Helper to check if rates object has at least one positive value
+    const hasPositiveRate = (rates) => {
+      return Object.values(rates).some((val) => {
+        const numVal = parseFloat(val);
+        return !isNaN(numVal) && numVal > 0;
+      });
+    };
+
+    // Format Dox rates
+    Object.entries(doxTableData).forEach(([slab, rows]) => {
+      rows.forEach((rowData, rowIndex) => {
+        const rowName = DOX_RATE_ROWS[rowIndex];
+        const rates = {};
+        const hasValidData = rowData.some((val) => val && val !== "");
+
+        rowData.forEach((value, colIndex) => {
+          // Convert to number and validate
+          const numValue = parseFloat(value);
+          // Only include non-empty, non-zero values OR include "0" if explicitly entered
+          if (!isNaN(numValue) && numValue >= 0) {
+            rates[`rate_${colIndex + 1}`] = numValue.toString();
+          } else if (value && value !== "") {
+            // Non-numeric value
+            rates[`rate_${colIndex + 1}`] = "0";
+          } else {
+            rates[`rate_${colIndex + 1}`] = "";
+          }
+        });
+
+        // Only add if has at least one valid rate value
+        if (hasValidData && hasPositiveRate(rates)) {
+          ratesData.push({
+            courier_type: "Dox",
+            row_name: rowName,
+            slab_type: slab,
+            rates,
+          });
+        } else if (hasValidData) {
+          skippedCount++;
+          console.warn(
+            `Skipped Dox ${rowName} [${slab}] - no positive rate values`
+          );
+        }
+      });
+    });
+
+    // Format NonDox rates (Air & Surface)
+    Object.entries(nonDoxTableData).forEach(([slab, slabData]) => {
+      // Air rates
+      slabData.air.forEach((rowData, rowIndex) => {
+        const rowName = RATE_ROWS[rowIndex];
+        const rates = {};
+        const hasValidData = rowData.some((val) => val && val !== "");
+
+        rowData.forEach((value, colIndex) => {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            rates[`rate_${colIndex + 1}`] = numValue.toString();
+          } else if (value && value !== "") {
+            rates[`rate_${colIndex + 1}`] = "0";
+          } else {
+            rates[`rate_${colIndex + 1}`] = "";
+          }
+        });
+
+        if (hasValidData && hasPositiveRate(rates)) {
+          ratesData.push({
+            courier_type: "NonDox",
+            row_name: rowName,
+            sub_type: "air",
+            slab_type: slab,
+            rates,
+          });
+        } else if (hasValidData) {
+          skippedCount++;
+          console.warn(
+            `Skipped NonDox Air ${rowName} [${slab}] - no positive rate values`
+          );
+        }
+      });
+      // Surface rates
+      slabData.surface.forEach((rowData, rowIndex) => {
+        const rowName = RATE_ROWS[rowIndex];
+        const rates = {};
+        const hasValidData = rowData.some((val) => val && val !== "");
+
+        rowData.forEach((value, colIndex) => {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            rates[`rate_${colIndex + 1}`] = numValue.toString();
+          } else if (value && value !== "") {
+            rates[`rate_${colIndex + 1}`] = "0";
+          } else {
+            rates[`rate_${colIndex + 1}`] = "";
+          }
+        });
+
+        if (hasValidData && hasPositiveRate(rates)) {
+          ratesData.push({
+            courier_type: "NonDox",
+            row_name: rowName,
+            sub_type: "surface",
+            slab_type: slab,
+            rates,
+          });
+        } else if (hasValidData) {
+          skippedCount++;
+          console.warn(
+            `Skipped NonDox Surface ${rowName} [${slab}] - no positive rate values`
+          );
+        }
+      });
+    });
+
+    // Format Dtdc PLUS rates
+    Object.entries(dtdcPlusTableData).forEach(([slab, rows]) => {
+      rows.forEach((rowData, rowIndex) => {
+        const rowName = DTDC_PLUS_ROWS[rowIndex];
+        const rates = {};
+        const hasValidData = rowData.some((val) => val && val !== "");
+
+        rowData.forEach((value, colIndex) => {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            rates[`rate_${colIndex + 1}`] = numValue.toString();
+          } else if (value && value !== "") {
+            rates[`rate_${colIndex + 1}`] = "0";
+          } else {
+            rates[`rate_${colIndex + 1}`] = "";
+          }
+        });
+
+        if (hasValidData && hasPositiveRate(rates)) {
+          ratesData.push({
+            courier_type: "Dtdc PLUS",
+            row_name: rowName,
+            slab_type: slab,
+            rates,
+          });
+        } else if (hasValidData) {
+          skippedCount++;
+          console.warn(
+            `Skipped Dtdc PLUS ${rowName} [${slab}] - no positive rate values`
+          );
+        }
+      });
+    });
+
+    // Format Dtdc PTP rates
+    Object.entries(dtdcPtpTableData).forEach(([slab, slabData]) => {
+      // PTP rates
+      slabData.ptp.forEach((rowData, rowIndex) => {
+        const rowName = DTDC_PLUS_ROWS[rowIndex];
+        const rates = {};
+        const hasValidData = rowData.some((val) => val && val !== "");
+
+        rowData.forEach((value, colIndex) => {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            rates[`rate_${colIndex + 1}`] = numValue.toString();
+          } else if (value && value !== "") {
+            rates[`rate_${colIndex + 1}`] = "0";
+          } else {
+            rates[`rate_${colIndex + 1}`] = "";
+          }
+        });
+
+        if (hasValidData && hasPositiveRate(rates)) {
+          ratesData.push({
+            courier_type: "Dtdc PTP",
+            row_name: rowName,
+            sub_type: "ptp",
+            slab_type: slab,
+            rates,
+          });
+        } else if (hasValidData) {
+          skippedCount++;
+          console.warn(
+            `Skipped Dtdc PTP ${rowName} [${slab}] - no positive rate values`
+          );
+        }
+      });
+      // PTP2 rates
+      slabData.ptp2.forEach((rowData, rowIndex) => {
+        const rowName = DTDC_PLUS_ROWS[rowIndex];
+        const rates = {};
+        const hasValidData = rowData.some((val) => val && val !== "");
+
+        rowData.forEach((value, colIndex) => {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            rates[`rate_${colIndex + 1}`] = numValue.toString();
+          } else if (value && value !== "") {
+            rates[`rate_${colIndex + 1}`] = "0";
+          } else {
+            rates[`rate_${colIndex + 1}`] = "";
+          }
+        });
+
+        if (hasValidData && hasPositiveRate(rates)) {
+          ratesData.push({
+            courier_type: "Dtdc PTP",
+            row_name: rowName,
+            sub_type: "ptp2",
+            slab_type: slab,
+            rates,
+          });
+        } else if (hasValidData) {
+          skippedCount++;
+          console.warn(
+            `Skipped Dtdc PTP2 ${rowName} [${slab}] - no positive rate values`
+          );
+        }
+      });
+    });
+
+    // Format Express Cargo rates
+    Object.entries(expressCargoTableData).forEach(([slab, rows]) => {
+      rows.forEach((rowData, rowIndex) => {
+        const rowName = EXPRESS_CARGO_ROWS[rowIndex];
+        const rates = {};
+        const hasValidData = rowData.some((val) => val && val !== "");
+
+        rowData.forEach((value, colIndex) => {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            rates[`rate_${colIndex + 1}`] = numValue.toString();
+          } else if (value && value !== "") {
+            rates[`rate_${colIndex + 1}`] = "0";
+          } else {
+            rates[`rate_${colIndex + 1}`] = "";
+          }
+        });
+
+        if (hasValidData && hasPositiveRate(rates)) {
+          ratesData.push({
+            courier_type: "Express Cargo",
+            row_name: rowName,
+            slab_type: slab,
+            rates,
+          });
+        } else if (hasValidData) {
+          skippedCount++;
+          console.warn(
+            `Skipped Express Cargo ${rowName} [${slab}] - no positive rate values`
+          );
+        }
+      });
+    });
+
+    // Format Priority GEC rates
+    Object.entries(priorityGecTableData).forEach(([slab, rows]) => {
+      rows.forEach((rowData, rowIndex) => {
+        const rowName = PRIORITY_GEC_ROWS[rowIndex];
+        const rates = {};
+        const hasValidData = rowData.some((val) => val && val !== "");
+
+        rowData.forEach((value, colIndex) => {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            rates[`rate_${colIndex + 1}`] = numValue.toString();
+          } else if (value && value !== "") {
+            rates[`rate_${colIndex + 1}`] = "0";
+          } else {
+            rates[`rate_${colIndex + 1}`] = "";
+          }
+        });
+
+        if (hasValidData && hasPositiveRate(rates)) {
+          ratesData.push({
+            courier_type: "Priority",
+            row_name: rowName,
+            slab_type: `Slab ${slab}`,
+            rates,
+          });
+        } else if (hasValidData) {
+          skippedCount++;
+          console.warn(
+            `Skipped Priority ${rowName} [Slab ${slab}] - no positive rate values`
+          );
+        }
+      });
+    });
+
+    // Format E-Commerce rates
+    ecommerceTableData.forEach((cityData) => {
+      const uptoVal = parseFloat(cityData.upto);
+      const additionalVal = parseFloat(cityData.additional);
+      const uptoNum = !isNaN(uptoVal) ? uptoVal : 0;
+      const additionalNum = !isNaN(additionalVal) ? additionalVal : 0;
+      const hasValidData = uptoNum > 0 || additionalNum > 0;
+
+      if (hasValidData && cityData.city) {
+        const rates = {
+          rate_1: Math.max(0, uptoNum).toString(),
+          rate_2: Math.max(0, additionalNum).toString(),
+        };
+        if (hasPositiveRate(rates)) {
+          ratesData.push({
+            courier_type: "E-Commerce",
+            row_name: cityData.city,
+            slab_type: "Slab 2", // E-Commerce only has 2 rates
+            rates,
+          });
+        } else {
+          skippedCount++;
+          console.warn(
+            `Skipped E-Commerce ${cityData.city} - no positive rate values`
+          );
+        }
+      }
+    });
+
+    if (skippedCount > 0) {
+      console.warn(
+        `⚠️ ${skippedCount} rows were skipped because they contained only zero/empty values`
+      );
+    }
+
+    return ratesData;
+  };
+
+  // Save courier rates to database
+  const saveCourierRates = async (companyId, ratesData) => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log("📤 Sending rates to backend...");
+      console.log("Company ID:", companyId);
+      console.log("Rates data count:", ratesData.length);
+      console.log("API URL:", `${import.meta.env.VITE_API_URL}/rates/courier`);
+
+      // Log sample rates
+      if (ratesData.length > 0) {
+        console.log(
+          "📊 Sample rate record:",
+          JSON.stringify(ratesData[0], null, 2)
+        );
+        console.log("📊 All rates being sent:");
+        ratesData.forEach((rate, idx) => {
+          console.log(`[${idx}]`, {
+            courier_type: rate.courier_type,
+            row_name: rate.row_name,
+            slab_type: rate.slab_type,
+            rates: rate.rates,
+            sub_type: rate.sub_type || "N/A",
+          });
+        });
+      }
+
+      // Validate token exists
+      if (!token) {
+        throw new Error("Authentication token not found. Please login again.");
+      }
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/rates/courier`,
+        {
+          company_id: companyId,
+          rates_data: ratesData,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("✅ Rates saved successfully:", response.data);
+      if (response.data.data?.errors && response.data.data.errors.length > 0) {
+        console.warn(
+          "⚠️ Warnings during rate save:",
+          response.data.data.errors
+        );
+      }
+      return {
+        success: true,
+        inserted: response.data.data?.inserted || 0,
+        warnings: response.data.data?.errors || [],
+      };
+    } catch (error) {
+      console.error("❌ Error saving courier rates:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      console.error("Error message:", error.message);
+
+      // Re-throw with better error info
+      const errorMsg =
+        error.response?.data?.message ||
+        error.response?.data?.errors?.[0] ||
+        error.message;
+      const errorObj = new Error(errorMsg);
+      errorObj.status = error.response?.status;
+      errorObj.errors = error.response?.data?.errors;
+      throw errorObj;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("🚀 Form submission started");
 
-    // Validate required fields
+    // Frontend validation
     if (
       !formData.company_id ||
       !formData.company_name ||
@@ -241,16 +645,40 @@ const AddCompanyPage = () => {
       !formData.email ||
       !formData.gst_no
     ) {
-      alert(
-        "Company ID, Company Name, Company Address, Phone Number, Email, and GST No are required!"
-      );
+      console.error("❌ Validation failed - Missing required fields");
+      const missingFields = [];
+      if (!formData.company_id) missingFields.push("Company ID");
+      if (!formData.company_name) missingFields.push("Company Name");
+      if (!formData.company_address) missingFields.push("Company Address");
+      if (!formData.phone) missingFields.push("Phone Number");
+      if (!formData.email) missingFields.push("Email");
+      if (!formData.gst_no) missingFields.push("GST No");
+
+      alert(`Missing required fields:\n${missingFields.join(", ")}`);
       return;
     }
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      console.error("❌ Invalid email format");
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    console.log("✅ Validation passed");
     setLoading(true);
 
     try {
       const token = localStorage.getItem("token");
+      console.log("📤 Posting company data to /rates/company");
+      console.log("Company data:", {
+        company_id: formData.company_id,
+        company_name: formData.company_name,
+        email: formData.email,
+        phone: formData.phone,
+      });
+
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/rates/company`,
         { ...formData, courier_type: activeTab },
@@ -262,8 +690,97 @@ const AddCompanyPage = () => {
         }
       );
 
+      console.log("✅ Company created:", response.data);
       if (response.data.success) {
-        alert("Company added successfully!");
+        const companyId = response.data.data.id;
+        console.log("📌 Company ID:", companyId);
+
+        // Format and save courier rates
+        try {
+          console.log("🔄 Formatting rate data...");
+          const ratesData = formatRatesData(companyId);
+          console.log(
+            "✅ Rate data formatted, total records:",
+            ratesData.length
+          );
+
+          if (ratesData.length === 0) {
+            console.warn(
+              "⚠️ No rates were formatted. Checking if any data was entered..."
+            );
+            // Check if ANY rate tables have data
+            const hasAnyData =
+              Object.values(doxTableData).some((slab) =>
+                slab.some((row) => row.some((cell) => cell))
+              ) ||
+              Object.values(nonDoxTableData).some(
+                (slab) =>
+                  (slab.air &&
+                    slab.air.some((row) => row.some((cell) => cell))) ||
+                  (slab.surface &&
+                    slab.surface.some((row) => row.some((cell) => cell)))
+              ) ||
+              Object.values(dtdcPlusTableData).some((slab) =>
+                slab.some((row) => row.some((cell) => cell))
+              ) ||
+              Object.values(dtdcPtpTableData).some(
+                (slab) =>
+                  (slab.ptp &&
+                    slab.ptp.some((row) => row.some((cell) => cell))) ||
+                  (slab.ptp2 &&
+                    slab.ptp2.some((row) => row.some((cell) => cell)))
+              ) ||
+              Object.values(expressCargoTableData).some((slab) =>
+                slab.some((row) => row.some((cell) => cell))
+              ) ||
+              Object.values(priorityGecTableData).some((slab) =>
+                slab.some((row) => row.some((cell) => cell))
+              ) ||
+              ecommerceTableData.some((row) => row.upto || row.additional);
+
+            if (!hasAnyData) {
+              alert(
+                "Company created successfully!\n\n⚠️ Note: No rates were entered. You can add rates later by editing this company or using the Rate Master section."
+              );
+            } else {
+              alert(
+                "Company created successfully!\n\n⚠️ Warning: Rate tables were filled but validation failed. This usually happens when:\n• Rates are entered as 0 or negative values\n• Required fields are left empty\n\nPlease review and try again."
+              );
+            }
+          } else {
+            const result = await saveCourierRates(companyId, ratesData);
+            let successMsg = `✅ Company created successfully!\n✅ ${result.inserted} rate records added.`;
+            if (result.warnings && result.warnings.length > 0) {
+              successMsg += `\n\n⚠️ ${
+                result.warnings.length
+              } warnings:\n${result.warnings.slice(0, 2).join("\n")}`;
+              if (result.warnings.length > 2) {
+                successMsg += `\n... and ${result.warnings.length - 2} more`;
+              }
+            }
+            alert(successMsg);
+          }
+        } catch (rateError) {
+          console.error("Rate saving error:", rateError);
+          console.error("Rate error details:", {
+            message: rateError.message,
+            status: rateError.status,
+            errors: rateError.errors,
+          });
+
+          const errorMsg = rateError.message || "Failed to save rates";
+          const fullMessage =
+            rateError.errors && rateError.errors.length > 0
+              ? `${errorMsg}\n\nDetails:\n${rateError.errors
+                  .slice(0, 3)
+                  .join("\n")}`
+              : errorMsg;
+
+          alert(
+            `Company created successfully!\n\n❌ Rate saving failed:\n${fullMessage}\n\nYou can add rates later using the Rate Master section.`
+          );
+        }
+
         // Reset form
         setFormData({
           company_id: "",
@@ -294,8 +811,16 @@ const AddCompanyPage = () => {
         fetchCompanies();
       }
     } catch (error) {
-      console.error("Error adding company:", error);
-      alert(error.response?.data?.message || "Failed to add company");
+      console.error("❌ Error adding company:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      console.error("Error message:", error.message);
+
+      const errorMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to add company";
+      alert(`❌ Error: ${errorMsg}`);
     } finally {
       setLoading(false);
     }

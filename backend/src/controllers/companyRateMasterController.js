@@ -106,6 +106,32 @@ export const createCompany = async (req, res) => {
       });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
+    }
+
+    // Validate phone - should be numeric
+    if (!/^\d{10,}$/.test(phone.replace(/\D/g, ""))) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number must be at least 10 digits",
+      });
+    }
+
+    // Validate GST format (Indian GST: 2 digits + 10 alphanumeric + 1 alphanumeric + Z + 1 digit)
+    const gstRegex = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{3}$/;
+    if (!gstRegex.test(gst_no)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid GST number format",
+      });
+    }
+
     const db = getDb();
 
     // Check if company_id already exists for this franchise
