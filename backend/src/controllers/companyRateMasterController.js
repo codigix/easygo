@@ -31,7 +31,7 @@ export const getAllCompanies = async (req, res) => {
   }
 };
 
-// Get single company by ID
+// Get single company by ID (database id)
 export const getCompanyById = async (req, res) => {
   try {
     const franchiseId = req.user.franchise_id;
@@ -50,6 +50,49 @@ export const getCompanyById = async (req, res) => {
     }
 
     res.json({ success: true, data: company });
+  } catch (error) {
+    console.error("Get company error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch company" });
+  }
+};
+
+// Get company by company_id (customer ID from booking)
+export const getCompanyByCompanyId = async (req, res) => {
+  try {
+    const franchiseId = req.user.franchise_id;
+    const { company_id } = req.params;
+    const db = getDb();
+
+    const [[company]] = await db.query(
+      "SELECT * FROM company_rate_master WHERE company_id = ? AND franchise_id = ?",
+      [company_id, franchiseId]
+    );
+
+    if (!company) {
+      // Return default values if company not found
+      return res.json({
+        success: true,
+        data: {
+          company_id: company_id,
+          gst_percent: 18, // Default GST rate for India
+          fuel_surcharge_percent: 0,
+          royalty_charges_percent: 0,
+          topay_charge: 0,
+          cod_charge: 0,
+          invoice_discount: false,
+        },
+      });
+    }
+
+    // Return company data with GST defaulting to 18% if not specified
+    const response = {
+      ...company,
+      gst_percent: 18, // Default GST rate - can be customized per company if needed
+    };
+
+    res.json({ success: true, data: response });
   } catch (error) {
     console.error("Get company error:", error);
     res

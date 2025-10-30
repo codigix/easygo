@@ -9,7 +9,15 @@ const upload = multer({ dest: "uploads/temp/" });
 export const getAllBookings = async (req, res) => {
   try {
     const franchiseId = req.user.franchise_id;
-    const { page = 1, limit = 20, status, search } = req.query;
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      search,
+      unbilledOnly,
+      customerId,
+      consignmentNo,
+    } = req.query;
     const offset = (page - 1) * limit;
 
     const db = getDb();
@@ -26,6 +34,20 @@ export const getAllBookings = async (req, res) => {
         " AND (consignment_number LIKE ? OR customer_id LIKE ? OR receiver LIKE ?)";
       const searchTerm = `%${search}%`;
       params.push(searchTerm, searchTerm, searchTerm);
+    }
+
+    if (unbilledOnly === "true") {
+      whereClause += " AND invoice_id IS NULL";
+    }
+
+    if (customerId) {
+      whereClause += " AND customer_id = ?";
+      params.push(customerId);
+    }
+
+    if (consignmentNo) {
+      whereClause += " AND LOWER(consignment_number) = LOWER(?)";
+      params.push(consignmentNo);
     }
 
     // Get total count
@@ -944,7 +966,7 @@ export const getRecycledConsignments = async (req, res) => {
 
     // Get recycled consignments
     const [consignments] = await db.query(
-      `SELECT id, consignment_number, customer_id, booking_date, total_amount as amount
+      `SELECT id, consignment_number, customer_id, booking_date, amount
        FROM bookings ${whereClause}
        ORDER BY booking_date DESC
        LIMIT ? OFFSET ?`,

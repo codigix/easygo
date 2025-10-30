@@ -124,21 +124,19 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
+    <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-3xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="rounded-lg bg-emerald-100 p-2">
-              <Lock className="h-6 w-6 text-emerald-600" />
+        <div className="mb-8 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-lg p-8 text-white">
+          <div className="flex items-start gap-4">
+            <div className="bg-emerald-500 rounded-lg p-3">
+              <Lock className="w-8 h-8" />
             </div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              Change Password
-            </h1>
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Change Password</h1>
+              <p className="text-emerald-100">Update your account password securely</p>
+            </div>
           </div>
-          <p className="text-slate-600">
-            Update your account password securely
-          </p>
         </div>
 
         {/* Main Content */}
@@ -178,7 +176,7 @@ export default function ChangePasswordPage() {
                       value={formData.oldPassword}
                       onChange={handleInputChange}
                       placeholder="Enter your current password"
-                      className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder-slate-400 transition-colors hover:border-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 transition-all hover:border-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                     />
                     <button
                       type="button"
@@ -202,7 +200,7 @@ export default function ChangePasswordPage() {
                       value={formData.newPassword}
                       onChange={handleInputChange}
                       placeholder="Enter your new password"
-                      className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder-slate-400 transition-colors hover:border-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 transition-all hover:border-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                     />
                     <button
                       type="button"
@@ -226,7 +224,7 @@ export default function ChangePasswordPage() {
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       placeholder="Confirm your new password"
-                      className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder-slate-400 transition-colors hover:border-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 transition-all hover:border-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                     />
                     <button
                       type="button"
@@ -244,7 +242,7 @@ export default function ChangePasswordPage() {
                 <button
                   onClick={handleSave}
                   disabled={loading}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-600 hover:to-emerald-700 disabled:from-slate-300 disabled:to-slate-400 transition-all text-sm font-semibold shadow-md hover:shadow-lg disabled:cursor-not-allowed disabled:shadow-none"
                 >
                   {loading ? (
                     <>
@@ -258,18 +256,18 @@ export default function ChangePasswordPage() {
                 <button
                   onClick={handleCancel}
                   disabled={loading}
-                  className="flex-1 rounded-lg border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-slate-300 bg-white text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancel
                 </button>
               </div>
 
               {/* Password Requirements */}
-              <div className="mt-8 rounded-lg bg-blue-50 border border-blue-200 p-4">
-                <h4 className="text-sm font-semibold text-blue-900 mb-2">
+              <div className="mt-8 rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 p-4">
+                <h4 className="text-sm font-semibold text-emerald-900 mb-2">
                   Password Requirements:
                 </h4>
-                <ul className="text-sm text-blue-800 space-y-1">
+                <ul className="text-sm text-emerald-800 space-y-1">
                   <li>• Minimum 6 characters long</li>
                   <li>• Must be different from current password</li>
                   <li>• New password and confirm password must match</li>
@@ -280,11 +278,11 @@ export default function ChangePasswordPage() {
 
           {/* Help Panel */}
           <div className="md:col-span-1">
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 sticky top-4">
-              <h3 className="text-sm font-semibold text-blue-900 mb-4">
+            <div className="rounded-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 sticky top-6 shadow-sm">
+              <h3 className="text-sm font-semibold text-emerald-900 mb-4">
                 Security Tips
               </h3>
-              <ul className="space-y-3 text-sm text-blue-800">
+              <ul className="space-y-3 text-sm text-emerald-800">
                 <li>
                   <strong>Use strong passwords:</strong> Mix uppercase,
                   lowercase, numbers, and symbols for maximum security.
@@ -307,8 +305,8 @@ export default function ChangePasswordPage() {
                 </li>
               </ul>
 
-              <div className="mt-6 rounded-lg bg-blue-100 p-3">
-                <p className="text-xs text-blue-900">
+              <div className="mt-6 rounded-lg bg-emerald-100 border border-emerald-300 p-3">
+                <p className="text-xs text-emerald-900">
                   💡 <strong>Tip:</strong> After changing your password, you'll
                   be logged out for security. Sign in again with your new
                   password.

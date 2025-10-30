@@ -557,6 +557,167 @@ export const generateSingleInvoice = async (req, res) => {
   }
 };
 
+// Generate single invoice for ALL bulk consignments of a customer
+export const generateBulkInvoiceForCustomer = async (req, res) => {
+  const connection = await getDb().getConnection();
+
+  try {
+    const franchiseId = req.user.franchise_id;
+    const {
+      customer_id,
+      invoice_date,
+      period_from,
+      period_to,
+      address,
+      invoice_discount,
+      reverse_charge,
+      gst_percent,
+      fuel_surcharge_percent,
+      royalty_charge,
+      docket_charge,
+      other_charge,
+    } = req.body;
+
+    if (!customer_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Customer ID is required",
+      });
+    }
+
+    await connection.beginTransaction();
+
+    // Fetch all unbilled bookings for this customer
+    const [bookings] = await connection.query(
+      `SELECT id, consignment_number, total, act_wt, mode, destination
+       FROM bookings 
+       WHERE franchise_id = ? AND customer_id = ? AND invoice_id IS NULL
+       ORDER BY booking_date ASC`,
+      [franchiseId, customer_id]
+    );
+
+    if (!bookings || bookings.length === 0) {
+      await connection.rollback();
+      return res.status(400).json({
+        success: false,
+        message: "No unbilled consignments found for this customer",
+      });
+    }
+
+    // Calculate totals
+    let subtotal = 0;
+    let total_weight = 0;
+
+    bookings.forEach((booking) => {
+      subtotal += parseFloat(booking.total) || 0;
+      total_weight += parseFloat(booking.act_wt) || 0;
+    });
+
+    const fuelSurchargeTotal =
+      (subtotal * parseFloat(fuel_surcharge_percent || 0)) / 100;
+    const royaltyChargeTotal =
+      (subtotal * parseFloat(royalty_charge || 0)) / 100;
+    const docketChargeTotal = (subtotal * parseFloat(docket_charge || 0)) / 100;
+    const otherChargeTotal = parseFloat(other_charge || 0);
+
+    const chargeableAmount =
+      subtotal +
+      fuelSurchargeTotal +
+      royaltyChargeTotal +
+      docketChargeTotal +
+      otherChargeTotal;
+    const gstAmount = invoice_discount
+      ? 0
+      : (chargeableAmount * parseFloat(gst_percent || 18)) / 100;
+    const net_amount = chargeableAmount + gstAmount;
+
+    // Generate unique invoice number
+    const invoiceNumber = await generateUniqueInvoiceNumber(
+      connection,
+      franchiseId
+    );
+
+    // Insert invoice
+    const [invoiceResult] = await connection.query(
+      `INSERT INTO invoices 
+       (franchise_id, invoice_number, invoice_date, customer_id, address, period_from, period_to,
+        total_amount, subtotal_amount, fuel_surcharge_percent, fuel_surcharge_total,
+        royalty_charge, docket_charge, other_charge, gst_percent, gst_amount_new, 
+        net_amount, payment_status, invoice_discount, reverse_charge)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'unpaid', ?, ?)`,
+      [
+        franchiseId,
+        invoiceNumber,
+        invoice_date || dayjs().format("YYYY-MM-DD"),
+        customer_id,
+        address,
+        period_from,
+        period_to,
+        subtotal,
+        subtotal,
+        fuel_surcharge_percent || 0,
+        fuelSurchargeTotal,
+        royaltyChargeTotal,
+        docketChargeTotal,
+        otherChargeTotal,
+        invoice_discount ? 0 : gst_percent || 18,
+        gstAmount,
+        net_amount,
+        invoice_discount ? 1 : 0,
+        reverse_charge ? 1 : 0,
+      ]
+    );
+
+    const invoiceId = invoiceResult.insertId;
+
+    // Link all bookings to this invoice and add invoice items
+    for (const booking of bookings) {
+      await connection.query(
+        `INSERT INTO invoice_items (invoice_id, booking_id, description, quantity, unit_price, amount)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          invoiceId,
+          booking.id,
+          `Booking: ${booking.consignment_number} (${booking.mode})`,
+          1,
+          booking.total,
+          booking.total,
+        ]
+      );
+
+      // Update booking with invoice_id
+      await connection.query(
+        `UPDATE bookings SET invoice_id = ? WHERE id = ?`,
+        [invoiceId, booking.id]
+      );
+    }
+
+    await connection.commit();
+
+    res.status(201).json({
+      success: true,
+      message: `Invoice generated for ${bookings.length} consignments`,
+      data: {
+        id: invoiceId,
+        invoice_number: invoiceNumber,
+        consignment_count: bookings.length,
+        total_weight: total_weight.toFixed(2),
+        net_amount: net_amount.toFixed(2),
+      },
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error("Generate bulk invoice error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to generate invoice",
+      error: error.message,
+    });
+  } finally {
+    connection.release();
+  }
+};
+
 // Generate invoice without GST
 export const generateInvoiceWithoutGST = async (req, res) => {
   const connection = await getDb().getConnection();
@@ -805,7 +966,7 @@ export const getRecycledInvoices = async (req, res) => {
 
     // Get recycled invoices
     const [invoices] = await db.query(
-      `SELECT id, invoice_number, customer_id, invoice_date, total_amount as net_amount
+      `SELECT id, invoice_number, customer_id, invoice_date, net_amount
        FROM invoices ${whereClause}
        ORDER BY invoice_date DESC
        LIMIT ? OFFSET ?`,

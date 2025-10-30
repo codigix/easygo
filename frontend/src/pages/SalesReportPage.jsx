@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { BarChart3, Calendar, Download, TrendingUp } from "lucide-react";
 
 export default function SalesReportPage() {
   const [formData, setFormData] = useState({
@@ -105,12 +106,22 @@ export default function SalesReportPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-7xl">
-        <div className="rounded-lg bg-white shadow-sm">
+        <div className="rounded-lg bg-white shadow-sm overflow-hidden">
           {/* Header */}
-          <div className="border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4">
-            <h1 className="text-2xl font-bold text-emerald-900">
-              Sales Report
-            </h1>
+          <div className="border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-8">
+            <div className="flex items-center gap-4">
+              <div className="rounded-lg bg-blue-600 p-3">
+                <BarChart3 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-slate-900">
+                  Sales Report
+                </h1>
+                <p className="mt-1 text-sm text-slate-600">
+                  View and analyze sales data
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Filter Section */}
@@ -119,46 +130,54 @@ export default function SalesReportPage() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-4 md:items-end">
                 {/* From Date */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    From Date:
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">
+                    From Date
                   </label>
-                  <input
-                    type="date"
-                    name="fromDate"
-                    value={formData.fromDate}
-                    onChange={handleDateChange}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-3.5 h-5 w-5 text-slate-400 pointer-events-none" />
+                    <input
+                      type="date"
+                      name="fromDate"
+                      value={formData.fromDate}
+                      onChange={handleDateChange}
+                      className="w-full rounded-lg border border-slate-300 px-10 py-2.5 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                    />
+                  </div>
                 </div>
 
                 {/* To Date */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    To Date:
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">
+                    To Date
                   </label>
-                  <input
-                    type="date"
-                    name="toDate"
-                    value={formData.toDate}
-                    onChange={handleDateChange}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-3.5 h-5 w-5 text-slate-400 pointer-events-none" />
+                    <input
+                      type="date"
+                      name="toDate"
+                      value={formData.toDate}
+                      onChange={handleDateChange}
+                      className="w-full rounded-lg border border-slate-300 px-10 py-2.5 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                    />
+                  </div>
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 md:col-span-2">
                   <button
                     type="submit"
-                    className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700 transition-colors"
+                    className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-2.5 font-medium text-white hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
                   >
+                    <TrendingUp className="h-4 w-4" />
                     Search
                   </button>
                   <button
                     type="button"
                     onClick={handleExportToExcel}
-                    className="rounded-lg bg-green-600 px-6 py-2 font-medium text-white hover:bg-green-700 transition-colors"
+                    className="rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-2.5 font-medium text-white hover:from-green-700 hover:to-emerald-700 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
                   >
-                    Export to Excel
+                    <Download className="h-4 w-4" />
+                    Export
                   </button>
                 </div>
               </div>
@@ -211,36 +230,36 @@ export default function SalesReportPage() {
               </div>
             ) : (
               <table className="w-full">
-                <thead className="border-b border-slate-200 bg-slate-50">
+                <thead className="border-b border-slate-200 bg-slate-900">
                   <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Sr. No.
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Action
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Consignment No.
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Destination
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Sender City
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Sender Pincode
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Recipient Name
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Recipient Pincode
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Booking Date
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Amount (₹)
                     </th>
                   </tr>
@@ -343,10 +362,12 @@ export default function SalesReportPage() {
           </div>
 
           {/* Total */}
-          <div className="border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <div className="border-t border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4">
             <div className="flex justify-end items-center gap-4">
-              <span className="font-medium text-slate-700">Total</span>
-              <span className="text-lg font-bold text-slate-900">
+              <span className="font-semibold text-slate-700 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" /> Total Sales
+              </span>
+              <span className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg">
                 ₹{totalAmount.toFixed(2)}
               </span>
             </div>

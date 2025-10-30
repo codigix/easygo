@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Calendar, Download, TrendingUp, AlertCircle, DollarSign } from "lucide-react";
 
 export default function DailyReportPage() {
   const [date, setDate] = useState("");
@@ -106,45 +107,60 @@ export default function DailyReportPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-7xl">
-        <div className="rounded-lg bg-white shadow-sm">
+        <div className="rounded-lg bg-white shadow-sm overflow-hidden">
           {/* Header */}
-          <div className="border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4">
-            <h1 className="text-2xl font-bold text-emerald-900">
-              Daily Report
-            </h1>
+          <div className="border-b border-slate-200 bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-8">
+            <div className="flex items-center gap-4">
+              <div className="rounded-lg bg-purple-600 p-3">
+                <Calendar className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-slate-900">
+                  Daily Report
+                </h1>
+                <p className="mt-1 text-sm text-slate-600">
+                  View daily consignments, expenses, and payments
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Filter Section */}
-          <div className="border-b border-slate-200 p-6">
+          <div className="border-b border-slate-200 p-6 bg-slate-50">
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:items-end">
                 {/* Date */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Date:
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">
+                    Date
                   </label>
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-3.5 h-5 w-5 text-slate-400 pointer-events-none" />
+                    <input
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="w-full rounded-lg border border-slate-300 px-10 py-2.5 text-slate-900 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all"
+                    />
+                  </div>
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 md:col-span-2">
                   <button
                     type="submit"
-                    className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700 transition-colors"
+                    className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-2.5 font-medium text-white hover:from-purple-700 hover:to-pink-700 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
                   >
+                    <TrendingUp className="h-4 w-4" />
                     Search
                   </button>
                   <button
                     type="button"
                     onClick={handleExportToExcel}
-                    className="rounded-lg bg-green-600 px-6 py-2 font-medium text-white hover:bg-green-700 transition-colors"
+                    className="rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-2.5 font-medium text-white hover:from-green-700 hover:to-emerald-700 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
                   >
-                    Export to Excel
+                    <Download className="h-4 w-4" />
+                    Export
                   </button>
                 </div>
               </div>
@@ -154,10 +170,13 @@ export default function DailyReportPage() {
           {/* Consignment Report Section */}
           <div className="border-b border-slate-200 p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-red-600">
-                Consignment Report
-              </h2>
-              <span className="rounded bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-red-600" />
+                <h2 className="text-lg font-bold text-red-600">
+                  Consignment Report
+                </h2>
+              </div>
+              <span className="rounded-lg bg-gradient-to-r from-blue-100 to-blue-200 px-4 py-2 text-sm font-bold text-blue-700 border border-blue-300">
                 Total: {consignmentData.length}
               </span>
             </div>
@@ -208,36 +227,36 @@ export default function DailyReportPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="border-b border-slate-200 bg-slate-50">
+                  <thead className="border-b border-slate-200 bg-slate-900">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Sr.No
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Action
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Consignment No
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Sender
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Sender Phone
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Destination
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Actual Weight
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Volumetric Weight
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Payment Mode
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Paid Amount
                       </th>
                     </tr>
@@ -291,9 +310,12 @@ export default function DailyReportPage() {
           {/* Expense Section */}
           <div className="border-b border-slate-200 p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-red-600">Expense</h3>
-              <span className="rounded bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
-                Total: {totalExpense.toFixed(2)}
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-amber-600" />
+                <h3 className="text-lg font-bold text-amber-600">Expense</h3>
+              </div>
+              <span className="rounded-lg bg-gradient-to-r from-amber-100 to-orange-100 px-4 py-2 text-sm font-bold text-amber-700 border border-amber-300">
+                Total: ₹{totalExpense.toFixed(2)}
               </span>
             </div>
 
@@ -304,12 +326,12 @@ export default function DailyReportPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="border-b border-slate-200 bg-slate-50">
+                  <thead className="border-b border-slate-200 bg-slate-900">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Amount
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Reason
                       </th>
                     </tr>
@@ -337,9 +359,12 @@ export default function DailyReportPage() {
           {/* Payment Section */}
           <div className="border-b border-slate-200 p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-blue-600">Payment</h3>
-              <span className="rounded bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
-                Total: {totalPayment.toFixed(2)}
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-emerald-600" />
+                <h3 className="text-lg font-bold text-emerald-600">Payment</h3>
+              </div>
+              <span className="rounded-lg bg-gradient-to-r from-emerald-100 to-teal-100 px-4 py-2 text-sm font-bold text-emerald-700 border border-emerald-300">
+                Total: ₹{totalPayment.toFixed(2)}
               </span>
             </div>
 
@@ -350,15 +375,15 @@ export default function DailyReportPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="border-b border-slate-200 bg-slate-50">
+                  <thead className="border-b border-slate-200 bg-slate-900">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Consignment No
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Amount
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Description
                       </th>
                     </tr>

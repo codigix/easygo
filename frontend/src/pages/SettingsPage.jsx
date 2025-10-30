@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Settings, Save, RotateCcw } from "lucide-react";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
@@ -150,10 +151,18 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">
-            Settings for {franchiseCode} - {franchiseName}
-          </h1>
+        <div className="mb-8 bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg p-8 text-white">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              <div className="bg-purple-500 rounded-lg p-3">
+                <Settings className="w-8 h-8" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold mb-2">Settings</h1>
+                <p className="text-purple-100">Configure invoice settings for {franchiseCode} - {franchiseName}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -206,7 +215,7 @@ export default function SettingsPage() {
                       invoice_round_off: e.target.value === "Yes",
                     }))
                   }
-                  className="mt-2 px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full"
+                  className="mt-2 px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 w-full transition-colors"
                 >
                   <option value="No">No</option>
                   <option value="Yes">Yes</option>
@@ -225,7 +234,7 @@ export default function SettingsPage() {
                   onChange={handleInputChange}
                   placeholder="e.g., 1, 100, etc."
                   min="1"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
                 />
                 <p className="text-sm text-slate-500 mt-1">
                   Starting number for invoice sequence (default: 1).
@@ -245,7 +254,7 @@ export default function SettingsPage() {
                       show_image_on_invoice: e.target.value === "Yes",
                     }))
                   }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
                 >
                   <option value="No">No</option>
                   <option value="Yes">Yes</option>
@@ -268,7 +277,7 @@ export default function SettingsPage() {
                       invoice_year: e.target.value,
                     }))
                   }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
                 >
                   {invoiceYearOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -287,7 +296,7 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Invoice Data To Hide
                 </label>
-                <div className="p-3 border border-slate-300 rounded-md bg-slate-50 max-h-48 overflow-y-auto">
+                <div className="p-4 border border-slate-300 rounded-lg bg-slate-50 max-h-48 overflow-y-auto">
                   {invoiceColumns.length > 0 ? (
                     <div className="space-y-2">
                       {invoiceColumns.map((column) => (
@@ -331,16 +340,16 @@ export default function SettingsPage() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400 transition-colors flex items-center gap-2"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-600 hover:to-emerald-700 disabled:from-slate-300 disabled:to-slate-400 transition-all text-sm font-semibold shadow-md hover:shadow-lg disabled:cursor-not-allowed"
                 >
-                  <span>💾</span>
+                  <Save className="w-4 h-4" />
                   {saving ? "Saving..." : "Save Settings"}
                 </button>
                 <button
                   onClick={handleCancel}
-                  className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center gap-2"
+                  className="inline-flex items-center gap-2 px-6 py-3 border-2 border-slate-300 bg-white text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-semibold"
                 >
-                  <span>✕</span>
+                  <RotateCcw className="w-4 h-4" />
                   Cancel
                 </button>
               </div>
@@ -349,9 +358,9 @@ export default function SettingsPage() {
 
           {/* Settings Help Panel */}
           <div className="lg:col-span-1">
-            <div className="bg-blue-50 rounded-lg shadow-sm p-6 border border-blue-100">
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-sm p-6 border border-purple-200 sticky top-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <span>ℹ️</span> Settings Help
+                <span className="text-purple-600">ℹ️</span> Settings Help
               </h2>
 
               <div className="space-y-4 text-sm">
@@ -366,7 +375,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="border-t border-blue-200 pt-3">
+                <div className="border-t border-purple-200 pt-3">
                   <h3 className="font-semibold text-slate-900 mb-1">
                     Invoice Start From
                   </h3>
@@ -386,7 +395,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="border-t border-blue-200 pt-3">
+                <div className="border-t border-purple-200 pt-3">
                   <h3 className="font-semibold text-slate-900 mb-1">
                     Want to show Image on Invoice?
                   </h3>
@@ -396,7 +405,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="border-t border-blue-200 pt-3">
+                <div className="border-t border-purple-200 pt-3">
                   <h3 className="font-semibold text-slate-900 mb-1">
                     Invoice Year
                   </h3>
@@ -408,7 +417,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="border-t border-blue-200 pt-3">
+                <div className="border-t border-purple-200 pt-3">
                   <h3 className="font-semibold text-slate-900 mb-1">
                     Invoice Data To Hide
                   </h3>

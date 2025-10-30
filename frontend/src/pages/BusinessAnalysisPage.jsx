@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { Calendar, BarChart3, TrendingUp, TrendingDown, Search } from "lucide-react";
 
 export default function BusinessAnalysisPage() {
   const [filters, setFilters] = useState({
@@ -67,28 +68,39 @@ export default function BusinessAnalysisPage() {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
-      {/* Title */}
-      <h1 className="text-2xl font-semibold text-slate-800 mb-6">
-        Business Analysis
-      </h1>
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+            <BarChart3 className="w-6 h-6 text-emerald-600" />
+          </div>
+          <h1 className="text-4xl font-bold text-slate-900">Business Analysis</h1>
+        </div>
+        <p className="text-slate-600 ml-13">Track consignment performance and profitability metrics</p>
+      </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div className="bg-slate-50 p-6 rounded-xl mb-6 border border-slate-200">
+        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Filters</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Customer id
+          <label className="flex items-center text-sm font-medium text-slate-700 mb-2">
+            <BarChart3 className="w-4 h-4 mr-2 text-slate-500" />
+            Customer ID
           </label>
           <input
             type="text"
             name="customerId"
             value={filters.customerId}
             onChange={handleFilterChange}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter customer ID"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <label className="flex items-center text-sm font-medium text-slate-700 mb-2">
+            <Calendar className="w-4 h-4 mr-2 text-slate-500" />
             From Date <span className="text-red-500">*</span>
           </label>
           <input
@@ -96,12 +108,13 @@ export default function BusinessAnalysisPage() {
             name="fromDate"
             value={filters.fromDate}
             onChange={handleFilterChange}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <label className="flex items-center text-sm font-medium text-slate-700 mb-2">
+            <Calendar className="w-4 h-4 mr-2 text-slate-500" />
             To Date <span className="text-red-500">*</span>
           </label>
           <input
@@ -109,62 +122,64 @@ export default function BusinessAnalysisPage() {
             name="toDate"
             value={filters.toDate}
             onChange={handleFilterChange}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
           />
         </div>
       </div>
 
-      {/* Action Button */}
-      <div className="mb-4">
-        <button
-          onClick={handleShow}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Show
-        </button>
+        {/* Action Button */}
+        <div className="mb-6">
+          <button
+            onClick={handleShow}
+            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-sm hover:shadow-md font-medium"
+          >
+            Show Report
+          </button>
+        </div>
       </div>
 
       {/* Search */}
-      <div className="flex justify-end mb-4">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700">Search:</label>
+      <div className="flex justify-end mb-6">
+        <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-lg border border-slate-300">
+          <Search className="w-4 h-4 text-slate-500" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Search..."
+            className="bg-transparent outline-none text-sm w-48"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto border border-slate-200 rounded-lg mb-4">
+      <div className="overflow-x-auto border border-slate-200 rounded-xl mb-6">
         <table className="w-full">
           <thead>
-            <tr className="bg-slate-100 border-b border-slate-200">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+            <tr className="bg-slate-900 border-b border-slate-200">
+              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                 Sr.No
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                Consignment no
+              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                Consignment No
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                 Booking Date
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                 Weight
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                 Destination
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                 Amount
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                Dtdc Amount
+              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                DTDC Amount
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                Profit/Loss,(%)
+              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                Profit/Loss (%)
               </th>
             </tr>
           </thead>
@@ -173,7 +188,7 @@ export default function BusinessAnalysisPage() {
               <tr>
                 <td
                   colSpan="8"
-                  className="px-4 py-8 text-center text-slate-500"
+                  className="px-6 py-8 text-center text-slate-500"
                 >
                   Loading...
                 </td>
@@ -182,7 +197,7 @@ export default function BusinessAnalysisPage() {
               <tr>
                 <td
                   colSpan="8"
-                  className="px-4 py-8 text-center text-slate-500"
+                  className="px-6 py-8 text-center text-slate-500"
                 >
                   No data available in table
                 </td>
@@ -191,31 +206,33 @@ export default function BusinessAnalysisPage() {
               filteredData.map((row, index) => (
                 <tr
                   key={index}
-                  className="border-b border-slate-100 hover:bg-slate-50"
+                  className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                 >
-                  <td className="px-4 py-3 text-sm text-slate-700">
+                  <td className="px-6 py-4 text-sm text-slate-700 font-medium">
                     {index + 1}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
+                  <td className="px-6 py-4 text-sm text-slate-700">
                     {row.consignment_number}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
+                  <td className="px-6 py-4 text-sm text-slate-700">
                     {new Date(row.booking_date).toLocaleDateString("en-GB")}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
-                    {row.weight}
+                  <td className="px-6 py-4 text-sm text-slate-700">
+                    {row.weight} kg
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
+                  <td className="px-6 py-4 text-sm text-slate-700">
                     {row.destination}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
-                    {Number(row.amount).toLocaleString("en-IN")}
+                  <td className="px-6 py-4 text-sm text-slate-900 font-semibold">
+                    ₹{Number(row.amount).toLocaleString("en-IN")}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
-                    {Number(row.dtdc_amount).toLocaleString("en-IN")}
+                  <td className="px-6 py-4 text-sm text-slate-900 font-semibold">
+                    ₹{Number(row.dtdc_amount).toLocaleString("en-IN")}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
-                    {row.profit_loss_percent}
+                  <td className="px-6 py-4 text-sm font-semibold">
+                    <span className={row.profit_loss_percent >= 0 ? "text-emerald-700" : "text-red-700"}>
+                      {row.profit_loss_percent}%
+                    </span>
                   </td>
                 </tr>
               ))
@@ -224,23 +241,62 @@ export default function BusinessAnalysisPage() {
         </table>
       </div>
 
-      {/* Summary Badges */}
-      <div className="flex gap-4">
-        <div className="px-6 py-2 bg-blue-600 text-white rounded flex items-center gap-2">
-          <span className="font-medium">Total</span>
-          <span className="font-semibold">{summary.total}</span>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="px-6 py-5 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Total</span>
+              <span className="block font-bold text-2xl text-blue-900 mt-1">
+                ₹{Number(summary.total || 0).toLocaleString("en-IN")}
+              </span>
+            </div>
+            <div className="w-12 h-12 bg-blue-200 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
         </div>
-        <div className="px-6 py-2 bg-green-600 text-white rounded flex items-center gap-2">
-          <span className="font-medium">DTDC Total</span>
-          <span className="font-semibold">{summary.dtdcTotal}</span>
+
+        <div className="px-6 py-5 bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-xl shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">DTDC Total</span>
+              <span className="block font-bold text-2xl text-emerald-900 mt-1">
+                ₹{Number(summary.dtdcTotal || 0).toLocaleString("en-IN")}
+              </span>
+            </div>
+            <div className="w-12 h-12 bg-emerald-200 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-emerald-600" />
+            </div>
+          </div>
         </div>
-        <div className="px-6 py-2 bg-red-600 text-white rounded flex items-center gap-2">
-          <span className="font-medium">Profit/Loss</span>
-          <span className="font-semibold">{summary.profitLoss}</span>
+
+        <div className="px-6 py-5 bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-xl shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Profit/Loss</span>
+              <span className="block font-bold text-2xl text-red-900 mt-1">
+                ₹{Number(summary.profitLoss || 0).toLocaleString("en-IN")}
+              </span>
+            </div>
+            <div className="w-12 h-12 bg-red-200 rounded-lg flex items-center justify-center">
+              <TrendingDown className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
         </div>
-        <div className="px-6 py-2 bg-orange-500 text-white rounded flex items-center gap-2">
-          <span className="font-medium">Profit/Loss(%)</span>
-          <span className="font-semibold">{summary.profitLossPercent}</span>
+
+        <div className="px-6 py-5 bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-xl shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-orange-600 uppercase tracking-wider">Profit/Loss %</span>
+              <span className="block font-bold text-2xl text-orange-900 mt-1">
+                {Number(summary.profitLossPercent || 0).toFixed(2)}%
+              </span>
+            </div>
+            <div className="w-12 h-12 bg-orange-200 rounded-lg flex items-center justify-center">
+              <BarChart3 className="w-6 h-6 text-orange-600" />
+            </div>
+          </div>
         </div>
       </div>
     </div>

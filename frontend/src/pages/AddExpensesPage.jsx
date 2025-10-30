@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { DollarSign, Type, Tag } from "lucide-react";
 
 export default function AddExpensesPage() {
   const [formData, setFormData] = useState({
@@ -86,10 +87,20 @@ export default function AddExpensesPage() {
       <div className="mx-auto max-w-2xl">
         <div className="rounded-lg bg-white shadow-sm">
           {/* Header */}
-          <div className="border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4">
-            <h1 className="text-2xl font-bold text-emerald-900">
-              Add Expenses
-            </h1>
+          <div className="border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-8">
+            <div className="flex items-center gap-4">
+              <div className="rounded-lg bg-emerald-600 p-3">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-slate-900">
+                  Add Expense
+                </h1>
+                <p className="mt-1 text-sm text-slate-600">
+                  Record a new business expense
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Form */}
@@ -109,48 +120,51 @@ export default function AddExpensesPage() {
 
             {/* Amount */}
             <div>
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
                 Amount <span className="text-red-500">*</span>
               </label>
-              <input
-                type="number"
-                name="amount"
-                value={formData.amount}
-                onChange={handleChange}
-                placeholder="Enter Amount"
-                step="0.01"
-                min="0"
-                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              />
+              <div className="relative">
+                <span className="absolute left-4 top-3.5 text-slate-500 font-medium">₹</span>
+                <input
+                  type="number"
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                  className="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-4 py-3 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all"
+                />
+              </div>
             </div>
 
             {/* Reason/Description */}
             <div>
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
                 Reason <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Enter reason for expense"
+                placeholder="Describe the reason for this expense"
                 rows="4"
-                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all"
               />
             </div>
 
             {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
                 Category <span className="text-red-500">*</span>
               </label>
               <select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all"
               >
-                <option value="">Select</option>
+                <option value="">Select a category</option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
@@ -160,13 +174,14 @@ export default function AddExpensesPage() {
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-end pt-6">
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-lg bg-blue-600 px-8 py-2 font-medium text-white hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
+                className="px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium rounded-lg hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2"
               >
-                {loading ? "Adding..." : "Add"}
+                <DollarSign className="h-4 w-4" />
+                {loading ? "Adding..." : "Add Expense"}
               </button>
             </div>
           </form>

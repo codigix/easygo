@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Calendar, User, Database } from "lucide-react";
 
 export default function PaymentTrackPage() {
   const [filters, setFilters] = useState({
@@ -98,55 +98,63 @@ export default function PaymentTrackPage() {
   const totalPages = Math.ceil(totalRecords / recordsPerPage);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-800">Payment Details</h1>
-        <p className="text-sm text-slate-500">
-          Track and manage payment history
-        </p>
+        <h1 className="text-4xl font-bold text-slate-900">Payment Details</h1>
+        <p className="text-slate-500 mt-2">Track and manage all payment transactions</p>
       </div>
 
       {/* Filter Section */}
-      <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Filter Payments</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              CustomerId
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Customer ID
+              </div>
             </label>
             <input
               type="text"
               name="customer_id"
               value={filters.customer_id}
               onChange={handleFilterChange}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
               placeholder="Enter customer ID"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              From Date <span className="text-red-500">*</span>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                From Date
+              </div>
             </label>
             <input
               type="date"
               name="from_date"
               value={filters.from_date}
               onChange={handleFilterChange}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              To Date <span className="text-red-500">*</span>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                To Date
+              </div>
             </label>
             <input
               type="date"
               name="to_date"
               value={filters.to_date}
               onChange={handleFilterChange}
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
             />
           </div>
 
@@ -154,81 +162,62 @@ export default function PaymentTrackPage() {
             <button
               onClick={handleShow}
               disabled={loading}
-              className="w-full rounded-md bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="w-full rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {loading ? "Loading..." : "Show"}
+              <Database className="h-4 w-4" />
+              {loading ? "Loading..." : "Search"}
             </button>
           </div>
         </div>
       </div>
 
       {/* Table Section */}
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-200 p-4">
-          <div className="flex items-center gap-2">
-            <select
-              value={recordsPerPage}
-              onChange={(e) => setRecordsPerPage(Number(e.target.value))}
-              className="rounded border border-slate-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-            <span className="text-sm text-slate-600">records per page</span>
-          </div>
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="border-b border-slate-200 px-6 py-4 bg-slate-50">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-slate-600">Show</span>
+              <select
+                value={recordsPerPage}
+                onChange={(e) => setRecordsPerPage(Number(e.target.value))}
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span className="text-sm text-slate-600">entries</span>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-slate-600">Search:</label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="rounded border border-slate-300 px-3 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Search..."
-            />
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all w-40"
+                placeholder="Search payments..."
+              />
+            </div>
           </div>
         </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-slate-100 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                  Sr.No
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                  Action
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                  Invoiceno
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                  invoicedate
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                  Customer_Id
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                  Modeofpayment
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                  Remark
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                  Payment date
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">
-                  Net Amount
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">
-                  Balance
-                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">No.</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Invoice</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Invoice Date</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Customer ID</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Mode</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Remarks</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Payment Date</th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Net Amount</th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -236,67 +225,74 @@ export default function PaymentTrackPage() {
                 <tr>
                   <td
                     colSpan="11"
-                    className="px-4 py-8 text-center text-slate-500"
+                    className="px-6 py-12 text-center text-slate-500"
                   >
-                    {loading
-                      ? "Loading..."
-                      : "No records found. Click 'Show' to load data."}
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="text-lg font-medium mb-2">No payments found</div>
+                      <p className="text-sm">{loading ? "Loading payments..." : "Click 'Search' to load payment data"}</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 payments.map((payment, index) => (
-                  <tr key={payment.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 text-sm text-slate-900">
+                  <tr key={payment.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
                       {(currentPage - 1) * recordsPerPage + index + 1}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex gap-3">
                         <button
                           onClick={() => handleEdit(payment)}
-                          className="text-blue-600 hover:text-blue-800"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                           title="Edit"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(payment)}
-                          className="text-red-600 hover:text-red-800"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
                           title="Delete"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
                       {payment.invoice_number}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                       {new Date(payment.invoice_date).toLocaleDateString(
                         "en-GB"
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                       {payment.customer_id}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
-                      {payment.payment_mode}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                      <span className="inline-flex px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">
+                        {payment.payment_mode}
+                      </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
-                      {payment.notes || "-"}
+                    <td className="px-6 py-4 text-sm text-slate-600">
+                      {payment.notes ? (
+                        <span className="max-w-xs truncate">{payment.notes}</span>
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                       {new Date(payment.payment_date).toLocaleDateString(
                         "en-GB"
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-slate-900">
-                      {payment.amount}
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-900">
+                      ₹{(payment.amount || 0).toLocaleString("en-IN")}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm font-medium text-slate-900">
-                      {payment.net_amount}
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-slate-900">
+                      ₹{(payment.net_amount || 0).toLocaleString("en-IN")}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-red-600 font-medium">
-                      {payment.balance || 0}
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-red-600">
+                      ₹{(payment.balance || 0).toLocaleString("en-IN")}
                     </td>
                   </tr>
                 ))
@@ -308,51 +304,49 @@ export default function PaymentTrackPage() {
         {/* Footer with Totals */}
         {payments.length > 0 && (
           <>
-            <div className="border-t border-slate-200 px-4 py-3 flex justify-end gap-8">
-              <div className="flex items-center gap-2">
-                <span className="rounded bg-blue-600 px-4 py-1 text-sm font-medium text-white">
+            <div className="border-t border-slate-200 px-6 py-4 bg-slate-50 flex justify-end gap-8">
+              <div className="flex items-center gap-3">
+                <span className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white">
                   Net Total
                 </span>
-                <span className="text-lg font-bold text-slate-900">
-                  {totals.net_total.toLocaleString("en-IN", {
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
+                <span className="text-xl font-bold text-slate-900">
+                  ₹{totals.net_total.toLocaleString("en-IN", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="rounded bg-blue-600 px-4 py-1 text-sm font-medium text-white">
+              <div className="flex items-center gap-3">
+                <span className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">
                   Total
                 </span>
-                <span className="text-lg font-bold text-slate-900">
-                  {totals.total.toLocaleString("en-IN", {
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
+                <span className="text-xl font-bold text-slate-900">
+                  ₹{totals.total.toLocaleString("en-IN", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}
                 </span>
               </div>
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3">
-              <div className="text-sm text-slate-600">
-                Showing {(currentPage - 1) * recordsPerPage + 1} to{" "}
-                {Math.min(currentPage * recordsPerPage, totalRecords)} of{" "}
-                {totalRecords} entries
+            <div className="border-t border-slate-200 px-6 py-4 flex items-center justify-between">
+              <div className="text-sm font-medium text-slate-600">
+                Showing <span className="font-semibold text-slate-900">{(currentPage - 1) * recordsPerPage + 1}</span> to <span className="font-semibold text-slate-900">{Math.min(currentPage * recordsPerPage, totalRecords)}</span> of <span className="font-semibold text-slate-900">{totalRecords}</span> entries
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  ← Previous
+                  ← Prev
                 </button>
                 {[...Array(Math.min(5, totalPages))].map((_, i) => (
                   <button
                     key={i + 1}
                     onClick={() => setCurrentPage(i + 1)}
-                    className={`rounded px-3 py-1 text-sm ${
+                    className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       currentPage === i + 1
                         ? "bg-blue-600 text-white"
                         : "border border-slate-300 text-slate-600 hover:bg-slate-50"
@@ -366,7 +360,7 @@ export default function PaymentTrackPage() {
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
                   disabled={currentPage === totalPages}
-                  className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next →
                 </button>
