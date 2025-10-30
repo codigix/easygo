@@ -1,4 +1,5 @@
 import { getDb } from "../config/database.js";
+import { calculateBookingRate } from "../services/rateCalculationService.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -210,11 +211,55 @@ export const createBooking = async (req, res) => {
       });
     }
 
-    // Calculate total (can be enhanced with rate master calculations)
-    const calculatedAmount = amount || 0;
-    const calculatedOtherCharges = other_charges || 0;
+    // Step 1: Calculate rate from RateMaster
+    // Required: from_pincode, to_pincode, service_type (mode), weight, quantity
+    let rateCalculation = null;
+    let calculatedAmount = parseFloat(amount || 0);
+    let calculatedTax = 0;
+    let calculatedFuel = 0;
+    let gstPercent = 18;
+    let fuelPercent = 0;
+
+    // If amount is not provided, calculate from RateMaster
+    if (!amount || parseFloat(amount) === 0) {
+      // Try to calculate using rate master if we have required fields
+      if (char_wt) {
+        try {
+          rateCalculation = await calculateBookingRate(
+            franchiseId,
+            null, // from_pincode - may need to fetch from customer or use franchise default
+            pincode, // to_pincode
+            mode === "AR" ? "Air" : mode === "SR" ? "Surface" : mode, // service_type
+            parseFloat(char_wt),
+            parseInt(qty),
+            parseFloat(other_charges || 0)
+          );
+
+          if (rateCalculation) {
+            calculatedAmount = rateCalculation.lineAmount;
+            calculatedTax = rateCalculation.taxAmount;
+            calculatedFuel = rateCalculation.fuelAmount;
+            gstPercent = rateCalculation.gstPercent;
+            fuelPercent = rateCalculation.fuelPercent;
+          }
+        } catch (error) {
+          console.warn("Rate calculation skipped:", error.message);
+          // Fall back to using provided amount if calculation fails
+          calculatedAmount = parseFloat(amount || 0);
+        }
+      }
+    } else {
+      // If amount is provided, apply default tax calculations
+      calculatedTax = (parseFloat(calculatedAmount) * gstPercent) / 100;
+      calculatedFuel = (parseFloat(calculatedAmount) * fuelPercent) / 100;
+    }
+
+    const calculatedOtherCharges = parseFloat(other_charges || 0);
     const calculatedTotal =
-      parseFloat(calculatedAmount) + parseFloat(calculatedOtherCharges);
+      parseFloat(calculatedAmount) +
+      parseFloat(calculatedTax) +
+      parseFloat(calculatedFuel) +
+      parseFloat(calculatedOtherCharges);
 
     const bookingData = {
       franchise_id: franchiseId,
@@ -230,18 +275,22 @@ export const createBooking = async (req, res) => {
       char_wt,
       qty,
       type: type || "D",
-      amount: calculatedAmount,
-      other_charges: calculatedOtherCharges,
+      amount: parseFloat(calculatedAmount.toFixed(2)),
+      tax_amount: parseFloat(calculatedTax.toFixed(2)), // Calculated GST
+      fuel_amount: parseFloat(calculatedFuel.toFixed(2)), // Calculated Fuel Surcharge
+      other_charges: parseFloat(calculatedOtherCharges.toFixed(2)),
       reference: reference || null,
       dtdc_amt: dtdc_amt || 0,
       insurance: 0,
       percentage: 0,
       risk_surcharge: 0,
       bill_amount: 0,
-      total: calculatedTotal,
+      total: parseFloat(calculatedTotal.toFixed(2)),
       destination: null,
       status: "Booked",
       remarks: null,
+      gst_percent: gstPercent,
+      fuel_percent: fuelPercent,
     };
 
     const [result] = await db.query("INSERT INTO bookings SET ?", [

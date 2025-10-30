@@ -25,7 +25,9 @@ export default function GenerateSingleInvoicePage() {
     period_to: "",
     address: "",
     invoice_discount: false,
+    invoice_discount_value: 0,
     reverse_charge: false,
+    reverse_charge_value: 0,
     gst_percent: 18,
     fuel_surcharge_percent: 0,
     royalty_charge: 0,
@@ -190,7 +192,9 @@ export default function GenerateSingleInvoicePage() {
           period_to: "",
           address: "",
           invoice_discount: false,
+          invoice_discount_value: 0,
           reverse_charge: false,
+          reverse_charge_value: 0,
           gst_percent: 18,
           fuel_surcharge_percent: 0,
           royalty_charge: 0,
@@ -226,10 +230,25 @@ export default function GenerateSingleInvoicePage() {
 
     const chargeableAmount =
       subtotal + fuelSurcharge + royalty + docket + other;
-    const gst = formData.invoice_discount
-      ? 0
-      : (chargeableAmount * parseFloat(formData.gst_percent || 18)) / 100;
-    const netAmount = chargeableAmount + gst;
+
+    // Apply invoice discount if selected
+    const invoiceDiscount = formData.invoice_discount
+      ? parseFloat(formData.invoice_discount_value || 0)
+      : 0;
+    const amountAfterDiscount = chargeableAmount - invoiceDiscount;
+
+    // Calculate GST on discounted amount
+    const gst =
+      (amountAfterDiscount * parseFloat(formData.gst_percent || 18)) / 100;
+
+    // Calculate net amount before reverse charge
+    let netAmount = amountAfterDiscount + gst;
+
+    // Apply reverse charge if selected
+    const reverseCharge = formData.reverse_charge
+      ? parseFloat(formData.reverse_charge_value || 0)
+      : 0;
+    netAmount = netAmount + reverseCharge;
 
     return {
       subtotal: subtotal.toFixed(2),
@@ -238,7 +257,10 @@ export default function GenerateSingleInvoicePage() {
       docket: docket.toFixed(2),
       other: other.toFixed(2),
       chargeableAmount: chargeableAmount.toFixed(2),
+      invoiceDiscount: invoiceDiscount.toFixed(2),
+      amountAfterDiscount: amountAfterDiscount.toFixed(2),
       gst: gst.toFixed(2),
+      reverseCharge: reverseCharge.toFixed(2),
       netAmount: netAmount.toFixed(2),
       totalWeight: totalWeight.toFixed(2),
       count: consignments.length,
@@ -541,79 +563,192 @@ export default function GenerateSingleInvoicePage() {
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
+                </div>
+              </div>
+            </div>
 
-                  <div className="pt-2 space-y-2">
-                    <label className="flex items-center gap-2 text-sm">
+            {/* Invoice Options */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <h3 className="text-sm font-semibold text-slate-900 mb-4">
+                  Invoice Options
+                </h3>
+
+                <div className="space-y-4">
+                  {/* Invoice Discount */}
+                  <div className="border border-slate-200 rounded-lg p-4">
+                    <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
                         name="invoice_discount"
                         checked={formData.invoice_discount}
                         onChange={handleFormChange}
-                        className="rounded border-slate-200"
+                        className="w-4 h-4 rounded border-slate-300"
                       />
-                      <span className="text-slate-700">
-                        Invoice Discount (No GST)
+                      <span className="text-sm font-medium text-slate-700">
+                        Invoice Discount
                       </span>
                     </label>
-                    <label className="flex items-center gap-2 text-sm">
+                    {formData.invoice_discount && (
+                      <div className="mt-3 ml-7">
+                        <label className="block text-xs font-medium text-slate-700 mb-2">
+                          Discount Amount (₹)
+                        </label>
+                        <input
+                          type="number"
+                          name="invoice_discount_value"
+                          value={formData.invoice_discount_value}
+                          onChange={handleFormChange}
+                          placeholder="0.00"
+                          min="0"
+                          step="0.01"
+                          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Reverse Charge */}
+                  <div className="border border-slate-200 rounded-lg p-4">
+                    <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
                         name="reverse_charge"
                         checked={formData.reverse_charge}
                         onChange={handleFormChange}
-                        className="rounded border-slate-200"
+                        className="w-4 h-4 rounded border-slate-300"
                       />
-                      <span className="text-slate-700">Reverse Charge</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        Reverse Charge
+                      </span>
                     </label>
+                    {formData.reverse_charge && (
+                      <div className="mt-3 ml-7">
+                        <label className="block text-xs font-medium text-slate-700 mb-2">
+                          Reverse Charge Amount (₹)
+                        </label>
+                        <input
+                          type="number"
+                          name="reverse_charge_value"
+                          value={formData.reverse_charge_value}
+                          onChange={handleFormChange}
+                          placeholder="0.00"
+                          min="0"
+                          step="0.01"
+                          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Summary */}
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 p-8 shadow-sm">
-              <h3 className="text-lg font-semibold text-slate-900 mb-6">
-                Invoice Summary
+            {/* Charges & Calculations Breakdown */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+              <h3 className="text-lg font-semibold text-slate-900 mb-8">
+                Charges & Calculations
               </h3>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div>
-                  <p className="text-sm text-slate-600">Subtotal</p>
-                  <p className="text-2xl font-bold text-slate-900">
+              <div className="space-y-4">
+                {/* Total */}
+                <div className="grid grid-cols-2 gap-4 pb-4 border-b border-slate-200">
+                  <p className="text-sm font-medium text-slate-700">Total</p>
+                  <p className="text-sm font-bold text-slate-900 text-right">
                     ₹{totals.subtotal}
                   </p>
                 </div>
 
-                {parseFloat(totals.fuelSurcharge) > 0 && (
-                  <div>
-                    <p className="text-sm text-slate-600">Fuel Surcharge</p>
-                    <p className="text-2xl font-bold text-slate-900">
+                {/* Fuel Surcharge */}
+                {parseFloat(formData.fuel_surcharge_percent) > 0 && (
+                  <div className="grid grid-cols-2 gap-4 pb-3">
+                    <p className="text-sm text-slate-700">
+                      Fuel/Surcharge Tax ({formData.fuel_surcharge_percent}%)
+                    </p>
+                    <p className="text-sm text-slate-900 text-right">
                       ₹{totals.fuelSurcharge}
                     </p>
                   </div>
                 )}
 
-                {parseFloat(totals.royalty) > 0 && (
-                  <div>
-                    <p className="text-sm text-slate-600">Royalty</p>
-                    <p className="text-2xl font-bold text-slate-900">
+                {/* Sub Total */}
+                <div className="grid grid-cols-2 gap-4 py-4 border-y border-slate-200 bg-slate-50 px-4 rounded">
+                  <p className="font-semibold text-slate-900">Sub Total</p>
+                  <p className="font-bold text-slate-900 text-right">
+                    ₹{totals.chargeableAmount}
+                  </p>
+                </div>
+
+                {/* GST */}
+                <div className="grid grid-cols-2 gap-4 pb-3 pt-4">
+                  <p className="text-sm text-slate-700">
+                    GST {formData.gst_percent}%
+                  </p>
+                  <p className="text-sm text-slate-900 text-right">
+                    ₹{totals.gst}
+                  </p>
+                </div>
+
+                {/* Royalty Charge */}
+                {parseFloat(formData.royalty_charge) > 0 && (
+                  <div className="grid grid-cols-2 gap-4 pb-3">
+                    <p className="text-sm text-slate-700">
+                      Royalty Charge ({formData.royalty_charge}%)
+                    </p>
+                    <p className="text-sm text-slate-900 text-right">
                       ₹{totals.royalty}
                     </p>
                   </div>
                 )}
 
-                {parseFloat(totals.gst) > 0 && (
-                  <div>
-                    <p className="text-sm text-slate-600">GST</p>
-                    <p className="text-2xl font-bold text-slate-900">
-                      ₹{totals.gst}
+                {/* Docket Charge */}
+                {parseFloat(formData.docket_charge) > 0 && (
+                  <div className="grid grid-cols-2 gap-4 pb-3">
+                    <p className="text-sm text-slate-700">
+                      Docket Charge ({formData.docket_charge}%)
+                    </p>
+                    <p className="text-sm text-slate-900 text-right">
+                      ₹{totals.docket}
                     </p>
                   </div>
                 )}
 
-                <div className="md:col-span-full pt-4 border-t border-emerald-200">
-                  <p className="text-sm text-slate-600 mb-1">Net Amount</p>
-                  <p className="text-4xl font-bold text-emerald-600">
+                {/* Other Charge */}
+                {parseFloat(totals.other) > 0 && (
+                  <div className="grid grid-cols-2 gap-4 pb-3">
+                    <p className="text-sm text-slate-700">Other Charge</p>
+                    <p className="text-sm text-slate-900 text-right">
+                      ₹{totals.other}
+                    </p>
+                  </div>
+                )}
+
+                {/* Invoice Discount */}
+                {formData.invoice_discount &&
+                  parseFloat(totals.invoiceDiscount) > 0 && (
+                    <div className="grid grid-cols-2 gap-4 pb-3 text-red-600">
+                      <p className="text-sm font-medium">Invoice Discount</p>
+                      <p className="text-sm font-medium text-right">
+                        -₹{totals.invoiceDiscount}
+                      </p>
+                    </div>
+                  )}
+
+                {/* Reverse Charge */}
+                {formData.reverse_charge &&
+                  parseFloat(totals.reverseCharge) > 0 && (
+                    <div className="grid grid-cols-2 gap-4 pb-3 text-blue-600">
+                      <p className="text-sm font-medium">Reverse Charge</p>
+                      <p className="text-sm font-medium text-right">
+                        +₹{totals.reverseCharge}
+                      </p>
+                    </div>
+                  )}
+
+                {/* Net Amount */}
+                <div className="grid grid-cols-2 gap-4 pt-6 pb-4 border-t-2 border-emerald-300 bg-emerald-50 px-4 py-4 rounded-lg">
+                  <p className="font-bold text-lg text-slate-900">Net Amount</p>
+                  <p className="font-bold text-2xl text-emerald-600 text-right">
                     ₹{totals.netAmount}
                   </p>
                 </div>

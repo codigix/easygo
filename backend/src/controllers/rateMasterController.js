@@ -95,15 +95,17 @@ export const calculateRate = async (req, res) => {
       });
     }
 
-    const totalAmount = rate.rate_per_kg * weight;
+    const totalAmount = parseFloat(rate.rate) * parseFloat(weight);
 
     res.json({
       success: true,
       data: {
-        rate: rate.rate_per_kg,
+        rate: parseFloat(rate.rate),
         weight,
-        total_amount: totalAmount,
+        total_amount: parseFloat(totalAmount.toFixed(2)),
         service_type,
+        gst_percent: parseFloat(rate.gst_percentage) || 18,
+        fuel_surcharge: parseFloat(rate.fuel_surcharge) || 0,
       },
     });
   } catch (error) {
