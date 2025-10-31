@@ -15,16 +15,16 @@ export function DashboardLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-100">
       <Sidebar />
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col w-full min-w-0 overflow-hidden">
         <TopBar
           onOpenChat={() => setIsChatOpen(true)}
           onToggleMobileSidebar={() =>
             setIsMobileSidebarOpen(!isMobileSidebarOpen)
           }
         />
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-2 md:p-6 w-full">
           <Outlet />
         </main>
       </div>
@@ -35,6 +35,7 @@ export function DashboardLayout() {
         <div
           className="fixed inset-0 z-40 bg-black/50 md:hidden"
           onClick={() => setIsMobileSidebarOpen(false)}
+          style={{ pointerEvents: "auto" }}
         />
       )}
 

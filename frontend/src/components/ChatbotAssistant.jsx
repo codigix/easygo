@@ -475,7 +475,7 @@ export default function ChatbotAssistant() {
                   <div
                     className={`${
                       message.type === "booking_table"
-                        ? "max-w-4xl w-full px-2 sm:px-3 md:px-4 py-2"
+                        ? "max-w-4xl w-full px-2 sm:px-3 md:px-4 py-2 overflow-x-hidden"
                         : "max-w-xs sm:max-w-sm px-3 sm:px-4 py-2"
                     } rounded-lg ${
                       message.sender === "user"
@@ -506,8 +506,8 @@ export default function ChatbotAssistant() {
                         </div>
 
                         {/* Desktop Table View */}
-                        <div className="hidden sm:block overflow-x-auto bg-white text-gray-900 rounded border border-gray-300">
-                          <table className="w-full border-collapse">
+                        <div className="hidden sm:block overflow-x-auto bg-white text-gray-900 rounded border border-gray-300 max-w-full">
+                          <table className="border-collapse min-w-max">
                             <thead>
                               <tr className="bg-gray-200 border-b">
                                 <th className="px-2 py-2 text-left font-semibold text-xs">
