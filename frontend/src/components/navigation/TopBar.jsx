@@ -3,7 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
-export function TopBar({ onOpenChat }) {
+export function TopBar({ onOpenChat, onToggleMobileSidebar }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -22,7 +22,9 @@ export function TopBar({ onOpenChat }) {
         <div className="flex items-center gap-3">
           <button
             type="button"
+            onClick={onToggleMobileSidebar}
             className="rounded-lg p-2 transition hover:bg-emerald-50 md:hidden"
+            title="Toggle navigation menu"
           >
             <Menu className="h-5 w-5 text-emerald-600" />
           </button>
