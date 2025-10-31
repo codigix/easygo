@@ -6,62 +6,50 @@
 exports.up = function (knex) {
   return knex.schema.table("bookings", (table) => {
     // Add tax and fuel amount columns if they don't exist
-    if (!table._getColumns().includes("tax_amount")) {
-      table
-        .decimal("tax_amount", 10, 2)
-        .defaultTo(0)
-        .comment("GST/Tax amount calculated from RateMaster");
-    }
+    table
+      .decimal("tax_amount", 10, 2)
+      .defaultTo(0)
+      .nullable()
+      .comment("GST/Tax amount calculated from RateMaster");
 
-    if (!table._getColumns().includes("fuel_amount")) {
-      table
-        .decimal("fuel_amount", 10, 2)
-        .defaultTo(0)
-        .comment("Fuel surcharge calculated from RateMaster");
-    }
+    table
+      .decimal("fuel_amount", 10, 2)
+      .defaultTo(0)
+      .nullable()
+      .comment("Fuel surcharge calculated from RateMaster");
 
-    if (!table._getColumns().includes("gst_percent")) {
-      table
-        .decimal("gst_percent", 5, 2)
-        .defaultTo(18)
-        .comment("GST percentage used in calculation");
-    }
+    table
+      .decimal("gst_percent", 5, 2)
+      .defaultTo(18)
+      .nullable()
+      .comment("GST percentage used in calculation");
 
-    if (!table._getColumns().includes("fuel_percent")) {
-      table
-        .decimal("fuel_percent", 5, 2)
-        .defaultTo(0)
-        .comment("Fuel surcharge percentage used in calculation");
-    }
+    table
+      .decimal("fuel_percent", 5, 2)
+      .defaultTo(0)
+      .nullable()
+      .comment("Fuel surcharge percentage used in calculation");
 
-    if (!table._getColumns().includes("from_pincode")) {
-      table
-        .string("from_pincode", 10)
-        .nullable()
-        .comment("Source pincode for rate calculation");
-    }
+    table
+      .string("from_pincode", 10)
+      .nullable()
+      .comment("Source pincode for rate calculation");
 
-    if (!table._getColumns().includes("to_pincode")) {
-      table
-        .string("to_pincode", 10)
-        .nullable()
-        .comment("Destination pincode for rate calculation");
-    }
+    table
+      .string("to_pincode", 10)
+      .nullable()
+      .comment("Destination pincode for rate calculation");
 
-    if (!table._getColumns().includes("rate")) {
-      table
-        .decimal("rate", 10, 2)
-        .nullable()
-        .comment("Rate fetched from RateMaster");
-    }
+    table
+      .decimal("rate", 10, 2)
+      .nullable()
+      .comment("Rate fetched from RateMaster");
 
-    if (!table._getColumns().includes("rate_master_id")) {
-      table
-        .integer("rate_master_id")
-        .unsigned()
-        .nullable()
-        .comment("Reference to rate_master record used");
-    }
+    table
+      .integer("rate_master_id")
+      .unsigned()
+      .nullable()
+      .comment("Reference to rate_master record used");
   });
 };
 

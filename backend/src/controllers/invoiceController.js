@@ -1,5 +1,9 @@
 import { getDb } from "../config/database.js";
 import { calculateInvoiceTotals } from "../services/rateCalculationService.js";
+import {
+  validateInvoiceCalculations,
+  validateGstCalculation,
+} from "../services/calculationValidationService.js";
 import dayjs from "dayjs";
 import ejs from "ejs";
 import path from "path";
@@ -261,10 +265,33 @@ export const generateInvoice = async (req, res) => {
       invoice_no
     );
 
+    // FIX #2: Calculate GST from booking tax amounts (not recalculating on net_amount)
+    let calculatedGstAmount = 0;
+    let bookingsList = [];
+
+    if (bookings && Array.isArray(bookings) && bookings.length > 0) {
+      // Fetch all bookings and sum their tax amounts
+      for (const bookingId of bookings) {
+        const [[booking]] = await connection.query(
+          `SELECT id, tax_amount FROM bookings WHERE id = ? AND franchise_id = ?`,
+          [bookingId, franchiseId]
+        );
+        if (booking) {
+          bookingsList.push(booking);
+          calculatedGstAmount += parseFloat(booking.tax_amount || 0);
+        }
+      }
+      calculatedGstAmount = parseFloat(calculatedGstAmount.toFixed(2));
+    } else {
+      // If no bookings array, use the passed gst_percent (for backward compatibility)
+      calculatedGstAmount =
+        (parseFloat(net_amount) * parseFloat(gst_percent)) / 100;
+    }
+
     // Calculate fuel surcharge
     const fuelSurchargeTotal =
       (parseFloat(subtotal) * parseFloat(fuel_surcharge_tax_percent)) / 100;
-    const gstAmount = (parseFloat(net_amount) * parseFloat(gst_percent)) / 100;
+    const gstAmount = calculatedGstAmount;
 
     // Calculate balance amount (initially equal to total amount)
     const balanceAmount = total || 0;

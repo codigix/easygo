@@ -1,5 +1,10 @@
 import { getDb } from "../config/database.js";
 import { calculateBookingRate } from "../services/rateCalculationService.js";
+import {
+  getCompanyDefaults,
+  calculateCompanyCharges,
+} from "../services/companyService.js";
+import { validateBookingCalculations } from "../services/calculationValidationService.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -211,6 +216,9 @@ export const createBooking = async (req, res) => {
       });
     }
 
+    // FIX #1: Fetch company defaults from company_rate_master
+    const companyDefaults = await getCompanyDefaults(franchiseId, customer_id);
+
     // Step 1: Calculate rate from RateMaster
     // Required: from_pincode, to_pincode, service_type (mode), weight, quantity
     let rateCalculation = null;
@@ -254,7 +262,18 @@ export const createBooking = async (req, res) => {
       calculatedFuel = (parseFloat(calculatedAmount) * fuelPercent) / 100;
     }
 
-    const calculatedOtherCharges = parseFloat(other_charges || 0);
+    // FIX #1: Apply company-specific charges (fuel surcharge, royalty, insurance, etc.)
+    const companyCharges = calculateCompanyCharges(
+      calculatedAmount,
+      companyDefaults,
+      char_wt
+    );
+
+    const userOtherCharges = parseFloat(other_charges || 0);
+    const calculatedOtherCharges = parseFloat(
+      (userOtherCharges + companyCharges.totalCompanyCharges).toFixed(2)
+    );
+
     const calculatedTotal =
       parseFloat(calculatedAmount) +
       parseFloat(calculatedTax) +
@@ -296,6 +315,23 @@ export const createBooking = async (req, res) => {
     const [result] = await db.query("INSERT INTO bookings SET ?", [
       bookingData,
     ]);
+
+    // FIX #3: Validate booking calculations
+    try {
+      const bookingForValidation = {
+        id: result.insertId,
+        amount: bookingData.amount,
+        tax_amount: bookingData.tax_amount,
+        fuel_amount: bookingData.fuel_amount,
+        other_charges: bookingData.other_charges,
+        total: bookingData.total,
+      };
+      validateBookingCalculations(bookingForValidation);
+    } catch (validationError) {
+      console.error("Booking validation error:", validationError.message);
+      // Log but don't fail - the booking is already created
+      // In production, you might want to flag this for review
+    }
 
     // Create initial tracking entry
     await db.query("INSERT INTO tracking SET ?", {
