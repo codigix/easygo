@@ -77,7 +77,7 @@ export function TopBar({ onOpenChat }) {
           <button
             type="button"
             onClick={handleLogout}
-            className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 bg-red-700"
+            className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 bg-blue-800"
           >
             Sign Out
           </button>
