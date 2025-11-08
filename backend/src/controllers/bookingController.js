@@ -796,23 +796,78 @@ export const importFromExcel = async (req, res) => {
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    // Read with date formatting enabled
+    const data = XLSX.utils.sheet_to_json(worksheet, {
+      raw: false, // Don't use raw numbers for dates
+      defval: "",
+    });
+
+    console.log("=== IMPORT DEBUG ===");
+    console.log("Format:", format);
+    console.log("Total rows read:", data.length);
+    if (data.length > 0) {
+      console.log("Available columns:", Object.keys(data[0]));
+      console.log("First row data:", data[0]);
+      console.log("First row JSON:", JSON.stringify(data[0]));
+    }
 
     let imported = 0;
     const importedRows = [];
     const db = getDb();
 
+    // Helper function to format Excel dates properly
+    const formatDate = (dateValue) => {
+      if (!dateValue) return null;
+
+      // If it's already a string in expected format, return it
+      if (
+        typeof dateValue === "string" &&
+        /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateValue)
+      ) {
+        return dateValue;
+      }
+
+      // If it's a date object
+      if (dateValue instanceof Date) {
+        const day = String(dateValue.getDate()).padStart(2, "0");
+        const month = String(dateValue.getMonth() + 1).padStart(2, "0");
+        const year = dateValue.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+
+      // Try to parse as string
+      if (typeof dateValue === "string") {
+        try {
+          const date = new Date(dateValue);
+          if (!isNaN(date.getTime())) {
+            const day = String(date.getDate()).padStart(2, "0");
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+          }
+        } catch (e) {
+          console.log("Date parse error:", e);
+        }
+      }
+
+      return dateValue;
+    };
+
     // Format 1: Consignment No, Customer Id
     if (format === "1") {
-      for (const row of data) {
-        if (row["Consignment No"] && row["Customer Id"]) {
+      console.log("Format 1 - Processing", data.length, "rows");
+      for (let idx = 0; idx < data.length; idx++) {
+        const row = data[idx];
+
+        if (row["Consignment No*"] && row["Customer Id*"]) {
           try {
             await db.query(
               "INSERT INTO bookings (franchise_id, consignment_number, customer_id, booking_date, pincode, char_wt, qty) VALUES (?, ?, ?, ?, ?, ?, ?)",
               [
                 franchiseId,
-                row["Consignment No"],
-                row["Customer Id"],
+                row["Consignment No*"],
+                row["Customer Id*"],
                 new Date().toISOString().split("T")[0],
                 "000000",
                 0,
@@ -821,29 +876,37 @@ export const importFromExcel = async (req, res) => {
             );
             imported++;
             importedRows.push({
-              "Consignment No": row["Consignment No"],
-              "Customer Id": row["Customer Id"],
+              "Consignment No": row["Consignment No*"],
+              "Customer Id": row["Customer Id*"],
               "Booking Date": new Date().toISOString().split("T")[0],
               Status: "Imported",
             });
           } catch (err) {
             console.error("Error importing row:", err);
           }
+        } else {
+          console.log(`Format 1 - Row ${idx} validation failed:`, {
+            consignmentNo: row["Consignment No*"],
+            customerId: row["Customer Id*"],
+          });
         }
       }
     }
 
     // Format 2: Extended format with weights and charges
     if (format === "2") {
-      for (const row of data) {
-        if (row["Consignment No"] && row["Customer Id"]) {
+      console.log("Format 2 - Processing", data.length, "rows");
+      for (let idx = 0; idx < data.length; idx++) {
+        const row = data[idx];
+
+        if (row["Consignment No*"] && row["Customer Id*"]) {
           try {
             await db.query(
               "INSERT INTO bookings (franchise_id, consignment_number, customer_id, char_wt, insurance, percentage, other_charges, booking_date, pincode, qty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
               [
                 franchiseId,
-                row["Consignment No"],
-                row["Customer Id"],
+                row["Consignment No*"],
+                row["Customer Id*"],
                 row["Chargable Weight"] || 0,
                 row["Insurance Amt"] || 0,
                 row["FOV Per"] || 0,
@@ -855,8 +918,8 @@ export const importFromExcel = async (req, res) => {
             );
             imported++;
             importedRows.push({
-              "Consignment No": row["Consignment No"],
-              "Customer Id": row["Customer Id"],
+              "Consignment No": row["Consignment No*"],
+              "Customer Id": row["Customer Id*"],
               "Chargable Weight": row["Chargable Weight"] || 0,
               "Insurance Amt": row["Insurance Amt"] || 0,
               "FOV Per": row["FOV Per"] || 0,
@@ -866,33 +929,54 @@ export const importFromExcel = async (req, res) => {
           } catch (err) {
             console.error("Error importing row:", err);
           }
+        } else {
+          console.log(`Format 2 - Row ${idx} validation failed:`, {
+            consignmentNo: row["Consignment No*"],
+            customerId: row["Customer Id*"],
+          });
         }
       }
     }
 
     // Format 3: Complete format
     if (format === "3") {
-      for (const row of data) {
+      console.log("Format 3 - Total rows in Excel:", data.length);
+      console.log("First row sample:", data[0]);
+
+      for (let idx = 0; idx < data.length; idx++) {
+        const row = data[idx];
+        console.log(`Processing row ${idx}:`, row);
+
+        // Skip header rows or empty rows
+        if (!row["Consignment No*"]) {
+          console.log(`Skipping row ${idx} - no consignment number`);
+          continue;
+        }
+
+        // Format the booking date
+        const formattedDate = formatDate(row["Booking Date*"]);
+
         if (
-          row["Consignment No"] &&
-          row["Customer Id"] &&
-          row["Pincode"] &&
-          row["Booking Date"]
+          row["Consignment No*"] &&
+          row["Customer Id*"] &&
+          row["Pincode*"] &&
+          formattedDate
         ) {
           try {
+            console.log(`Importing row ${idx}`);
             await db.query(
               "INSERT INTO bookings (franchise_id, consignment_number, customer_id, char_wt, mode, address, qty, pincode, booking_date, type, other_charges, receiver, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
               [
                 franchiseId,
-                row["Consignment No"],
-                row["Customer Id"],
+                row["Consignment No*"],
+                row["Customer Id*"],
                 row["Chargable Weight"] || 0,
-                row["Mode"] || "AR",
+                row["Mode*"] || "AR",
                 row["Company Address"] || "",
-                row["Quantity"] || 1,
-                row["Pincode"],
-                row["Booking Date"],
-                row["Type or N"] || "D",
+                row["Quantity*"] || 1,
+                row["Pincode*"],
+                formattedDate,
+                row["Type or N*"] || "D",
                 row["Other Charges"] || 0,
                 row["Receiver"] || "",
                 row["Amount (Optional)"] || 0,
@@ -900,14 +984,14 @@ export const importFromExcel = async (req, res) => {
             );
             imported++;
             importedRows.push({
-              "Consignment No": row["Consignment No"],
-              "Customer Id": row["Customer Id"],
+              "Consignment No": row["Consignment No*"],
+              "Customer Id": row["Customer Id*"],
               "Chargable Weight": row["Chargable Weight"] || 0,
-              Mode: row["Mode"] || "AR",
-              Quantity: row["Quantity"] || 1,
-              Pincode: row["Pincode"],
-              "Booking Date": row["Booking Date"],
-              Type: row["Type or N"] || "D",
+              Mode: row["Mode*"] || "AR",
+              Quantity: row["Quantity*"] || 1,
+              Pincode: row["Pincode*"],
+              "Booking Date": formattedDate,
+              Type: row["Type or N*"] || "D",
               "Other Charges": row["Other Charges"] || 0,
               Receiver: row["Receiver"] || "",
               Amount: row["Amount (Optional)"] || 0,
@@ -916,6 +1000,14 @@ export const importFromExcel = async (req, res) => {
           } catch (err) {
             console.error("Error importing row:", err);
           }
+        } else {
+          console.log(`Row ${idx} validation failed. Has:`, {
+            consignmentNo: !!row["Consignment No*"],
+            customerId: !!row["Customer Id*"],
+            pincode: !!row["Pincode*"],
+            bookingDate: !!formattedDate,
+            rawBookingDate: row["Booking Date*"],
+          });
         }
       }
     }
@@ -948,37 +1040,36 @@ export const downloadTemplate = async (req, res) => {
     let data = [];
     if (format === "1") {
       data = [
-        ["Consignment No*", "Customer Id*"],
+        ["Consignment No", "Customer Id"],
         ["TT2300345", "Test Logistic"],
       ];
     } else if (format === "2") {
       data = [
         [
           "Sr.No",
-          "Consignment No*",
-          "Customer Id*",
+          "Consignment No",
+          "Customer Id",
           "Chargable Weight",
           "Insurance Amt",
-          "FOV Amt",
           "FOV Per",
           "Other charges",
         ],
-        [1, "TT2380345", "Test Logistic", 1.1, 100, 0.2, 2, 50],
+        [1, "TT2380345", "Test Logistic", 1.1, 100, 2, 50],
       ];
     } else if (format === "3") {
       data = [
         [
           "Sr.No",
-          "Consignment No*",
+          "Consignment No",
           "Chargable Weight",
-          "Mode*",
+          "Mode",
           "Company Address",
-          "Quantity*",
-          "Pincode*",
-          "Booking Date*",
+          "Quantity",
+          "Pincode",
+          "Booking Date",
           "Or Gt Amt or Cv",
-          "Type or N*",
-          "Customer Id*",
+          "Type or N",
+          "Customer Id",
           "Other Charges",
           "Receiver",
           "Amount (Optional)",

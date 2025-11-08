@@ -151,12 +151,10 @@ export default function ImportFromExcelBookingPage() {
               </thead>
               <tbody>
                 <tr>
-                  <td className="border px-4 py-2">1</td>
                   <td className="border px-4 py-2">TT2300345</td>
                   <td className="border px-4 py-2">Test Logistic</td>
                 </tr>
                 <tr>
-                  <td className="border px-4 py-2">2</td>
                   <td className="border px-4 py-2"></td>
                   <td className="border px-4 py-2"></td>
                 </tr>
@@ -273,7 +271,6 @@ export default function ImportFromExcelBookingPage() {
                 <th className="border px-4 py-2">E</th>
                 <th className="border px-4 py-2">F</th>
                 <th className="border px-4 py-2">G</th>
-                <th className="border px-4 py-2">H</th>
               </tr>
               <tr>
                 <th className="border px-4 py-2">Sr.No</th>
@@ -281,7 +278,6 @@ export default function ImportFromExcelBookingPage() {
                 <th className="border px-4 py-2">Customer Id*</th>
                 <th className="border px-4 py-2">Chargable Weight</th>
                 <th className="border px-4 py-2">Insurance Amt</th>
-                <th className="border px-4 py-2">FOV Amt</th>
                 <th className="border px-4 py-2">FOV Per</th>
                 <th className="border px-4 py-2">Other charges</th>
               </tr>
@@ -293,7 +289,6 @@ export default function ImportFromExcelBookingPage() {
                 <td className="border px-4 py-2">Test Logistic</td>
                 <td className="border px-4 py-2">1.1</td>
                 <td className="border px-4 py-2">100</td>
-                <td className="border px-4 py-2">0.2</td>
                 <td className="border px-4 py-2">2</td>
                 <td className="border px-4 py-2">50</td>
               </tr>
@@ -395,6 +390,7 @@ export default function ImportFromExcelBookingPage() {
                 <td className="border px-2 py-2">2</td>
                 <td className="border px-2 py-2">400001</td>
                 <td className="border px-2 py-2">30/01/2020</td>
+                <td className="border px-2 py-2"></td>
                 <td className="border px-2 py-2">D</td>
                 <td className="border px-2 py-2">Test Logistic</td>
                 <td className="border px-2 py-2">50</td>

@@ -143,9 +143,23 @@ export const createFranchise = async (req, res) => {
       });
     }
 
-    const [result] = await db.query("INSERT INTO franchises SET ?", [
-      franchiseData,
-    ]);
+    const processedData = { ...franchiseData };
+    
+    if (!processedData.subscription_start_date) {
+      processedData.subscription_start_date = null;
+    }
+    if (!processedData.subscription_end_date) {
+      processedData.subscription_end_date = null;
+    }
+
+    const columns = Object.keys(processedData);
+    const values = Object.values(processedData);
+    const placeholders = columns.map(() => "?").join(", ");
+    
+    const [result] = await db.query(
+      `INSERT INTO franchises (${columns.join(", ")}) VALUES (${placeholders})`,
+      values
+    );
 
     res.status(201).json({
       success: true,
@@ -215,10 +229,24 @@ export const updateFranchise = async (req, res) => {
       }
     }
 
-    await db.query("UPDATE franchises SET ?, updated_at = NOW() WHERE id = ?", [
-      franchiseData,
-      id,
-    ]);
+    const processedData = { ...franchiseData };
+    
+    if (!processedData.subscription_start_date) {
+      processedData.subscription_start_date = null;
+    }
+    if (!processedData.subscription_end_date) {
+      processedData.subscription_end_date = null;
+    }
+
+    const updateColumns = Object.keys(processedData)
+      .map(key => `${key} = ?`)
+      .join(", ");
+    const updateValues = Object.values(processedData);
+    
+    await db.query(
+      `UPDATE franchises SET ${updateColumns}, updated_at = NOW() WHERE id = ?`,
+      [...updateValues, id]
+    );
 
     res.json({
       success: true,
