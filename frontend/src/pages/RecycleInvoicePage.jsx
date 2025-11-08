@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { FileText, RotateCcw } from "lucide-react";
 
 export default function RecycleInvoicePage() {
   const [data, setData] = useState([]);
@@ -70,69 +71,83 @@ export default function RecycleInvoicePage() {
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm">
-      {/* Title */}
-      <h1 className="text-2xl font-semibold text-slate-800 mb-6">
-        Recycle Invoice
-      </h1>
-
-      {/* Records Per Page and Search */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-2">
-          <select
-            value={recordsPerPage}
-            onChange={(e) => {
-              setRecordsPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span className="text-sm text-slate-600">records per page</span>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8 bg-gradient-to-r from-amber-600 to-amber-700 rounded-lg p-8 text-white">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              <div className="bg-amber-500 rounded-lg p-3">
+                <FileText className="w-8 h-8" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold mb-2">Recycled Invoices</h1>
+                <p className="text-amber-100">View and restore deleted invoices</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700">Search:</label>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Invoice No or Customer ID"
-            className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-      </div>
+        {/* Main Content */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
 
-      {/* Table */}
-      <div className="overflow-x-auto border border-slate-200 rounded-lg mb-4">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100 border-b border-slate-200">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                Sr.No
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                Invoice No
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                Customer_Id
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                Invoice Date
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                Net Amount
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                Action
-              </th>
-            </tr>
-          </thead>
+        {/* Records Per Page and Search */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
+            <select
+              value={recordsPerPage}
+              onChange={(e) => {
+                setRecordsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span className="text-sm text-slate-600">records per page</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-slate-700">Search:</label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Invoice No or Customer ID"
+              className="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+            />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto border border-slate-200 rounded-lg mb-4">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-slate-900 border-b border-slate-700">
+                <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
+                  Sr.No
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
+                  Invoice No
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
+                  Customer ID
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
+                  Invoice Date
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
+                  Net Amount
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
+                  Action
+                </th>
+              </tr>
+            </thead>
           <tbody>
             {loading ? (
               <tr>
@@ -156,28 +171,29 @@ export default function RecycleInvoicePage() {
               data.map((row, index) => (
                 <tr
                   key={row.id}
-                  className="border-b border-slate-100 hover:bg-slate-50"
+                  className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                 >
-                  <td className="px-4 py-3 text-sm text-slate-700">
+                  <td className="px-6 py-4 text-sm text-slate-700">
                     {(currentPage - 1) * recordsPerPage + index + 1}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
+                  <td className="px-6 py-4 text-sm text-slate-700">
                     {row.invoice_number}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
+                  <td className="px-6 py-4 text-sm text-slate-700">
                     {row.customer_id}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
+                  <td className="px-6 py-4 text-sm text-slate-700">
                     {new Date(row.invoice_date).toLocaleDateString("en-IN")}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">
-                    {Number(row.net_amount).toLocaleString("en-IN")}
+                  <td className="px-6 py-4 text-sm text-slate-700">
+                    ₹{Number(row.net_amount).toLocaleString("en-IN")}
                   </td>
-                  <td className="px-4 py-3 text-sm">
+                  <td className="px-6 py-4 text-sm">
                     <button
                       onClick={() => handleRestore(row.id)}
-                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs font-medium"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-all text-sm font-medium shadow-md hover:shadow-lg"
                     >
+                      <RotateCcw className="w-4 h-4" />
                       Restore
                     </button>
                   </td>
@@ -188,32 +204,34 @@ export default function RecycleInvoicePage() {
         </table>
       </div>
 
-      {/* Pagination Info */}
-      <div className="flex justify-between items-center">
-        <div className="text-sm text-slate-600">
-          Showing{" "}
-          {data.length === 0 ? 0 : (currentPage - 1) * recordsPerPage + 1} to{" "}
-          {Math.min(currentPage * recordsPerPage, pagination.total)} of{" "}
-          {pagination.total} entries
-        </div>
+        {/* Pagination Info */}
+        <div className="flex justify-between items-center border-t border-slate-200 pt-4">
+          <div className="text-sm text-slate-600">
+            Showing{" "}
+            {data.length === 0 ? 0 : (currentPage - 1) * recordsPerPage + 1} to{" "}
+            {Math.min(currentPage * recordsPerPage, pagination.total)} of{" "}
+            {pagination.total} entries
+          </div>
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 border border-slate-300 rounded-md text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            ← Previous
-          </button>
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(pagination.pages, prev + 1))
-            }
-            disabled={currentPage === pagination.pages || data.length === 0}
-            className="px-4 py-2 border border-slate-300 rounded-md text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next →
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              ← Previous
+            </button>
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(pagination.pages, prev + 1))
+              }
+              disabled={currentPage === pagination.pages || data.length === 0}
+              className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
         </div>
       </div>
     </div>

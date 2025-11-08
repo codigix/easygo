@@ -16,6 +16,7 @@ import cashcounterRoutes from "./cashcounterRoutes.js";
 import settingsRoutes from "./settingsRoutes.js";
 import chatbotRoutes from "./chatbotRoutes.js";
 import courierCompanyRatesRoutes from "./courierCompanyRatesRoutes.js";
+import companyRateRoutes from "./companyRateRoutes.js";
 
 const router = express.Router();
 
@@ -28,6 +29,7 @@ router.use("/invoices", invoiceRoutes);
 router.use("/payments", paymentRoutes);
 router.use("/rates", rateMasterRoutes);
 router.use("/rates/courier", courierCompanyRatesRoutes);
+router.use("/company-rates", companyRateRoutes);
 router.use("/stationary", stationaryRoutes);
 router.use("/tracking", trackingRoutes);
 router.use("/expenses", expenseRoutes);

@@ -1,4 +1,10 @@
 import { getDb } from "../config/database.js";
+import { calculateBookingRate } from "../services/rateCalculationService.js";
+import {
+  getCompanyDefaults,
+  calculateCompanyCharges,
+} from "../services/companyService.js";
+import { validateBookingCalculations } from "../services/calculationValidationService.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -9,7 +15,15 @@ const upload = multer({ dest: "uploads/temp/" });
 export const getAllBookings = async (req, res) => {
   try {
     const franchiseId = req.user.franchise_id;
-    const { page = 1, limit = 20, status, search } = req.query;
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      search,
+      unbilledOnly,
+      customerId,
+      consignmentNo,
+    } = req.query;
     const offset = (page - 1) * limit;
 
     const db = getDb();
@@ -26,6 +40,20 @@ export const getAllBookings = async (req, res) => {
         " AND (consignment_number LIKE ? OR customer_id LIKE ? OR receiver LIKE ?)";
       const searchTerm = `%${search}%`;
       params.push(searchTerm, searchTerm, searchTerm);
+    }
+
+    if (unbilledOnly === "true") {
+      whereClause += " AND invoice_id IS NULL";
+    }
+
+    if (customerId) {
+      whereClause += " AND customer_id = ?";
+      params.push(customerId);
+    }
+
+    if (consignmentNo) {
+      whereClause += " AND LOWER(consignment_number) = LOWER(?)";
+      params.push(consignmentNo);
     }
 
     // Get total count
@@ -188,11 +216,69 @@ export const createBooking = async (req, res) => {
       });
     }
 
-    // Calculate total (can be enhanced with rate master calculations)
-    const calculatedAmount = amount || 0;
-    const calculatedOtherCharges = other_charges || 0;
+    // FIX #1: Fetch company defaults from company_rate_master
+    const companyDefaults = await getCompanyDefaults(franchiseId, customer_id);
+
+    // Step 1: Calculate rate from RateMaster
+    // Required: from_pincode, to_pincode, service_type (mode), weight, quantity
+    let rateCalculation = null;
+    let calculatedAmount = parseFloat(amount || 0);
+    let calculatedTax = 0;
+    let calculatedFuel = 0;
+    let gstPercent = 18;
+    let fuelPercent = 0;
+
+    // If amount is not provided, calculate from RateMaster
+    if (!amount || parseFloat(amount) === 0) {
+      // Try to calculate using rate master if we have required fields
+      if (char_wt) {
+        try {
+          rateCalculation = await calculateBookingRate(
+            franchiseId,
+            null, // from_pincode - may need to fetch from customer or use franchise default
+            pincode, // to_pincode
+            mode === "AR" ? "Air" : mode === "SR" ? "Surface" : mode, // service_type
+            parseFloat(char_wt),
+            parseInt(qty),
+            parseFloat(other_charges || 0)
+          );
+
+          if (rateCalculation) {
+            calculatedAmount = rateCalculation.lineAmount;
+            calculatedTax = rateCalculation.taxAmount;
+            calculatedFuel = rateCalculation.fuelAmount;
+            gstPercent = rateCalculation.gstPercent;
+            fuelPercent = rateCalculation.fuelPercent;
+          }
+        } catch (error) {
+          console.warn("Rate calculation skipped:", error.message);
+          // Fall back to using provided amount if calculation fails
+          calculatedAmount = parseFloat(amount || 0);
+        }
+      }
+    } else {
+      // If amount is provided, apply default tax calculations
+      calculatedTax = (parseFloat(calculatedAmount) * gstPercent) / 100;
+      calculatedFuel = (parseFloat(calculatedAmount) * fuelPercent) / 100;
+    }
+
+    // FIX #1: Apply company-specific charges (fuel surcharge, royalty, insurance, etc.)
+    const companyCharges = calculateCompanyCharges(
+      calculatedAmount,
+      companyDefaults,
+      char_wt
+    );
+
+    const userOtherCharges = parseFloat(other_charges || 0);
+    const calculatedOtherCharges = parseFloat(
+      (userOtherCharges + companyCharges.totalCompanyCharges).toFixed(2)
+    );
+
     const calculatedTotal =
-      parseFloat(calculatedAmount) + parseFloat(calculatedOtherCharges);
+      parseFloat(calculatedAmount) +
+      parseFloat(calculatedTax) +
+      parseFloat(calculatedFuel) +
+      parseFloat(calculatedOtherCharges);
 
     const bookingData = {
       franchise_id: franchiseId,
@@ -208,23 +294,44 @@ export const createBooking = async (req, res) => {
       char_wt,
       qty,
       type: type || "D",
-      amount: calculatedAmount,
-      other_charges: calculatedOtherCharges,
+      amount: parseFloat(calculatedAmount.toFixed(2)),
+      tax_amount: parseFloat(calculatedTax.toFixed(2)), // Calculated GST
+      fuel_amount: parseFloat(calculatedFuel.toFixed(2)), // Calculated Fuel Surcharge
+      other_charges: parseFloat(calculatedOtherCharges.toFixed(2)),
       reference: reference || null,
       dtdc_amt: dtdc_amt || 0,
       insurance: 0,
       percentage: 0,
       risk_surcharge: 0,
       bill_amount: 0,
-      total: calculatedTotal,
+      total: parseFloat(calculatedTotal.toFixed(2)),
       destination: null,
       status: "Booked",
       remarks: null,
+      gst_percent: gstPercent,
+      fuel_percent: fuelPercent,
     };
 
     const [result] = await db.query("INSERT INTO bookings SET ?", [
       bookingData,
     ]);
+
+    // FIX #3: Validate booking calculations
+    try {
+      const bookingForValidation = {
+        id: result.insertId,
+        amount: bookingData.amount,
+        tax_amount: bookingData.tax_amount,
+        fuel_amount: bookingData.fuel_amount,
+        other_charges: bookingData.other_charges,
+        total: bookingData.total,
+      };
+      validateBookingCalculations(bookingForValidation);
+    } catch (validationError) {
+      console.error("Booking validation error:", validationError.message);
+      // Log but don't fail - the booking is already created
+      // In production, you might want to flag this for review
+    }
 
     // Create initial tracking entry
     await db.query("INSERT INTO tracking SET ?", {
@@ -689,23 +796,78 @@ export const importFromExcel = async (req, res) => {
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    // Read with date formatting enabled
+    const data = XLSX.utils.sheet_to_json(worksheet, {
+      raw: false, // Don't use raw numbers for dates
+      defval: "",
+    });
+
+    console.log("=== IMPORT DEBUG ===");
+    console.log("Format:", format);
+    console.log("Total rows read:", data.length);
+    if (data.length > 0) {
+      console.log("Available columns:", Object.keys(data[0]));
+      console.log("First row data:", data[0]);
+      console.log("First row JSON:", JSON.stringify(data[0]));
+    }
 
     let imported = 0;
     const importedRows = [];
     const db = getDb();
 
+    // Helper function to format Excel dates properly
+    const formatDate = (dateValue) => {
+      if (!dateValue) return null;
+
+      // If it's already a string in expected format, return it
+      if (
+        typeof dateValue === "string" &&
+        /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateValue)
+      ) {
+        return dateValue;
+      }
+
+      // If it's a date object
+      if (dateValue instanceof Date) {
+        const day = String(dateValue.getDate()).padStart(2, "0");
+        const month = String(dateValue.getMonth() + 1).padStart(2, "0");
+        const year = dateValue.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+
+      // Try to parse as string
+      if (typeof dateValue === "string") {
+        try {
+          const date = new Date(dateValue);
+          if (!isNaN(date.getTime())) {
+            const day = String(date.getDate()).padStart(2, "0");
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+          }
+        } catch (e) {
+          console.log("Date parse error:", e);
+        }
+      }
+
+      return dateValue;
+    };
+
     // Format 1: Consignment No, Customer Id
     if (format === "1") {
-      for (const row of data) {
-        if (row["Consignment No"] && row["Customer Id"]) {
+      console.log("Format 1 - Processing", data.length, "rows");
+      for (let idx = 0; idx < data.length; idx++) {
+        const row = data[idx];
+
+        if (row["Consignment No*"] && row["Customer Id*"]) {
           try {
             await db.query(
               "INSERT INTO bookings (franchise_id, consignment_number, customer_id, booking_date, pincode, char_wt, qty) VALUES (?, ?, ?, ?, ?, ?, ?)",
               [
                 franchiseId,
-                row["Consignment No"],
-                row["Customer Id"],
+                row["Consignment No*"],
+                row["Customer Id*"],
                 new Date().toISOString().split("T")[0],
                 "000000",
                 0,
@@ -714,29 +876,37 @@ export const importFromExcel = async (req, res) => {
             );
             imported++;
             importedRows.push({
-              "Consignment No": row["Consignment No"],
-              "Customer Id": row["Customer Id"],
+              "Consignment No": row["Consignment No*"],
+              "Customer Id": row["Customer Id*"],
               "Booking Date": new Date().toISOString().split("T")[0],
               Status: "Imported",
             });
           } catch (err) {
             console.error("Error importing row:", err);
           }
+        } else {
+          console.log(`Format 1 - Row ${idx} validation failed:`, {
+            consignmentNo: row["Consignment No*"],
+            customerId: row["Customer Id*"],
+          });
         }
       }
     }
 
     // Format 2: Extended format with weights and charges
     if (format === "2") {
-      for (const row of data) {
-        if (row["Consignment No"] && row["Customer Id"]) {
+      console.log("Format 2 - Processing", data.length, "rows");
+      for (let idx = 0; idx < data.length; idx++) {
+        const row = data[idx];
+
+        if (row["Consignment No*"] && row["Customer Id*"]) {
           try {
             await db.query(
               "INSERT INTO bookings (franchise_id, consignment_number, customer_id, char_wt, insurance, percentage, other_charges, booking_date, pincode, qty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
               [
                 franchiseId,
-                row["Consignment No"],
-                row["Customer Id"],
+                row["Consignment No*"],
+                row["Customer Id*"],
                 row["Chargable Weight"] || 0,
                 row["Insurance Amt"] || 0,
                 row["FOV Per"] || 0,
@@ -748,8 +918,8 @@ export const importFromExcel = async (req, res) => {
             );
             imported++;
             importedRows.push({
-              "Consignment No": row["Consignment No"],
-              "Customer Id": row["Customer Id"],
+              "Consignment No": row["Consignment No*"],
+              "Customer Id": row["Customer Id*"],
               "Chargable Weight": row["Chargable Weight"] || 0,
               "Insurance Amt": row["Insurance Amt"] || 0,
               "FOV Per": row["FOV Per"] || 0,
@@ -759,33 +929,54 @@ export const importFromExcel = async (req, res) => {
           } catch (err) {
             console.error("Error importing row:", err);
           }
+        } else {
+          console.log(`Format 2 - Row ${idx} validation failed:`, {
+            consignmentNo: row["Consignment No*"],
+            customerId: row["Customer Id*"],
+          });
         }
       }
     }
 
     // Format 3: Complete format
     if (format === "3") {
-      for (const row of data) {
+      console.log("Format 3 - Total rows in Excel:", data.length);
+      console.log("First row sample:", data[0]);
+
+      for (let idx = 0; idx < data.length; idx++) {
+        const row = data[idx];
+        console.log(`Processing row ${idx}:`, row);
+
+        // Skip header rows or empty rows
+        if (!row["Consignment No*"]) {
+          console.log(`Skipping row ${idx} - no consignment number`);
+          continue;
+        }
+
+        // Format the booking date
+        const formattedDate = formatDate(row["Booking Date*"]);
+
         if (
-          row["Consignment No"] &&
-          row["Customer Id"] &&
-          row["Pincode"] &&
-          row["Booking Date"]
+          row["Consignment No*"] &&
+          row["Customer Id*"] &&
+          row["Pincode*"] &&
+          formattedDate
         ) {
           try {
+            console.log(`Importing row ${idx}`);
             await db.query(
               "INSERT INTO bookings (franchise_id, consignment_number, customer_id, char_wt, mode, address, qty, pincode, booking_date, type, other_charges, receiver, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
               [
                 franchiseId,
-                row["Consignment No"],
-                row["Customer Id"],
+                row["Consignment No*"],
+                row["Customer Id*"],
                 row["Chargable Weight"] || 0,
-                row["Mode"] || "AR",
+                row["Mode*"] || "AR",
                 row["Company Address"] || "",
-                row["Quantity"] || 1,
-                row["Pincode"],
-                row["Booking Date"],
-                row["Type or N"] || "D",
+                row["Quantity*"] || 1,
+                row["Pincode*"],
+                formattedDate,
+                row["Type or N*"] || "D",
                 row["Other Charges"] || 0,
                 row["Receiver"] || "",
                 row["Amount (Optional)"] || 0,
@@ -793,14 +984,14 @@ export const importFromExcel = async (req, res) => {
             );
             imported++;
             importedRows.push({
-              "Consignment No": row["Consignment No"],
-              "Customer Id": row["Customer Id"],
+              "Consignment No": row["Consignment No*"],
+              "Customer Id": row["Customer Id*"],
               "Chargable Weight": row["Chargable Weight"] || 0,
-              Mode: row["Mode"] || "AR",
-              Quantity: row["Quantity"] || 1,
-              Pincode: row["Pincode"],
-              "Booking Date": row["Booking Date"],
-              Type: row["Type or N"] || "D",
+              Mode: row["Mode*"] || "AR",
+              Quantity: row["Quantity*"] || 1,
+              Pincode: row["Pincode*"],
+              "Booking Date": formattedDate,
+              Type: row["Type or N*"] || "D",
               "Other Charges": row["Other Charges"] || 0,
               Receiver: row["Receiver"] || "",
               Amount: row["Amount (Optional)"] || 0,
@@ -809,6 +1000,14 @@ export const importFromExcel = async (req, res) => {
           } catch (err) {
             console.error("Error importing row:", err);
           }
+        } else {
+          console.log(`Row ${idx} validation failed. Has:`, {
+            consignmentNo: !!row["Consignment No*"],
+            customerId: !!row["Customer Id*"],
+            pincode: !!row["Pincode*"],
+            bookingDate: !!formattedDate,
+            rawBookingDate: row["Booking Date*"],
+          });
         }
       }
     }
@@ -841,37 +1040,36 @@ export const downloadTemplate = async (req, res) => {
     let data = [];
     if (format === "1") {
       data = [
-        ["Consignment No*", "Customer Id*"],
+        ["Consignment No", "Customer Id"],
         ["TT2300345", "Test Logistic"],
       ];
     } else if (format === "2") {
       data = [
         [
           "Sr.No",
-          "Consignment No*",
-          "Customer Id*",
+          "Consignment No",
+          "Customer Id",
           "Chargable Weight",
           "Insurance Amt",
-          "FOV Amt",
           "FOV Per",
           "Other charges",
         ],
-        [1, "TT2380345", "Test Logistic", 1.1, 100, 0.2, 2, 50],
+        [1, "TT2380345", "Test Logistic", 1.1, 100, 2, 50],
       ];
     } else if (format === "3") {
       data = [
         [
           "Sr.No",
-          "Consignment No*",
+          "Consignment No",
           "Chargable Weight",
-          "Mode*",
+          "Mode",
           "Company Address",
-          "Quantity*",
-          "Pincode*",
-          "Booking Date*",
+          "Quantity",
+          "Pincode",
+          "Booking Date",
           "Or Gt Amt or Cv",
-          "Type or N*",
-          "Customer Id*",
+          "Type or N",
+          "Customer Id",
           "Other Charges",
           "Receiver",
           "Amount (Optional)",
@@ -944,7 +1142,7 @@ export const getRecycledConsignments = async (req, res) => {
 
     // Get recycled consignments
     const [consignments] = await db.query(
-      `SELECT id, consignment_number, customer_id, booking_date, total_amount as amount
+      `SELECT id, consignment_number, customer_id, booking_date, amount
        FROM bookings ${whereClause}
        ORDER BY booking_date DESC
        LIMIT ? OFFSET ?`,

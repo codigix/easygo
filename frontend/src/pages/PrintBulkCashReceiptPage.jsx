@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { Printer, ArrowRight } from "lucide-react";
 
 export default function PrintBulkCashReceiptPage() {
   const [loading, setLoading] = useState(false);
@@ -51,52 +52,78 @@ export default function PrintBulkCashReceiptPage() {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-800">
-          Print Bulk Cash Receipt
-        </h1>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 max-w-2xl">
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              From Consignment No
-            </label>
-            <input
-              type="text"
-              name="from_consignment"
-              value={formData.from_consignment}
-              onChange={handleInputChange}
-              placeholder="Enter From Consignment Number"
-              className="w-full px-4 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-2xl">
+        <div className="rounded-lg bg-white shadow-sm overflow-hidden">
+          {/* Header */}
+          <div className="border-b border-slate-200 bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-8">
+            <div className="flex items-center gap-4">
+              <div className="rounded-lg bg-blue-600 p-3">
+                <Printer className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-slate-900">
+                  Print Bulk Receipt
+                </h1>
+                <p className="mt-1 text-sm text-slate-600">
+                  Print receipts for a range of consignments
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              To Consignment No
-            </label>
-            <input
-              type="text"
-              name="to_consignment"
-              value={formData.to_consignment}
-              onChange={handleInputChange}
-              placeholder="Enter To Consignment Number"
-              className="w-full px-4 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
+          {/* Form */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleDownload();
+            }}
+            className="p-8"
+          >
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">
+                  From Consignment No <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="from_consignment"
+                  value={formData.from_consignment}
+                  onChange={handleInputChange}
+                  placeholder="Enter starting consignment number"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                />
+              </div>
 
-          <div className="flex justify-end">
-            <button
-              onClick={handleDownload}
-              disabled={loading}
-              className="px-8 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-            >
-              {loading ? "Loading..." : "Download"}
-            </button>
-          </div>
+              <div className="flex justify-center">
+                <ArrowRight className="h-5 w-5 text-slate-400" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">
+                  To Consignment No <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="to_consignment"
+                  value={formData.to_consignment}
+                  onChange={handleInputChange}
+                  placeholder="Enter ending consignment number"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                />
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+                >
+                  {loading ? "Processing..." : "Download & Print"}
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

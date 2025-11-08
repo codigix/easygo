@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { CreditCard, DollarSign, FileText, Calendar } from "lucide-react";
 
 export default function AddPaymentsPage() {
   const [formData, setFormData] = useState({
@@ -141,10 +142,20 @@ export default function AddPaymentsPage() {
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-6xl">
         {/* Form Section */}
-        <div className="mb-8 rounded-lg bg-white shadow-sm">
+        <div className="mb-8 rounded-lg bg-white shadow-sm overflow-hidden">
           {/* Header */}
-          <div className="border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4">
-            <h1 className="text-2xl font-bold text-emerald-900">Add Payment</h1>
+          <div className="border-b border-slate-200 bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-8">
+            <div className="flex items-center gap-4">
+              <div className="rounded-lg bg-blue-600 p-3">
+                <CreditCard className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-slate-900">Add Payment</h1>
+                <p className="mt-1 text-sm text-slate-600">
+                  Record a payment for a consignment
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Form */}
@@ -165,7 +176,7 @@ export default function AddPaymentsPage() {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* Consignment No */}
               <div>
-                <label className="block text-sm font-medium text-slate-700">
+                <label className="block text-sm font-semibold text-slate-700 mb-3">
                   Consignment No <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -173,46 +184,49 @@ export default function AddPaymentsPage() {
                   name="consignment_number"
                   value={formData.consignment_number}
                   onChange={handleChange}
-                  placeholder="Enter Consignment No"
-                  className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  placeholder="Enter consignment number"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
                 />
               </div>
 
               {/* Amount */}
               <div>
-                <label className="block text-sm font-medium text-slate-700">
+                <label className="block text-sm font-semibold text-slate-700 mb-3">
                   Amount <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  name="amount"
-                  value={formData.amount}
-                  onChange={handleChange}
-                  placeholder="Enter Amount"
-                  step="0.01"
-                  min="0"
-                  className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                />
+                <div className="relative">
+                  <span className="absolute left-4 top-3.5 text-slate-500 font-medium">₹</span>
+                  <input
+                    type="number"
+                    name="amount"
+                    value={formData.amount}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                    className="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-4 py-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Payment Mode */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">
-                Mode <span className="text-red-500">*</span>
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
+                Payment Mode <span className="text-red-500">*</span>
               </label>
               <div className="flex flex-wrap gap-4">
                 {paymentModes.map((mode) => (
-                  <label key={mode} className="flex items-center">
+                  <label key={mode} className="flex items-center cursor-pointer">
                     <input
                       type="radio"
                       name="payment_mode"
                       value={mode.toLowerCase()}
                       checked={formData.payment_mode === mode.toLowerCase()}
                       onChange={handleChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 text-blue-600"
                     />
-                    <span className="ml-2 text-sm text-slate-700">{mode}</span>
+                    <span className="ml-2 text-sm font-medium text-slate-700">{mode}</span>
                   </label>
                 ))}
               </div>
@@ -220,7 +234,7 @@ export default function AddPaymentsPage() {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
                 Description <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -229,30 +243,34 @@ export default function AddPaymentsPage() {
                 onChange={handleChange}
                 placeholder="Enter payment description"
                 rows="3"
-                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
               />
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-end pt-6">
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-lg bg-blue-600 px-8 py-2 font-medium text-white hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2"
               >
-                {loading ? "Adding..." : "Add"}
+                <CreditCard className="h-4 w-4" />
+                {loading ? "Adding..." : "Add Payment"}
               </button>
             </div>
           </form>
         </div>
 
         {/* Report Section */}
-        <div className="rounded-lg bg-white shadow-sm">
+        <div className="rounded-lg bg-white shadow-sm overflow-hidden">
           {/* Header */}
-          <div className="border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4">
-            <h2 className="text-xl font-bold text-emerald-900">
-              Consignment Report
-            </h2>
+          <div className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-6">
+            <div className="flex items-center gap-3">
+              <FileText className="h-6 w-6 text-slate-700" />
+              <h2 className="text-2xl font-bold text-slate-900">
+                Consignment Report
+              </h2>
+            </div>
           </div>
 
           {/* Search and Controls */}
@@ -301,33 +319,33 @@ export default function AddPaymentsPage() {
               </div>
             ) : (
               <table className="w-full">
-                <thead className="border-b border-slate-200 bg-slate-50">
+                <thead className="border-b border-slate-200 bg-slate-900">
                   <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Consignment No
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Booking Date
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Destination
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Sender Phone
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Sender
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Recipients Pincode
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Charge Total
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Paid Amount
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-slate-700">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Balance Amount
                     </th>
                   </tr>
@@ -408,12 +426,11 @@ export default function AddPaymentsPage() {
           </div>
 
           {/* Total Balance */}
-          <div className="border-t border-slate-200 bg-slate-50 px-6 py-4">
-            <button className="rounded bg-blue-600 px-6 py-2 text-white">
-              Total Balance
-              <span className="ml-2 font-semibold">
-                ₹
-                {consignmentData
+          <div className="border-t border-slate-200 bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-700">Total Balance:</span>
+              <span className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-lg">
+                ₹{consignmentData
                   .reduce(
                     (sum, row) =>
                       sum + ((row.charge_total || 0) - (row.paid_amount || 0)),
@@ -421,7 +438,7 @@ export default function AddPaymentsPage() {
                   )
                   .toFixed(2)}
               </span>
-            </button>
+            </div>
           </div>
         </div>
       </div>

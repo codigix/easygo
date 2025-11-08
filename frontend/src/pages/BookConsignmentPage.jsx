@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Info } from "lucide-react";
+import api from "../services/api";
 
 export default function BookConsignmentPage() {
   const [formData, setFormData] = useState({
@@ -46,18 +47,9 @@ export default function BookConsignmentPage() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await api.post("/bookings", formData);
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         alert("Consignment booked successfully!");
         // Reset form
         setFormData({
@@ -79,11 +71,11 @@ export default function BookConsignmentPage() {
           dtdc_amt: "",
         });
       } else {
-        alert(data.message || "Failed to book consignment");
+        alert(response.data.message || "Failed to book consignment");
       }
     } catch (error) {
       console.error("Error booking consignment:", error);
-      alert("An error occurred while booking consignment");
+      alert(error.response?.data?.message || "An error occurred while booking consignment");
     }
   };
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Printer, Save, RotateCcw, FileText } from "lucide-react";
 
 export default function PrintReceiptPage() {
   const [loading, setLoading] = useState(false);
@@ -230,13 +231,21 @@ export default function PrintReceiptPage() {
   ];
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-800">Print Receipt</h1>
-      </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="mb-8 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg p-8">
+          <div className="flex items-center gap-4">
+            <Printer className="h-8 w-8 text-white" />
+            <div>
+              <h1 className="text-4xl font-bold text-white">Print Receipt</h1>
+              <p className="mt-1 text-blue-100">Create and print cash counter bookings</p>
+            </div>
+          </div>
+        </div>
 
-      {/* Top Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
+        {/* Form Container */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -279,10 +288,11 @@ export default function PrintReceiptPage() {
         </div>
 
         {/* Sender Details */}
-        <div className="mb-6">
-          <h3 className="text-base font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200">
-            Sender Details
-          </h3>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-blue-200">
+            <FileText className="h-5 w-5 text-blue-600" />
+            <h3 className="text-lg font-bold text-slate-900">Sender Details</h3>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -390,10 +400,11 @@ export default function PrintReceiptPage() {
         </div>
 
         {/* Recipient's Details */}
-        <div className="mb-6">
-          <h3 className="text-base font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200">
-            Recipient&apos;s Details
-          </h3>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-green-200">
+            <FileText className="h-5 w-5 text-green-600" />
+            <h3 className="text-lg font-bold text-slate-900">Recipient's Details</h3>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -501,10 +512,11 @@ export default function PrintReceiptPage() {
         </div>
 
         {/* Shipment Type */}
-        <div className="mb-6">
-          <h3 className="text-base font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200">
-            Shipment Type
-          </h3>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-purple-200">
+            <Printer className="h-5 w-5 text-purple-600" />
+            <h3 className="text-lg font-bold text-slate-900">Shipment Details</h3>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -1002,9 +1014,10 @@ export default function PrintReceiptPage() {
 
           {/* Services */}
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h3 className="text-base font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200">
-              Services
-            </h3>
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-amber-200">
+              <Printer className="h-5 w-5 text-amber-600" />
+              <h3 className="text-lg font-bold text-slate-900">Services</h3>
+            </div>
             <div className="space-y-2">
               {services.map((service) => (
                 <div key={service.name} className="flex items-center gap-3">
@@ -1032,28 +1045,33 @@ export default function PrintReceiptPage() {
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-3 mt-6">
-        <button
-          onClick={handleSaveAndPrint}
-          disabled={loading}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Saving..." : "Save and Print"}
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={loading}
-          className="px-6 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Saving..." : "Save"}
-        </button>
-        <button
-          onClick={handleClear}
-          className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-        >
-          Clear
-        </button>
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3 mt-8">
+          <button
+            onClick={handleClear}
+            disabled={loading}
+            className="px-6 py-3 bg-slate-200 text-slate-700 font-medium rounded-lg hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Clear
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium rounded-lg hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
+            {loading ? "Saving..." : "Save"}
+          </button>
+          <button
+            onClick={handleSaveAndPrint}
+            disabled={loading}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+          >
+            <Printer className="h-4 w-4" />
+            {loading ? "Saving..." : "Save & Print"}
+          </button>
+        </div>
       </div>
     </div>
   );

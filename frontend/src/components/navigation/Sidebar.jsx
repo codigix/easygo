@@ -180,7 +180,7 @@ const menuStructure = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ mobile = false }) {
   const location = useLocation();
   const [expandedGroups, setExpandedGroups] = useState({
     Stationary: location.pathname.startsWith("/stationary"),
@@ -226,12 +226,16 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden w-64 flex-col border-r border-emerald-100 bg-white md:flex">
-      <div className="flex h-20 flex-col justify-center bg-gradient-to-r from-emerald-600 to-emerald-500 px-6 text-white">
+    <aside
+      className={`w-64 flex-col border-r border-emerald-100 bg-white flex h-screen ${
+        mobile ? "" : "hidden md:flex"
+      }`}
+    >
+      <div className="flex h-20 flex-col justify-center flex-shrink-0 bg-gradient-to-r from-emerald-600 to-emerald-500 px-6 text-white">
         <span className="text-lg font-semibold tracking-tight">FR-Billing</span>
         <span className="text-xs text-emerald-100">Go Easy...</span>
       </div>
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-3 py-4">
         {menuStructure.map((entry, index) => {
           if (entry.type === "heading") {
             return (

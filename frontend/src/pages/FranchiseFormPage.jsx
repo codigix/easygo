@@ -563,6 +563,32 @@ const FranchiseFormPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium mb-2">
+                    Subscription Start Date
+                  </label>
+                  <input
+                    type="date"
+                    name="subscription_start_date"
+                    value={formData.subscription_start_date || ""}
+                    onChange={handleChange}
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Subscription End Date
+                  </label>
+                  <input
+                    type="date"
+                    name="subscription_end_date"
+                    value={formData.subscription_end_date || ""}
+                    onChange={handleChange}
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
                     GEC Service (Applicable/Not)
                   </label>
                   <div className="flex items-center">

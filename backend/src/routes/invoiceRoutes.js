@@ -7,6 +7,7 @@ import {
   generateInvoice,
   generateMultipleInvoices,
   generateSingleInvoice,
+  generateBulkInvoiceForCustomer,
   generateInvoiceWithoutGST,
   getInvoiceSummary,
   getSingleInvoiceSummary,
@@ -31,6 +32,11 @@ router.get("/:id", authenticate, getInvoiceById);
 router.post("/generate", authenticate, generateInvoice);
 router.post("/generate-multiple", authenticate, generateMultipleInvoices);
 router.post("/generate-single", authenticate, generateSingleInvoice);
+router.post(
+  "/generate-customer-bulk",
+  authenticate,
+  generateBulkInvoiceForCustomer
+);
 router.post("/generate-without-gst", authenticate, generateInvoiceWithoutGST);
 
 // Email routes
