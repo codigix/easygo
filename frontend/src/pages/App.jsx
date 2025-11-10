@@ -67,7 +67,11 @@ function PrivateRoute({ children }) {
     );
   }
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 }
 
 export default function App() {
@@ -85,7 +89,10 @@ export default function App() {
       }
     >
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        <Route 
+          path="/login" 
+          element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} 
+        />
 
         <Route
           path="/"
