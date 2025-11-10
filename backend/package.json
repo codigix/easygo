@@ -10,7 +10,8 @@
     "lint": "eslint ./src",
     "migrate": "knex --knexfile knexfile.cjs migrate:latest",
     "migrate:rollback": "knex --knexfile knexfile.cjs migrate:rollback",
-    "seed": "knex --knexfile knexfile.cjs seed:run"
+    "seed": "knex --knexfile knexfile.cjs seed:run",
+    "setup:demo": "node setup-demo-users.js"
   },
   "engines": {
     "node": ">=18.0.0"
