@@ -1,18 +1,34 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const signupSuccess = localStorage.getItem("signupSuccess");
+    const signupUsername = localStorage.getItem("signupUsername");
+
+    if (signupSuccess === "true") {
+      setSuccess("✅ Account created successfully! Please log in with your credentials.");
+      if (signupUsername) {
+        setUsername(signupUsername);
+      }
+      localStorage.removeItem("signupSuccess");
+      localStorage.removeItem("signupUsername");
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
 
     try {
@@ -41,6 +57,12 @@ export function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          {success && (
+            <div className="rounded-md bg-green-50 p-3 text-sm text-green-600 border border-green-200">
+              {success}
+            </div>
+          )}
+
           {error && (
             <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
               {error}
@@ -98,6 +120,13 @@ export function LoginPage() {
             <p className="mt-1">Username: admin</p>
             <p>Password: password123</p>
           </div>
+
+          <p className="text-center text-sm text-slate-600">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-emerald-600 hover:text-emerald-700 font-medium">
+              Sign up here
+            </Link>
+          </p>
         </form>
       </div>
     </div>

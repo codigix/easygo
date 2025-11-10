@@ -185,6 +185,163 @@ export const getCurrentUser = async (req, res) => {
   }
 };
 
+export const signup = async (req, res) => {
+  try {
+    const {
+      username,
+      email,
+      password,
+      confirmPassword,
+      fullName,
+      phone,
+      franchiseCode,
+      franchiseName,
+      ownerName,
+    } = req.body;
+
+    if (!username || !email || !password || !fullName) {
+      return res.status(400).json({
+        success: false,
+        message: "Username, email, password, and full name are required",
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
+    }
+
+    const db = getDb();
+
+    // Check if username already exists
+    const [existingUsers] = await db.query(
+      "SELECT id FROM users WHERE username = ? LIMIT 1",
+      [username]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Username already exists",
+      });
+    }
+
+    // Check if email already exists
+    const [existingEmails] = await db.query(
+      "SELECT id FROM users WHERE email = ? LIMIT 1",
+      [email]
+    );
+
+    if (existingEmails.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered",
+      });
+    }
+
+    let franchiseId;
+
+    // If franchise code is provided, use existing franchise
+    if (franchiseCode) {
+      const [franchises] = await db.query(
+        "SELECT id FROM franchises WHERE franchise_code = ? LIMIT 1",
+        [franchiseCode]
+      );
+
+      if (franchises.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid franchise code",
+        });
+      }
+
+      franchiseId = franchises[0].id;
+    } else if (franchiseName && ownerName) {
+      // Create new franchise
+      const newFranchiseCode = `FR${Date.now().toString().slice(-6)}`;
+
+      const [franchiseResult] = await db.query(
+        `INSERT INTO franchises (
+          franchise_code, franchise_name, owner_name, email, phone, 
+          status, subscription_status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [newFranchiseCode, franchiseName, ownerName, email, phone || "", "active", "active"]
+      );
+
+      franchiseId = franchiseResult.insertId;
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Either franchise code or franchise details are required",
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    await db.query(
+      `INSERT INTO users (
+        franchise_id, username, email, password, full_name, 
+        phone, role, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [franchiseId, username, email, hashedPassword, fullName, phone || "", "staff", "active"]
+    );
+
+    console.log(`[SIGNUP] ✅ New user registered: ${username} with email: ${email}`);
+
+    // Fetch user with franchise info
+    const [users] = await db.query(
+      `SELECT u.*, f.franchise_code, f.franchise_name, f.subscription_status, f.subscription_end_date
+       FROM users u
+       JOIN franchises f ON u.franchise_id = f.id
+       WHERE u.username = ?`,
+      [username]
+    );
+
+    const user = users[0];
+
+    // Generate JWT token
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        franchiseId: user.franchise_id,
+      },
+      env.jwtSecret,
+      { expiresIn: env.jwtExpiration }
+    );
+
+    // Remove password from response
+    delete user.password;
+
+    res.status(201).json({
+      success: true,
+      message: "Registration successful",
+      data: {
+        token,
+        user,
+      },
+    });
+  } catch (error) {
+    console.error("[SIGNUP] Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Registration failed",
+    });
+  }
+};
+
 export const logout = async (req, res) => {
   res.json({
     success: true,

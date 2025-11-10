@@ -35,6 +35,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signup = async (userData) => {
+    try {
+      const response = await authService.signup(userData);
+      if (response.success) {
+        return { success: true };
+      }
+      return { success: false, message: response.message };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Signup failed",
+      };
+    }
+  };
+
   const logout = async () => {
     await authService.logout();
     setUser(null);
@@ -43,6 +58,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     login,
+    signup,
     logout,
     loading,
     isAuthenticated: !!user,

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { LoginPage } from "./LoginPage.jsx";
+import { SignupPage } from "./SignupPage.jsx";
 import { DashboardLayout } from "../layouts/DashboardLayout.jsx";
 import { DashboardPage } from "./DashboardPage.jsx";
 import FranchiseListPage from "./FranchiseListPage.jsx";
@@ -92,6 +93,10 @@ export default function App() {
         <Route 
           path="/login" 
           element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} 
+        />
+        <Route 
+          path="/signup" 
+          element={isAuthenticated ? <Navigate to="/" replace /> : <SignupPage />} 
         />
 
         <Route

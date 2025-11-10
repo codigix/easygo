@@ -10,6 +10,11 @@ export const authService = {
     return response.data;
   },
 
+  signup: async (userData) => {
+    const response = await api.post("/auth/signup", userData);
+    return response.data;
+  },
+
   logout: async () => {
     try {
       await api.post("/auth/logout");

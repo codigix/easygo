@@ -1,6 +1,7 @@
 import express from "express";
 import {
   login,
+  signup,
   getCurrentUser,
   logout,
 } from "../controllers/authController.js";
@@ -11,6 +12,7 @@ import { getDb } from "../config/database.js";
 const router = express.Router();
 
 router.post("/login", login);
+router.post("/signup", signup);
 router.get("/me", authenticate, getCurrentUser);
 router.post("/logout", authenticate, logout);
 router.post("/change-password", authenticate, changePassword);
