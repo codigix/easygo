@@ -15,15 +15,21 @@ export function LoginPage() {
     setError("");
     setLoading(true);
 
-    const result = await login(username, password);
+    try {
+      const result = await login(username, password);
 
-    if (result.success) {
-      navigate("/");
-    } else {
-      setError(result.message || "Invalid username or password");
+      if (result.success) {
+        setTimeout(() => {
+          navigate("/");
+        }, 100);
+      } else {
+        setError(result.message || "Invalid username or password");
+        setLoading(false);
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
