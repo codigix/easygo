@@ -17,7 +17,7 @@ export const login = async (req, res) => {
     const db = getDb();
 
     // Find user with franchise information
-    const [users] = await db.query(
+    let [users] = await db.query(
       `SELECT u.*, f.franchise_code, f.franchise_name, f.subscription_status, f.subscription_end_date
        FROM users u
        JOIN franchises f ON u.franchise_id = f.id
@@ -25,7 +25,88 @@ export const login = async (req, res) => {
       [username]
     );
 
+    console.log(`[LOGIN] Username: ${username}, Found users: ${users.length}`);
+
+    // Auto-create demo user if not found (only for demo credentials)
+    if (users.length === 0 && username === "admin" && password === "password123") {
+      console.log(`[LOGIN] 🔧 Demo user not found, auto-creating...`);
+      
+      try {
+        // Check if franchise exists
+        const [franchises] = await db.query(
+          "SELECT id FROM franchises WHERE franchise_code = 'FR001' LIMIT 1"
+        );
+        
+        let franchiseId;
+        
+        if (franchises.length === 0) {
+          // Create franchise if doesn't exist
+          const [franchiseResult] = await db.query(
+            `INSERT INTO franchises (
+              franchise_code, franchise_name, owner_name, email, phone, 
+              address, city, state, pincode, gst_number, status, subscription_status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              "FR001",
+              "Demo Franchise",
+              "Demo Owner",
+              "demo@frbilling.com",
+              "+91 9876543210",
+              "123 Demo Street, Mumbai",
+              "Mumbai",
+              "Maharashtra",
+              "400001",
+              "27AAAAA0000A1Z5",
+              "active",
+              "active",
+            ]
+          );
+          franchiseId = franchiseResult.insertId;
+          console.log(`[LOGIN] 📝 Created franchise with ID: ${franchiseId}`);
+        } else {
+          franchiseId = franchises[0].id;
+          console.log(`[LOGIN] ✅ Using existing franchise with ID: ${franchiseId}`);
+        }
+        
+        // Hash the password and create user
+        const hashedPassword = await bcrypt.hash("password123", 10);
+        await db.query(
+          `INSERT INTO users (
+            franchise_id, username, email, password, full_name, 
+            phone, role, status
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            franchiseId,
+            "admin",
+            "admin@frbilling.com",
+            hashedPassword,
+            "Admin User",
+            "+91 9876543210",
+            "admin",
+            "active",
+          ]
+        );
+        console.log(`[LOGIN] ✅ Created demo user: admin`);
+        
+        // Fetch the newly created user
+        [users] = await db.query(
+          `SELECT u.*, f.franchise_code, f.franchise_name, f.subscription_status, f.subscription_end_date
+           FROM users u
+           JOIN franchises f ON u.franchise_id = f.id
+           WHERE u.username = ? AND u.status = 'active'`,
+          [username]
+        );
+      } catch (autoCreateError) {
+        console.error(`[LOGIN] ❌ Failed to auto-create demo user:`, autoCreateError.message);
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials",
+        });
+      }
+    }
+
     if (users.length === 0) {
+      console.log(`[LOGIN] ❌ User not found or inactive: ${username}`);
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
@@ -37,7 +118,10 @@ export const login = async (req, res) => {
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
 
+    console.log(`[LOGIN] Password valid: ${isValidPassword}, User: ${username}`);
+
     if (!isValidPassword) {
+      console.log(`[LOGIN] ❌ Invalid password for user: ${username}`);
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
@@ -63,6 +147,8 @@ export const login = async (req, res) => {
 
     // Remove password from response
     delete user.password;
+
+    console.log(`[LOGIN] ✅ Successful login for user: ${username}`);
 
     res.json({
       success: true,

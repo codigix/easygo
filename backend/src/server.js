@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import { env } from "./config/env.js";
 import { connectDatabase } from "./config/database.js";
 import { initEmailTransporter } from "./config/email.js";
+import { initializeDatabase } from "./utils/initializeDatabase.js";
 import apiRoutes from "./routes/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -37,6 +38,7 @@ app.use((err, req, res, next) => {
 
 const startServer = async () => {
   await connectDatabase();
+  await initializeDatabase();
   initEmailTransporter();
 
   app.listen(env.port, () => {
