@@ -17,6 +17,18 @@ import {
   Key,
   ChevronDown,
   ChevronRight,
+  Truck,
+  Package,
+  Factory,
+  Navigation,
+  MapPinCheck,
+  Zap,
+  Users,
+  Bell,
+  TrendingUp,
+  Link2,
+  Briefcase,
+  HeartHandshake,
 } from "lucide-react";
 
 const menuStructure = [
@@ -70,6 +82,58 @@ const menuStructure = [
   },
   {
     type: "group",
+    label: "Pickup Management",
+    icon: Truck,
+    items: [
+      { to: "/pickup/create", label: "Create Pickup Request" },
+      { to: "/pickup/schedule", label: "Pickup Schedule" },
+      { to: "/pickup/assignment", label: "Pickup Assignment" },
+      { to: "/pickup/status", label: "Pickup Status" },
+    ],
+  },
+  {
+    type: "group",
+    label: "Shipments",
+    icon: Package,
+    items: [
+      { to: "/shipments/create", label: "Create Shipment" },
+      { to: "/shipments/bulk-upload", label: "Bulk Upload" },
+      { to: "/shipments/list", label: "Shipment List" },
+      { to: "/shipments/exceptions", label: "Shipment Exceptions" },
+    ],
+  },
+  {
+    type: "group",
+    label: "Hub Operations",
+    icon: Factory,
+    items: [
+      { to: "/hub/create-manifest", label: "Create Manifest" },
+      { to: "/hub/manifest-list", label: "Manifest List" },
+      { to: "/hub/re-manifest", label: "Re-Manifest / RTO" },
+      { to: "/hub/in-scan", label: "Hub In-Scan" },
+      { to: "/hub/out-scan", label: "Hub Out-Scan" },
+    ],
+  },
+  {
+    type: "group",
+    label: "Delivery",
+    icon: MapPinCheck,
+    items: [
+      { to: "/delivery/assign", label: "Assign Delivery" },
+      { to: "/delivery/out-for-delivery", label: "Out for Delivery" },
+      { to: "/delivery/pod", label: "Proof of Delivery (POD)" },
+      { to: "/delivery/failed-rto", label: "Failed Delivery / RTO" },
+      { to: "/delivery/performance", label: "Delivery Performance" },
+    ],
+  },
+  {
+    type: "item",
+    to: "/tracking",
+    label: "Live Tracking",
+    icon: MapPin,
+  },
+  {
+    type: "group",
     label: "Invoice",
     icon: FileText,
     items: [
@@ -97,10 +161,39 @@ const menuStructure = [
     ],
   },
   {
-    type: "item",
-    to: "/tracking",
-    label: "Tracking Page",
-    icon: MapPin,
+    type: "group",
+    label: "Wallet & Offers",
+    icon: Wallet,
+    items: [
+      { to: "/wallet/customer-wallet", label: "Customer Wallet" },
+      { to: "/wallet/recharge", label: "Wallet Recharge" },
+      { to: "/wallet/coupons", label: "Coupons" },
+      { to: "/wallet/discount-rules", label: "Discount Rules" },
+    ],
+  },
+  {
+    type: "group",
+    label: "CRM & Support",
+    icon: HeartHandshake,
+    items: [
+      { to: "/crm/leads", label: "Leads" },
+      { to: "/crm/customers", label: "Customers" },
+      { to: "/crm/support-tickets", label: "Support Tickets" },
+      { to: "/crm/sla-monitoring", label: "SLA Monitoring" },
+      { to: "/crm/interaction-log", label: "Customer Interaction Log" },
+    ],
+  },
+  {
+    type: "group",
+    label: "HRMS",
+    icon: Users,
+    items: [
+      { to: "/hrms/employees", label: "Employee Master" },
+      { to: "/hrms/attendance", label: "Attendance" },
+      { to: "/hrms/leave", label: "Leave Management" },
+      { to: "/hrms/payroll", label: "Payroll" },
+      { to: "/hrms/roles", label: "Roles & Permissions" },
+    ],
   },
   {
     type: "group",
@@ -159,6 +252,51 @@ const menuStructure = [
   },
   {
     type: "group",
+    label: "Notifications",
+    icon: Bell,
+    items: [
+      { to: "/notifications/sms-templates", label: "SMS Templates" },
+      { to: "/notifications/whatsapp-templates", label: "WhatsApp Templates" },
+      { to: "/notifications/email-templates", label: "Email Templates" },
+      { to: "/notifications/trigger-config", label: "Trigger Configuration" },
+      { to: "/notifications/logs", label: "Notification Logs" },
+    ],
+  },
+  {
+    type: "group",
+    label: "Analytics & AI",
+    icon: TrendingUp,
+    items: [
+      { to: "/analytics/route-optimization", label: "Route Optimization" },
+      { to: "/analytics/demand-forecast", label: "Demand Forecast" },
+      { to: "/analytics/sla-alerts", label: "SLA Risk Alerts" },
+      { to: "/analytics/performance", label: "Performance Insights" },
+    ],
+  },
+  {
+    type: "group",
+    label: "Integrations",
+    icon: Link2,
+    items: [
+      { to: "/integrations/api-keys", label: "API Keys" },
+      { to: "/integrations/partner-apis", label: "Partner APIs" },
+      { to: "/integrations/webhooks", label: "Webhooks" },
+      { to: "/integrations/usage-logs", label: "API Usage Logs" },
+    ],
+  },
+  {
+    type: "group",
+    label: "Fleet & Routes",
+    icon: Navigation,
+    items: [
+      { to: "/fleet/vehicles", label: "Vehicles" },
+      { to: "/fleet/drivers", label: "Drivers" },
+      { to: "/fleet/routes", label: "Route Master" },
+      { to: "/fleet/load-planning", label: "Load Planning" },
+    ],
+  },
+  {
+    type: "group",
     label: "Recycle Bin",
     icon: Trash2,
     items: [
@@ -189,11 +327,22 @@ export function Sidebar({ mobile = false }) {
       (location.pathname.startsWith("/booking") &&
         !location.pathname.startsWith("/booking/recycle")) ||
       location.pathname.startsWith("/cashcounter"),
+    "Pickup Management": location.pathname.startsWith("/pickup"),
+    Shipments: location.pathname.startsWith("/shipments"),
+    "Hub Operations": location.pathname.startsWith("/hub"),
+    Delivery: location.pathname.startsWith("/delivery"),
     Invoice:
       location.pathname.startsWith("/invoices") &&
       !location.pathname.startsWith("/invoices/recycle"),
     Payment: location.pathname.startsWith("/payments"),
+    "Wallet & Offers": location.pathname.startsWith("/wallet"),
+    "CRM & Support": location.pathname.startsWith("/crm"),
+    HRMS: location.pathname.startsWith("/hrms"),
     "Billing Reports": location.pathname.startsWith("/reports"),
+    Notifications: location.pathname.startsWith("/notifications"),
+    "Analytics & AI": location.pathname.startsWith("/analytics"),
+    Integrations: location.pathname.startsWith("/integrations"),
+    "Fleet & Routes": location.pathname.startsWith("/fleet"),
     "Daily Expenses": location.pathname.startsWith("/daily-expenses"),
     "Cashcounter Reports": location.pathname.startsWith("/cashcounter-reports"),
     "Recycle Bin":
@@ -209,9 +358,20 @@ export function Sidebar({ mobile = false }) {
         (location.pathname.startsWith("/booking") &&
           !location.pathname.startsWith("/booking/recycle")) ||
         location.pathname.startsWith("/cashcounter"),
+      "Pickup Management": location.pathname.startsWith("/pickup"),
+      Shipments: location.pathname.startsWith("/shipments"),
+      "Hub Operations": location.pathname.startsWith("/hub"),
+      Delivery: location.pathname.startsWith("/delivery"),
       Invoice:
         location.pathname.startsWith("/invoices") &&
         !location.pathname.startsWith("/invoices/recycle"),
+      "Wallet & Offers": location.pathname.startsWith("/wallet"),
+      "CRM & Support": location.pathname.startsWith("/crm"),
+      HRMS: location.pathname.startsWith("/hrms"),
+      Notifications: location.pathname.startsWith("/notifications"),
+      "Analytics & AI": location.pathname.startsWith("/analytics"),
+      Integrations: location.pathname.startsWith("/integrations"),
+      "Fleet & Routes": location.pathname.startsWith("/fleet"),
       "Recycle Bin":
         location.pathname.startsWith("/booking/recycle") ||
         location.pathname.startsWith("/invoices/recycle"),

@@ -53,6 +53,56 @@ import RecycleConsignmentPage from "./RecycleConsignmentPage.jsx";
 import RecycleInvoicePage from "./RecycleInvoicePage.jsx";
 import SettingsPage from "./SettingsPage.jsx";
 import ChangePasswordPage from "./ChangePasswordPage.jsx";
+import TrackingPage from "./TrackingPage.jsx";
+import PickupCreatePage from "./PickupCreatePage.jsx";
+import PickupSchedulePage from "./PickupSchedulePage.jsx";
+import PickupAssignmentPage from "./PickupAssignmentPage.jsx";
+import PickupStatusPage from "./PickupStatusPage.jsx";
+import ShipmentCreatePage from "./ShipmentCreatePage.jsx";
+import ShipmentBulkUploadPage from "./ShipmentBulkUploadPage.jsx";
+import ShipmentListPage from "./ShipmentListPage.jsx";
+import ShipmentExceptionsPage from "./ShipmentExceptionsPage.jsx";
+import HubCreateManifestPage from "./HubCreateManifestPage.jsx";
+import HubManifestListPage from "./HubManifestListPage.jsx";
+import HubReManifestPage from "./HubReManifestPage.jsx";
+import HubInScanPage from "./HubInScanPage.jsx";
+import HubOutScanPage from "./HubOutScanPage.jsx";
+import DeliveryAssignPage from "./DeliveryAssignPage.jsx";
+import DeliveryOutForDeliveryPage from "./DeliveryOutForDeliveryPage.jsx";
+import DeliveryPODPage from "./DeliveryPODPage.jsx";
+import DeliveryFailedRTOPage from "./DeliveryFailedRTOPage.jsx";
+import DeliveryPerformancePage from "./DeliveryPerformancePage.jsx";
+import WalletCustomerWalletPage from "./WalletCustomerWalletPage.jsx";
+import WalletRechargePage from "./WalletRechargePage.jsx";
+import WalletCouponsPage from "./WalletCouponsPage.jsx";
+import WalletDiscountRulesPage from "./WalletDiscountRulesPage.jsx";
+import CRMLeadsPage from "./CRMLeadsPage.jsx";
+import CRMCustomersPage from "./CRMCustomersPage.jsx";
+import CRMSupportTicketsPage from "./CRMSupportTicketsPage.jsx";
+import CRMSLAMonitoringPage from "./CRMSLAMonitoringPage.jsx";
+import CRMInteractionLogPage from "./CRMInteractionLogPage.jsx";
+import HRMSEmployeesPage from "./HRMSEmployeesPage.jsx";
+import HRMSAttendancePage from "./HRMSAttendancePage.jsx";
+import HRMSLeavePage from "./HRMSLeavePage.jsx";
+import HRMSPayrollPage from "./HRMSPayrollPage.jsx";
+import HRMSRolesPage from "./HRMSRolesPage.jsx";
+import NotificationSMSTemplatesPage from "./NotificationSMSTemplatesPage.jsx";
+import NotificationWhatsAppTemplatesPage from "./NotificationWhatsAppTemplatesPage.jsx";
+import NotificationEmailTemplatesPage from "./NotificationEmailTemplatesPage.jsx";
+import NotificationTriggerConfigPage from "./NotificationTriggerConfigPage.jsx";
+import NotificationLogsPage from "./NotificationLogsPage.jsx";
+import AnalyticsRouteOptimizationPage from "./AnalyticsRouteOptimizationPage.jsx";
+import AnalyticsDemandForecastPage from "./AnalyticsDemandForecastPage.jsx";
+import AnalyticsSLAAlertPage from "./AnalyticsSLAAlertPage.jsx";
+import AnalyticsPerformanceInsightsPage from "./AnalyticsPerformanceInsightsPage.jsx";
+import IntegrationAPIKeysPage from "./IntegrationAPIKeysPage.jsx";
+import IntegrationPartnerAPIsPage from "./IntegrationPartnerAPIsPage.jsx";
+import IntegrationWebhooksPage from "./IntegrationWebhooksPage.jsx";
+import IntegrationAPIUsageLogsPage from "./IntegrationAPIUsageLogsPage.jsx";
+import FleetVehiclesPage from "./FleetVehiclesPage.jsx";
+import FleetDriversPage from "./FleetDriversPage.jsx";
+import FleetRoutesMasterPage from "./FleetRoutesMasterPage.jsx";
+import FleetLoadPlanningPage from "./FleetLoadPlanningPage.jsx";
 
 function PrivateRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -240,6 +290,80 @@ export default function App() {
             path="cashcounter-reports/creditors-report"
             element={<CashCreditorsReportPage />}
           />
+
+          {/* Tracking Route */}
+          <Route path="tracking" element={<TrackingPage />} />
+
+          {/* Pickup Management Routes */}
+          <Route path="pickup/create" element={<PickupCreatePage />} />
+          <Route path="pickup/schedule" element={<PickupSchedulePage />} />
+          <Route path="pickup/assignment" element={<PickupAssignmentPage />} />
+          <Route path="pickup/status" element={<PickupStatusPage />} />
+
+          {/* Shipment Routes */}
+          <Route path="shipments/create" element={<ShipmentCreatePage />} />
+          <Route path="shipments/bulk-upload" element={<ShipmentBulkUploadPage />} />
+          <Route path="shipments/list" element={<ShipmentListPage />} />
+          <Route path="shipments/exceptions" element={<ShipmentExceptionsPage />} />
+
+          {/* Hub Operations Routes */}
+          <Route path="hub/create-manifest" element={<HubCreateManifestPage />} />
+          <Route path="hub/manifest-list" element={<HubManifestListPage />} />
+          <Route path="hub/re-manifest" element={<HubReManifestPage />} />
+          <Route path="hub/in-scan" element={<HubInScanPage />} />
+          <Route path="hub/out-scan" element={<HubOutScanPage />} />
+
+          {/* Delivery Routes */}
+          <Route path="delivery/assign" element={<DeliveryAssignPage />} />
+          <Route path="delivery/out-for-delivery" element={<DeliveryOutForDeliveryPage />} />
+          <Route path="delivery/pod" element={<DeliveryPODPage />} />
+          <Route path="delivery/failed-rto" element={<DeliveryFailedRTOPage />} />
+          <Route path="delivery/performance" element={<DeliveryPerformancePage />} />
+
+          {/* Wallet & Offers Routes */}
+          <Route path="wallet/customer-wallet" element={<WalletCustomerWalletPage />} />
+          <Route path="wallet/recharge" element={<WalletRechargePage />} />
+          <Route path="wallet/coupons" element={<WalletCouponsPage />} />
+          <Route path="wallet/discount-rules" element={<WalletDiscountRulesPage />} />
+
+          {/* CRM & Support Routes */}
+          <Route path="crm/leads" element={<CRMLeadsPage />} />
+          <Route path="crm/customers" element={<CRMCustomersPage />} />
+          <Route path="crm/support-tickets" element={<CRMSupportTicketsPage />} />
+          <Route path="crm/sla-monitoring" element={<CRMSLAMonitoringPage />} />
+          <Route path="crm/interaction-log" element={<CRMInteractionLogPage />} />
+
+          {/* HRMS Routes */}
+          <Route path="hrms/employees" element={<HRMSEmployeesPage />} />
+          <Route path="hrms/attendance" element={<HRMSAttendancePage />} />
+          <Route path="hrms/leave" element={<HRMSLeavePage />} />
+          <Route path="hrms/payroll" element={<HRMSPayrollPage />} />
+          <Route path="hrms/roles" element={<HRMSRolesPage />} />
+
+          {/* Notifications Routes */}
+          <Route path="notifications/sms-templates" element={<NotificationSMSTemplatesPage />} />
+          <Route path="notifications/whatsapp-templates" element={<NotificationWhatsAppTemplatesPage />} />
+          <Route path="notifications/email-templates" element={<NotificationEmailTemplatesPage />} />
+          <Route path="notifications/trigger-config" element={<NotificationTriggerConfigPage />} />
+          <Route path="notifications/logs" element={<NotificationLogsPage />} />
+
+          {/* Analytics & AI Routes */}
+          <Route path="analytics/route-optimization" element={<AnalyticsRouteOptimizationPage />} />
+          <Route path="analytics/demand-forecast" element={<AnalyticsDemandForecastPage />} />
+          <Route path="analytics/sla-alerts" element={<AnalyticsSLAAlertPage />} />
+          <Route path="analytics/performance" element={<AnalyticsPerformanceInsightsPage />} />
+
+          {/* Integrations Routes */}
+          <Route path="integrations/api-keys" element={<IntegrationAPIKeysPage />} />
+          <Route path="integrations/partner-apis" element={<IntegrationPartnerAPIsPage />} />
+          <Route path="integrations/webhooks" element={<IntegrationWebhooksPage />} />
+          <Route path="integrations/usage-logs" element={<IntegrationAPIUsageLogsPage />} />
+
+          {/* Fleet & Routes */}
+          <Route path="fleet/vehicles" element={<FleetVehiclesPage />} />
+          <Route path="fleet/drivers" element={<FleetDriversPage />} />
+          <Route path="fleet/routes" element={<FleetRoutesMasterPage />} />
+          <Route path="fleet/load-planning" element={<FleetLoadPlanningPage />} />
 
           {/* Settings Route */}
           <Route path="settings" element={<SettingsPage />} />
