@@ -9,7 +9,7 @@ const statusColors = {
   REMANIFESTED: "bg-purple-100 text-purple-700",
 };
 
-export default function HubManifestListPage() {
+export default function ManifestListPage() {
   const [manifests, setManifests] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);

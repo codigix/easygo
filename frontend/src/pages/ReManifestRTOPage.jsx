@@ -19,11 +19,20 @@ const statusColors = {
   RESOLVED: "bg-purple-100 text-purple-700",
 };
 
-export default function HubReManifestPage() {
+const hubOptions = [
+  { id: 1, name: "Pune Hub" },
+  { id: 2, name: "Mumbai Hub" },
+  { id: 3, name: "Delhi Hub" },
+  { id: 4, name: "Bangalore Hub" },
+];
+
+export default function ReManifestRTOPage() {
   const [activeTab, setActiveTab] = useState("rto");
   const [formData, setFormData] = useState({
     shipment_ids: [],
     rto_reason: "DELIVERY_FAILED",
+    origin_hub_id: "",
+    return_destination_hub_id: "",
     notes: "",
   });
 
@@ -48,7 +57,7 @@ export default function HubReManifestPage() {
     setLoading(true);
     try {
       const response = await shipmentService.getShipments(1, 100, {
-        status: "OUT_FOR_DELIVERY",
+        status: "DELIVERY_FAILED",
       });
       setShipments(response.data.shipments || []);
     } catch (err) {
@@ -96,11 +105,23 @@ export default function HubReManifestPage() {
       return;
     }
 
+    if (!formData.origin_hub_id) {
+      setError("Please select the origin hub");
+      return;
+    }
+
+    if (!formData.return_destination_hub_id) {
+      setError("Please select the return destination hub");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await hubOperationsService.initiateRTO({
         shipment_ids: Array.from(selectedShipments),
         rto_reason: formData.rto_reason,
+        origin_hub_id: parseInt(formData.origin_hub_id),
+        return_destination_hub_id: parseInt(formData.return_destination_hub_id),
         notes: formData.notes || null,
       });
 
@@ -111,6 +132,8 @@ export default function HubReManifestPage() {
       setFormData({
         shipment_ids: [],
         rto_reason: "DELIVERY_FAILED",
+        origin_hub_id: "",
+        return_destination_hub_id: "",
         notes: "",
       });
       fetchShipments();
@@ -214,6 +237,54 @@ export default function HubReManifestPage() {
                 </select>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Origin Hub *
+                  </label>
+                  <select
+                    value={formData.origin_hub_id}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        origin_hub_id: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="">Select hub</option>
+                    {hubOptions.map((hub) => (
+                      <option key={hub.id} value={hub.id}>
+                        {hub.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Return Destination Hub *
+                  </label>
+                  <select
+                    value={formData.return_destination_hub_id}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        return_destination_hub_id: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="">Select hub</option>
+                    {hubOptions.map((hub) => (
+                      <option key={hub.id} value={hub.id}>
+                        {hub.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
                   Notes (Optional)
@@ -235,7 +306,7 @@ export default function HubReManifestPage() {
               {shipments.length > 0 && (
                 <div className="space-y-3">
                   <p className="text-sm text-slate-600">
-                    Out for Delivery Shipments: {selectedShipments.size} selected
+                    Delivery Failed Shipments: {selectedShipments.size} selected
                   </p>
                   <div className="max-h-64 overflow-y-auto border border-slate-200 rounded-lg">
                     <div className="space-y-2 p-3">
@@ -262,14 +333,6 @@ export default function HubReManifestPage() {
                       ))}
                     </div>
                   </div>
-                </div>
-              )}
-
-              {shipments.length === 0 && !loading && (
-                <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
-                  <p className="text-sm text-yellow-800">
-                    No out-for-delivery shipments found. Create some shipments and update their status to OUT_FOR_DELIVERY to initiate RTO.
-                  </p>
                 </div>
               )}
 

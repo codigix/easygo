@@ -3,7 +3,7 @@ import { shipmentService } from "../services/shipmentService";
 import { hubOperationsService } from "../services/hubOperationsService";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
-export default function HubCreateManifestPage() {
+export default function CreateManifestPage() {
   const [formData, setFormData] = useState({
     courier_company_id: "",
     origin_hub_id: "",

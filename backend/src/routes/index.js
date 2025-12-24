@@ -18,6 +18,9 @@ import chatbotRoutes from "./chatbotRoutes.js";
 import courierCompanyRatesRoutes from "./courierCompanyRatesRoutes.js";
 import companyRateRoutes from "./companyRateRoutes.js";
 import pickupRoutes from "./pickupRoutes.js";
+import shipmentRoutes from "./shipmentRoutes.js";
+import hubOperationsRoutes from "./hubOperationsRoutes.js";
+import deliveryRoutes from "./deliveryRoutes.js";
 
 const router = express.Router();
 
@@ -27,6 +30,9 @@ router.use("/dashboard", dashboardRoutes);
 router.use("/franchises", franchiseRoutes);
 router.use("/bookings", bookingRoutes);
 router.use("/pickups", pickupRoutes);
+router.use("/shipments", shipmentRoutes);
+router.use("/hub-operations", hubOperationsRoutes);
+router.use("/delivery", deliveryRoutes);
 router.use("/invoices", invoiceRoutes);
 router.use("/payments", paymentRoutes);
 router.use("/rates", rateMasterRoutes);

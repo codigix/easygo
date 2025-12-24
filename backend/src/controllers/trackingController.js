@@ -1,4 +1,5 @@
 import { getDb } from "../config/database.js";
+import { getShipmentLiveLocation, getShipmentTrackingDetails } from "../services/trackingService.js";
 
 export const getTrackingByBooking = async (req, res) => {
   try {
@@ -71,6 +72,38 @@ export const getTrackingByConsignment = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Failed to fetch tracking history" });
+  }
+};
+
+export const getShipmentTrackingHandler = async (req, res) => {
+  try {
+    const franchiseId = req.user.franchise_id;
+    const { consignment } = req.params;
+    const data = await getShipmentTrackingDetails(franchiseId, consignment);
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error("Shipment tracking detail error:", error);
+    const statusCode = error.code === "NOT_FOUND" ? 404 : 500;
+    res.status(statusCode).json({
+      success: false,
+      message: error.code === "NOT_FOUND" ? "Shipment not found" : "Failed to fetch tracking details",
+    });
+  }
+};
+
+export const getShipmentLiveHandler = async (req, res) => {
+  try {
+    const franchiseId = req.user.franchise_id;
+    const { consignment } = req.params;
+    const data = await getShipmentLiveLocation(franchiseId, consignment);
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error("Shipment live tracking error:", error);
+    const statusCode = error.code === "NOT_FOUND" ? 404 : 500;
+    res.status(statusCode).json({
+      success: false,
+      message: error.code === "NOT_FOUND" ? "Shipment not found" : "Failed to fetch live tracking",
+    });
   }
 };
 
