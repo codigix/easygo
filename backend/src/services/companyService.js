@@ -21,30 +21,14 @@ export const getCompanyDefaults = async (franchiseId, customerId) => {
       [franchiseId, customerId]
     );
 
-    // Return company data or sensible defaults
-    return (
-      company || {
-        fuel_surcharge_percent: 0,
-        royalty_charges_percent: 0,
-        topay_charge: 0,
-        cod_charge: 0,
-        insurance_percent: 0,
-        gst_no: null,
-        company_address: null,
-      }
-    );
+    if (!company) {
+      return null;
+    }
+
+    return company;
   } catch (error) {
     console.error("Error fetching company defaults:", error);
-    // Return defaults on error for graceful degradation
-    return {
-      fuel_surcharge_percent: 0,
-      royalty_charges_percent: 0,
-      topay_charge: 0,
-      cod_charge: 0,
-      insurance_percent: 0,
-      gst_no: null,
-      company_address: null,
-    };
+    throw error;
   }
 };
 
@@ -58,22 +42,23 @@ export const calculateCompanyCharges = (
   chargeableWeight
 ) => {
   const amount = parseFloat(baseAmount || 0);
+  const defaults =
+    companyDefaults || {
+      fuel_surcharge_percent: 0,
+      royalty_charges_percent: 0,
+      topay_charge: 0,
+      cod_charge: 0,
+      insurance_percent: 0,
+    };
 
-  // Fuel surcharge calculation
   const fuelSurcharge =
-    (amount * (parseFloat(companyDefaults.fuel_surcharge_percent) || 0)) / 100;
-
-  // Royalty charges calculation (usually percentage-based on base amount)
+    (amount * (parseFloat(defaults.fuel_surcharge_percent) || 0)) / 100;
   const royaltyCharges =
-    (amount * (parseFloat(companyDefaults.royalty_charges_percent) || 0)) / 100;
-
-  // Insurance calculation (usually percentage-based, optional)
+    (amount * (parseFloat(defaults.royalty_charges_percent) || 0)) / 100;
   const insuranceCharges =
-    (amount * (parseFloat(companyDefaults.insurance_percent) || 0)) / 100;
-
-  // Fixed charges
-  const toPayCharge = parseFloat(companyDefaults.topay_charge || 0);
-  const codCharge = parseFloat(companyDefaults.cod_charge || 0);
+    (amount * (parseFloat(defaults.insurance_percent) || 0)) / 100;
+  const toPayCharge = parseFloat(defaults.topay_charge || 0);
+  const codCharge = parseFloat(defaults.cod_charge || 0);
 
   return {
     fuelSurcharge: parseFloat(fuelSurcharge.toFixed(2)),

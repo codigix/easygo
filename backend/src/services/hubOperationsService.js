@@ -1,4 +1,5 @@
 import { getDb } from "../config/database.js";
+import { creditWallet } from "./walletService.js";
 
 const generateManifestNumber = async (franchiseId) => {
   const date = new Date();
@@ -12,6 +13,27 @@ const generateRTOManifestNumber = async (franchiseId) => {
   const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");
   const randomStr = Math.random().toString(36).substr(2, 6).toUpperCase();
   return `RTO-${franchiseId}-${dateStr}-${randomStr}`;
+};
+
+const insertStatusLogs = async (conn, franchiseId, userId, logs = []) => {
+  if (!logs.length) {
+    return;
+  }
+  await conn.query(
+    `INSERT INTO shipment_status_logs (shipment_id, franchise_id, from_status, to_status, reason, updated_by, notes)
+     VALUES ?`,
+    [
+      logs.map((log) => [
+        log.shipment_id,
+        franchiseId,
+        log.from_status,
+        log.to_status,
+        log.reason || null,
+        userId || null,
+        log.notes || null,
+      ]),
+    ]
+  );
 };
 
 export const validateManifestCreation = (data) => {
@@ -76,6 +98,7 @@ export const createManifest = async (data, franchiseId) => {
     );
 
     const manifestId = manifestResult.insertId;
+    const statusLogs = [];
 
     for (const shipment of shipments) {
       await conn.query(
@@ -85,10 +108,19 @@ export const createManifest = async (data, franchiseId) => {
       );
 
       await conn.query(
-        `UPDATE shipments SET status = 'MANIFESTED', updated_at = ? WHERE id = ?`,
+        `UPDATE shipments SET status = 'MANIFESTED', sub_status = NULL, updated_at = ? WHERE id = ?`,
         [now, shipment.id]
       );
+
+      statusLogs.push({
+        shipment_id: shipment.id,
+        from_status: "CREATED",
+        to_status: "MANIFESTED",
+        reason: "Manifest created",
+      });
     }
+
+    await insertStatusLogs(conn, franchiseId, null, statusLogs);
 
     await conn.commit();
 
@@ -241,7 +273,7 @@ export const hubInScan = async (data, franchiseId) => {
     );
 
     await conn.query(
-      `UPDATE shipments SET status = 'HUB_IN_SCAN', updated_at = ? WHERE id = ?`,
+      `UPDATE shipments SET status = 'HUB_IN_SCAN', sub_status = NULL, updated_at = ? WHERE id = ?`,
       [now, shipment.id]
     );
 
@@ -254,6 +286,16 @@ export const hubInScan = async (data, franchiseId) => {
        updated_at = ?`,
       [shipment.id, franchiseId, hub_id, now, now, now, hub_id, now, now]
     );
+
+    await insertStatusLogs(conn, franchiseId, scanned_by || null, [
+      {
+        shipment_id: shipment.id,
+        from_status: shipment.status,
+        to_status: "HUB_IN_SCAN",
+        reason: "Hub in-scan",
+        notes: `Hub ${hub_id}`,
+      },
+    ]);
 
     await conn.commit();
 
@@ -274,7 +316,7 @@ export const hubInScan = async (data, franchiseId) => {
 
 export const hubOutScan = async (data, franchiseId) => {
   const db = getDb();
-  const { shipment_cn, hub_id, next_hub_id, route_code = null, vehicle_id = null } = data;
+  const { shipment_cn, hub_id, next_hub_id, route_code = null, vehicle_id = null, scanned_by = null } = data;
 
   const [shipments] = await db.query(
     `SELECT s.* FROM shipments s WHERE s.shipment_cn = ? AND s.franchise_id = ?`,
@@ -319,13 +361,13 @@ export const hubOutScan = async (data, franchiseId) => {
       `INSERT INTO hub_scans 
        (shipment_id, franchise_id, hub_id, scan_type, status, scanned_by, scan_time, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [shipment.id, franchiseId, hub_id, "OUT_SCAN", "SCANNED", data.scanned_by, now, now, now]
+      [shipment.id, franchiseId, hub_id, "OUT_SCAN", "SCANNED", scanned_by, now, now, now]
     );
 
-    const nextStatus = next_hub_id ? "IN_TRANSIT" : "OUT_FOR_DELIVERY";
+    const nextStatus = next_hub_id ? "IN_TRANSIT" : "HUB_OUT_SCAN";
 
     await conn.query(
-      `UPDATE shipments SET status = ?, updated_at = ? WHERE id = ?`,
+      `UPDATE shipments SET status = ?, sub_status = NULL, updated_at = ? WHERE id = ?`,
       [nextStatus, now, shipment.id]
     );
 
@@ -335,6 +377,16 @@ export const hubOutScan = async (data, franchiseId) => {
        WHERE shipment_id = ?`,
       [now, next_hub_id || null, route_code, vehicle_id, now, shipment.id]
     );
+
+    await insertStatusLogs(conn, franchiseId, scanned_by || null, [
+      {
+        shipment_id: shipment.id,
+        from_status: shipment.status,
+        to_status: nextStatus,
+        reason: "Hub out-scan",
+        notes: next_hub_id ? `Next hub ${next_hub_id}` : "Last mile",
+      },
+    ]);
 
     await conn.commit();
 
@@ -418,9 +470,10 @@ export const remanifest = async (data, franchiseId) => {
       );
 
       await conn.query(
-        `UPDATE manifest_shipments SET status = 'REMOVED' 
+        `UPDATE manifest_shipments
+         SET status = 'REMANIFESTED', updated_at = ?
          WHERE manifest_id = ? AND shipment_id = ?`,
-        [manifest_id, shipmentId]
+        [now, manifest_id, shipmentId]
       );
     }
 
@@ -471,6 +524,7 @@ export const initiateRTO = async (data, franchiseId) => {
 
   const [shipments] = await db.query(
     `SELECT s.id, s.shipment_cn, s.sender_pincode, s.receiver_pincode, s.status,
+            s.customer_id, s.payment_source, s.wallet_debit,
             ms.manifest_id, m.origin_hub_id,
             sht.current_hub_id, latest_scan.hub_id as last_scan_hub_id
      FROM shipments s 
@@ -536,12 +590,30 @@ export const initiateRTO = async (data, franchiseId) => {
       ]
     );
 
+    const statusLogs = [];
+
     for (const shipment of shipments) {
       await conn.query(
-        `UPDATE shipments SET status = 'RTO', updated_at = ? WHERE id = ?`,
+        `UPDATE shipments SET status = 'RTO', sub_status = 'IN_TRANSIT', updated_at = ? WHERE id = ?`,
         [now, shipment.id]
       );
+      const walletDebit = Number(Number(shipment.wallet_debit || 0).toFixed(2));
+      const refundAmount = shipment.payment_source === "WALLET" ? walletDebit : 0;
+      await conn.query(
+        `INSERT INTO rto_manifest_shipments 
+           (rto_manifest_id, shipment_id, refund_amount, wallet_debit_snapshot, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, 'PENDING', ?, ?)`,
+        [rtoResult.insertId, shipment.id, refundAmount, walletDebit, now, now]
+      );
+      statusLogs.push({
+        shipment_id: shipment.id,
+        from_status: shipment.status,
+        to_status: "RTO",
+        reason: "RTO initiated",
+      });
     }
+
+    await insertStatusLogs(conn, franchiseId, null, statusLogs);
 
     await conn.commit();
 
@@ -579,21 +651,132 @@ export const getRTOManifests = async (franchiseId, filters = {}) => {
 
 export const completeRTO = async (rtoId, franchiseId) => {
   const db = getDb();
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
 
-  const [rtos] = await db.query(
-    `SELECT * FROM rto_manifests WHERE id = ? AND franchise_id = ?`,
-    [rtoId, franchiseId]
-  );
+    const [[manifest]] = await conn.query(
+      `SELECT * FROM rto_manifests WHERE id = ? AND franchise_id = ? FOR UPDATE`,
+      [rtoId, franchiseId]
+    );
 
-  if (rtos.length === 0) {
-    throw new Error("RTO manifest not found");
+    if (!manifest) {
+      throw new Error("RTO manifest not found");
+    }
+
+    const [rtoShipments] = await conn.query(
+      `SELECT rms.id as rms_id, rms.refund_amount, rms.status as rms_status, rms.refund_wallet_transaction_id,
+              s.id as shipment_id, s.shipment_cn, s.customer_id, s.payment_source, s.wallet_debit,
+              s.wallet_refund_transaction_id
+       FROM rto_manifest_shipments rms
+       JOIN shipments s ON s.id = rms.shipment_id
+       WHERE rms.rto_manifest_id = ?
+       FOR UPDATE`,
+      [rtoId]
+    );
+
+    const shipmentIds = Array.from(new Set(rtoShipments.map((record) => record.shipment_id)));
+
+    let refundsIssued = 0;
+    let alreadyRefunded = 0;
+    let skipped = 0;
+
+    for (const record of rtoShipments) {
+      if (record.rms_status === "REFUNDED") {
+        alreadyRefunded += 1;
+        continue;
+      }
+      if (record.rms_status === "SKIPPED") {
+        skipped += 1;
+        continue;
+      }
+      const refundAmount = Number(record.refund_amount || 0);
+      const eligible =
+        refundAmount > 0 &&
+        record.payment_source === "WALLET" &&
+        record.customer_id &&
+        !record.wallet_refund_transaction_id;
+
+      if (!eligible) {
+        const now = new Date();
+        await conn.query(
+          `UPDATE rto_manifest_shipments SET status = 'SKIPPED', updated_at = ? WHERE id = ?`,
+          [now, record.rms_id]
+        );
+        skipped += 1;
+        continue;
+      }
+
+      const processedAt = new Date();
+      const creditResult = await creditWallet({
+        franchiseId,
+        customerId: record.customer_id,
+        amount: refundAmount,
+        source: "RTO_REFUND",
+        referenceId: record.shipment_cn,
+        metadata: { shipment_id: record.shipment_id, rto_manifest_id: rtoId },
+        connection: conn,
+      });
+
+      await conn.query(
+        `UPDATE shipments
+           SET wallet_refund_amount = ?, wallet_refund_transaction_id = ?, wallet_refund_processed_at = ?
+         WHERE id = ?`,
+        [refundAmount, creditResult.transaction_id, processedAt, record.shipment_id]
+      );
+
+      await conn.query(
+        `UPDATE rto_manifest_shipments
+           SET status = 'REFUNDED', refund_wallet_transaction_id = ?, updated_at = ?
+         WHERE id = ?`,
+        [creditResult.transaction_id, processedAt, record.rms_id]
+      );
+
+      refundsIssued += 1;
+    }
+
+    if (shipmentIds.length) {
+      const statusUpdateTime = new Date();
+      await conn.query(
+        `UPDATE shipments SET status = 'RTO', sub_status = 'RETURNED', updated_at = ? WHERE id IN (?)`,
+        [statusUpdateTime, shipmentIds]
+      );
+      await insertStatusLogs(
+        conn,
+        franchiseId,
+        null,
+        shipmentIds.map((id) => ({
+          shipment_id: id,
+          from_status: "RTO",
+          to_status: "RTO",
+          reason: "RTO returned",
+          notes: "Sub-status RETURNED",
+        }))
+      );
+    }
+
+    const now = new Date();
+    await conn.query(
+      `UPDATE rto_manifests SET status = 'RETURNED', returned_at = ?, updated_at = ? WHERE id = ?`,
+      [now, now, rtoId]
+    );
+
+    await conn.commit();
+
+    return {
+      rto_manifest_id: rtoId,
+      status: "RETURNED",
+      refunds: {
+        total: rtoShipments.length,
+        issued: refundsIssued,
+        already_refunded: alreadyRefunded,
+        skipped,
+      },
+    };
+  } catch (error) {
+    await conn.rollback();
+    throw error;
+  } finally {
+    conn.release();
   }
-
-  const now = new Date();
-  await db.query(
-    `UPDATE rto_manifests SET status = 'RETURNED', returned_at = ?, updated_at = ? WHERE id = ?`,
-    [now, now, rtoId]
-  );
-
-  return { success: true };
 };

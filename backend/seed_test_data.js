@@ -96,7 +96,7 @@ async function seedTestData() {
       );
 
       await db.query(
-        `UPDATE shipments SET status = 'MANIFESTED', updated_at = ? WHERE id = ?`,
+        `UPDATE shipments SET status = 'MANIFESTED', sub_status = NULL, updated_at = ? WHERE id = ?`,
         [now, shipmentId]
       );
     }

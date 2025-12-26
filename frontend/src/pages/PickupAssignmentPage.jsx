@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { pickupService } from "../services/pickupService";
+import { fleetService } from "../services/fleetService";
 import { AlertCircle, CheckCircle, User, Truck, MapPin } from "lucide-react";
 
 export default function PickupAssignmentPage() {
@@ -15,16 +16,14 @@ export default function PickupAssignmentPage() {
     routeArea: "",
     expectedPickupTime: "",
   });
-
-  const mockDrivers = [
-    { name: "Ramesh Kumar", vehicle: "MH12-AB-1234" },
-    { name: "Suresh Singh", vehicle: "MH12-CD-5678" },
-    { name: "Ajay Patel", vehicle: "MH12-EF-9012" },
-    { name: "Vishal Sharma", vehicle: "MH12-GH-3456" },
-  ];
+  const [drivers, setDrivers] = useState([]);
+  const [driverVehicles, setDriverVehicles] = useState({});
+  const [driversLoading, setDriversLoading] = useState(false);
+  const [selectedDriverId, setSelectedDriverId] = useState(null);
 
   useEffect(() => {
     fetchPickups();
+    fetchDrivers();
   }, []);
 
   const fetchPickups = async () => {
@@ -42,8 +41,33 @@ export default function PickupAssignmentPage() {
     }
   };
 
+  const fetchDrivers = async () => {
+    setDriversLoading(true);
+    try {
+      const [driversResponse, vehiclesResponse] = await Promise.all([
+        fleetService.getDrivers(),
+        fleetService.getVehicles(),
+      ]);
+      const driverList = driversResponse?.success ? driversResponse.data || [] : [];
+      const vehicleList = vehiclesResponse?.success
+        ? vehiclesResponse.data?.vehicles || vehiclesResponse.data || []
+        : [];
+      const vehicleMap = {};
+      vehicleList.forEach((vehicle) => {
+        vehicleMap[vehicle.id] = vehicle;
+      });
+      setDrivers(driverList);
+      setDriverVehicles(vehicleMap);
+    } catch (err) {
+      setError((prev) => prev || "Failed to load drivers");
+    } finally {
+      setDriversLoading(false);
+    }
+  };
+
   const handleAssignClick = (pickup) => {
     setSelectedPickup(pickup);
+    setSelectedDriverId(null);
     setAssignmentData({
       driverName: "",
       vehicleNo: "",
@@ -52,11 +76,25 @@ export default function PickupAssignmentPage() {
     });
   };
 
+  const resolveVehicleNumber = (driver) => {
+    if (!driver) {
+      return "";
+    }
+    if (driver.assigned_vehicle_id && driverVehicles[driver.assigned_vehicle_id]) {
+      return driverVehicles[driver.assigned_vehicle_id].vehicle_number || "";
+    }
+    return "";
+  };
+
+  const availableDrivers = drivers.filter((driver) => driver.status === "AVAILABLE");
+
   const handleDriverSelect = (driver) => {
+    const vehicleNumber = resolveVehicleNumber(driver);
+    setSelectedDriverId(driver.id);
     setAssignmentData((prev) => ({
       ...prev,
       driverName: driver.name,
-      vehicleNo: driver.vehicle,
+      vehicleNo: vehicleNumber,
     }));
   };
 
@@ -237,25 +275,64 @@ export default function PickupAssignmentPage() {
                   Select Driver *
                 </label>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  {mockDrivers.map((driver) => (
-                    <button
-                      key={driver.name}
-                      onClick={() => handleDriverSelect(driver)}
-                      className={`rounded-lg border-2 p-4 text-left transition ${
-                        assignmentData.driverName === driver.name
-                          ? "border-emerald-500 bg-emerald-50"
-                          : "border-slate-200 hover:border-emerald-300 bg-white"
-                      }`}
-                    >
-                      <p className="font-medium text-slate-900">{driver.name}</p>
-                      <p className="text-xs text-slate-600">{driver.vehicle}</p>
-                    </button>
-                  ))}
+                  {driversLoading ? (
+                    <div className="col-span-full flex items-center justify-center rounded-lg border border-dashed border-slate-200 p-6 text-sm text-slate-600">
+                      <div className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent"></div>
+                      Loading drivers...
+                    </div>
+                  ) : availableDrivers.length === 0 ? (
+                    <div className="col-span-full rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-600">
+                      No available drivers. Update availability in Fleet & Routes → Drivers.
+                    </div>
+                  ) : (
+                    availableDrivers.map((driver) => {
+                      const vehicleNumber = resolveVehicleNumber(driver);
+                      return (
+                        <button
+                          key={driver.id}
+                          onClick={() => handleDriverSelect(driver)}
+                          className={`rounded-lg border-2 p-4 text-left transition ${
+                            selectedDriverId === driver.id
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-slate-200 hover:border-emerald-300 bg-white"
+                          }`}
+                        >
+                          <p className="font-medium text-slate-900">{driver.name}</p>
+                          <p className="text-xs text-slate-600">{driver.phone}</p>
+                          <div className="mt-2 flex flex-col text-[11px] text-slate-500">
+                            <span className="flex items-center gap-1">
+                              <Truck className="h-3 w-3" /> {vehicleNumber || "Assign vehicle"}
+                            </span>
+                            <span>Hub: {driver.current_hub || "Not set"}</span>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
               {assignmentData.driverName && (
                 <>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      <Truck className="inline mr-2 h-4 w-4" />
+                      Vehicle Number
+                    </label>
+                    <input
+                      type="text"
+                      value={assignmentData.vehicleNo}
+                      onChange={(e) =>
+                        setAssignmentData((prev) => ({
+                          ...prev,
+                          vehicleNo: e.target.value,
+                        }))
+                      }
+                      placeholder="e.g., MH14-JK-9217"
+                      className="w-full rounded border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       <MapPin className="inline mr-2 h-4 w-4" />
@@ -294,7 +371,7 @@ export default function PickupAssignmentPage() {
 
                   <div className="rounded-lg bg-amber-50 p-3">
                     <p className="text-xs text-amber-700">
-                      <strong>Note:</strong> Driver {assignmentData.driverName} will be assigned vehicle {assignmentData.vehicleNo}. They will receive a notification about this pickup.
+                      <strong>Note:</strong> Driver {assignmentData.driverName} will be assigned vehicle {assignmentData.vehicleNo || "TBD"}. They will receive a notification about this pickup.
                     </p>
                   </div>
                 </>

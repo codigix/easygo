@@ -23,12 +23,7 @@ import {
   Navigation,
   MapPinCheck,
   Zap,
-  Users,
-  Bell,
-  TrendingUp,
-  Link2,
   Briefcase,
-  HeartHandshake,
 } from "lucide-react";
 
 const menuStructure = [
@@ -173,30 +168,6 @@ const menuStructure = [
   },
   {
     type: "group",
-    label: "CRM & Support",
-    icon: HeartHandshake,
-    items: [
-      { to: "/crm/leads", label: "Leads" },
-      { to: "/crm/customers", label: "Customers" },
-      { to: "/crm/support-tickets", label: "Support Tickets" },
-      { to: "/crm/sla-monitoring", label: "SLA Monitoring" },
-      { to: "/crm/interaction-log", label: "Customer Interaction Log" },
-    ],
-  },
-  {
-    type: "group",
-    label: "HRMS",
-    icon: Users,
-    items: [
-      { to: "/hrms/employees", label: "Employee Master" },
-      { to: "/hrms/attendance", label: "Attendance" },
-      { to: "/hrms/leave", label: "Leave Management" },
-      { to: "/hrms/payroll", label: "Payroll" },
-      { to: "/hrms/roles", label: "Roles & Permissions" },
-    ],
-  },
-  {
-    type: "group",
     label: "Billing Reports",
     icon: BarChart3,
     items: [
@@ -252,40 +223,6 @@ const menuStructure = [
   },
   {
     type: "group",
-    label: "Notifications",
-    icon: Bell,
-    items: [
-      { to: "/notifications/sms-templates", label: "SMS Templates" },
-      { to: "/notifications/whatsapp-templates", label: "WhatsApp Templates" },
-      { to: "/notifications/email-templates", label: "Email Templates" },
-      { to: "/notifications/trigger-config", label: "Trigger Configuration" },
-      { to: "/notifications/logs", label: "Notification Logs" },
-    ],
-  },
-  {
-    type: "group",
-    label: "Analytics & AI",
-    icon: TrendingUp,
-    items: [
-      { to: "/analytics/route-optimization", label: "Route Optimization" },
-      { to: "/analytics/demand-forecast", label: "Demand Forecast" },
-      { to: "/analytics/sla-alerts", label: "SLA Risk Alerts" },
-      { to: "/analytics/performance", label: "Performance Insights" },
-    ],
-  },
-  {
-    type: "group",
-    label: "Integrations",
-    icon: Link2,
-    items: [
-      { to: "/integrations/api-keys", label: "API Keys" },
-      { to: "/integrations/partner-apis", label: "Partner APIs" },
-      { to: "/integrations/webhooks", label: "Webhooks" },
-      { to: "/integrations/usage-logs", label: "API Usage Logs" },
-    ],
-  },
-  {
-    type: "group",
     label: "Fleet & Routes",
     icon: Navigation,
     items: [
@@ -336,12 +273,7 @@ export function Sidebar({ mobile = false }) {
       !location.pathname.startsWith("/invoices/recycle"),
     Payment: location.pathname.startsWith("/payments"),
     "Wallet & Offers": location.pathname.startsWith("/wallet"),
-    "CRM & Support": location.pathname.startsWith("/crm"),
-    HRMS: location.pathname.startsWith("/hrms"),
     "Billing Reports": location.pathname.startsWith("/reports"),
-    Notifications: location.pathname.startsWith("/notifications"),
-    "Analytics & AI": location.pathname.startsWith("/analytics"),
-    Integrations: location.pathname.startsWith("/integrations"),
     "Fleet & Routes": location.pathname.startsWith("/fleet"),
     "Daily Expenses": location.pathname.startsWith("/daily-expenses"),
     "Cashcounter Reports": location.pathname.startsWith("/cashcounter-reports"),
@@ -366,11 +298,6 @@ export function Sidebar({ mobile = false }) {
         location.pathname.startsWith("/invoices") &&
         !location.pathname.startsWith("/invoices/recycle"),
       "Wallet & Offers": location.pathname.startsWith("/wallet"),
-      "CRM & Support": location.pathname.startsWith("/crm"),
-      HRMS: location.pathname.startsWith("/hrms"),
-      Notifications: location.pathname.startsWith("/notifications"),
-      "Analytics & AI": location.pathname.startsWith("/analytics"),
-      Integrations: location.pathname.startsWith("/integrations"),
       "Fleet & Routes": location.pathname.startsWith("/fleet"),
       "Recycle Bin":
         location.pathname.startsWith("/booking/recycle") ||

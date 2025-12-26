@@ -219,6 +219,13 @@ export const createBooking = async (req, res) => {
     // FIX #1: Fetch company defaults from company_rate_master
     const companyDefaults = await getCompanyDefaults(franchiseId, customer_id);
 
+    if (!companyDefaults) {
+      return res.status(400).json({
+        success: false,
+        message: `Company ID "${customer_id}" is not configured for your franchise. Add it in Rate Master before creating a booking.`,
+      });
+    }
+
     // Step 1: Calculate rate from RateMaster
     // Required: from_pincode, to_pincode, service_type (mode), weight, quantity
     let rateCalculation = null;

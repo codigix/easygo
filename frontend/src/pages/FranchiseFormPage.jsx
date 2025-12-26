@@ -84,13 +84,20 @@ const FranchiseFormPage = () => {
   const fetchFranchise = async () => {
     try {
       const response = await api.get(`/franchises/${id}`);
-      const franchise = response.data.data;
-      setFormData(franchise);
-      setUploadUrls({
-        logo_url: franchise.logo_url,
-        stamp_url: franchise.stamp_url,
-        qr_code_url: franchise.qr_code_url,
-      });
+      const { franchise } = response.data.data;
+      if (!franchise) return;
+      setFormData((prev) => ({
+        ...prev,
+        ...franchise,
+        subscription_start_date: franchise.subscription_start_date || "",
+        subscription_end_date: franchise.subscription_end_date || "",
+      }));
+      setUploadUrls((prev) => ({
+        ...prev,
+        logo_url: franchise.logo_url || null,
+        stamp_url: franchise.stamp_url || null,
+        qr_code_url: franchise.qr_code_url || null,
+      }));
     } catch (error) {
       console.error("Error fetching franchise:", error);
       alert("Failed to load franchise data");

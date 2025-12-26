@@ -30,6 +30,7 @@ const {
   SMTP_PORT = "",
   SMTP_EMAIL = "",
   SMTP_PASSWORD = "",
+  WALLET_WEBHOOK_SECRET = "wallet-webhook-secret",
 } = process.env;
 
 // Debug logging for SMTP
@@ -58,4 +59,5 @@ export const env = {
     email: SMTP_EMAIL,
     password: SMTP_PASSWORD,
   },
+  walletWebhookSecret: WALLET_WEBHOOK_SECRET,
 };

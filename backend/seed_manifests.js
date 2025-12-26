@@ -58,7 +58,7 @@ async function seedManifests() {
         [manifestId, shipment.id, franchiseId, now, now]
       );
 
-      await db.query(`UPDATE shipments SET status = 'MANIFESTED', updated_at = ? WHERE id = ?`, [
+      await db.query(`UPDATE shipments SET status = 'MANIFESTED', sub_status = NULL, updated_at = ? WHERE id = ?`, [
         now,
         shipment.id,
       ]);

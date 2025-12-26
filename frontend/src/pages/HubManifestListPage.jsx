@@ -6,7 +6,7 @@ const statusColors = {
   OPEN: "bg-blue-100 text-blue-700",
   CLOSED: "bg-gray-100 text-gray-700",
   PICKUP_ASSIGNED: "bg-orange-100 text-orange-700",
-  REMANIFESTED: "bg-purple-100 text-purple-700",
+  CANCELLED: "bg-rose-100 text-rose-700",
 };
 
 export default function HubManifestListPage() {
@@ -140,7 +140,7 @@ export default function HubManifestListPage() {
             <option value="OPEN">Open</option>
             <option value="CLOSED">Closed</option>
             <option value="PICKUP_ASSIGNED">Pickup Assigned</option>
-            <option value="REMANIFESTED">Remanifested</option>
+            <option value="CANCELLED">Cancelled</option>
           </select>
         </div>
 

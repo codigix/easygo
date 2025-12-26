@@ -278,11 +278,12 @@ export const completeRTOHandler = async (req, res) => {
     const franchiseId = req.user.franchise_id;
     const { id } = req.params;
 
-    await completeRTO(parseInt(id), franchiseId);
+    const result = await completeRTO(parseInt(id), franchiseId);
 
     res.json({
       success: true,
       message: "RTO completed successfully",
+      data: result,
     });
   } catch (error) {
     console.error("Complete RTO error:", error);

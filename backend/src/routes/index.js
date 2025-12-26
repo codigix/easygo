@@ -21,6 +21,8 @@ import pickupRoutes from "./pickupRoutes.js";
 import shipmentRoutes from "./shipmentRoutes.js";
 import hubOperationsRoutes from "./hubOperationsRoutes.js";
 import deliveryRoutes from "./deliveryRoutes.js";
+import walletRoutes from "./walletRoutes.js";
+import fleetRoutes from "./fleetRoutes.js";
 
 const router = express.Router();
 
@@ -47,6 +49,8 @@ router.use("/reports", reportsRoutes);
 router.use("/cashcounter", cashcounterRoutes);
 router.use("/settings", settingsRoutes);
 router.use("/chatbot", chatbotRoutes);
+router.use("/wallet", walletRoutes);
+router.use("/fleet", fleetRoutes);
 
 // Health check
 router.get("/health", (req, res) => {

@@ -176,7 +176,7 @@ export const assignShipmentsToDelivery = async (payload, franchiseId, userId) =>
     const now = new Date();
 
     await conn.query(
-      `UPDATE shipments SET status = 'OUT_FOR_DELIVERY', updated_at = ? WHERE id IN (?)`,
+      `UPDATE shipments SET status = 'OUT_FOR_DELIVERY', sub_status = NULL, updated_at = ? WHERE id IN (?)`,
       [now, shipment_ids]
     );
 
@@ -390,7 +390,7 @@ export const completeDeliveryAssignment = async (
     );
 
     await conn.query(
-      `UPDATE shipments SET status = 'DELIVERED', delivered_at = ?, updated_at = ? WHERE id = ?`,
+      `UPDATE shipments SET status = 'DELIVERED', sub_status = NULL, delivered_at = ?, updated_at = ? WHERE id = ?`,
       [now, now, assignment.shipment_id]
     );
 
@@ -479,7 +479,7 @@ export const failDeliveryAssignment = async (
 
     if (!initiate_rto) {
       await conn.query(
-        `UPDATE shipments SET status = 'IN_TRANSIT', updated_at = ? WHERE id = ?`,
+        `UPDATE shipments SET status = 'IN_TRANSIT', sub_status = NULL, updated_at = ? WHERE id = ?`,
         [now, assignment.shipment_id]
       );
 
