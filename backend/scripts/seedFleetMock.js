@@ -39,6 +39,41 @@ const futureDate = (days) => {
   return date.toISOString().slice(0, 10);
 };
 
+const args = process.argv.slice(2);
+const flags = args.reduce((acc, arg) => {
+  if (!arg.startsWith("--")) {
+    return acc;
+  }
+  const [key, value] = arg.slice(2).split("=");
+  acc[key] = value ?? true;
+  return acc;
+}, {});
+
+const requestedFranchiseId = flags["franchise-id"] ? Number(flags["franchise-id"]) : null;
+const requestedFranchiseCode = flags["franchise-code"] || flags["fr_code"] || null;
+
+const resolveFranchise = async (db) => {
+  if (Number.isFinite(requestedFranchiseId)) {
+    const [[match]] = await db.query("SELECT id, franchise_code FROM franchises WHERE id = ?", [requestedFranchiseId]);
+    if (!match) {
+      throw new Error(`Franchise id ${requestedFranchiseId} not found`);
+    }
+    return match;
+  }
+  if (requestedFranchiseCode) {
+    const [[match]] = await db.query("SELECT id, franchise_code FROM franchises WHERE franchise_code = ?", [requestedFranchiseCode]);
+    if (!match) {
+      throw new Error(`Franchise code ${requestedFranchiseCode} not found`);
+    }
+    return match;
+  }
+  const [[fallback]] = await db.query("SELECT id, franchise_code FROM franchises ORDER BY id ASC LIMIT 1");
+  if (!fallback) {
+    throw new Error("Franchise data not found");
+  }
+  return fallback;
+};
+
 const insertShipments = async (db, franchiseId, shipments) => {
   const ids = [];
   for (const shipment of shipments) {
@@ -119,24 +154,44 @@ const insertShipments = async (db, franchiseId, shipments) => {
 const run = async () => {
   await connectDatabase();
   const db = getDb();
-  const [[franchise]] = await db.query("SELECT id FROM franchises ORDER BY id ASC LIMIT 1");
-  if (!franchise) {
-    throw new Error("Franchise data not found");
-  }
-  const [[adminUser]] = await db.query("SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1");
-  if (!adminUser) {
-    throw new Error("Admin user not found");
-  }
+  const franchise = await resolveFranchise(db);
   const franchiseId = franchise.id;
-  const userId = adminUser.id;
+  const franchiseCode = franchise.franchise_code;
+  const demoLoadNumber = `LP-DEMO-LIVE-${franchiseCode || franchiseId}`;
+  const [[user]] = await db.query(
+    "SELECT id FROM users WHERE franchise_id = ? ORDER BY (role = 'admin') DESC, id ASC LIMIT 1",
+    [franchiseId]
+  );
+  if (!user) {
+    console.warn(`⚠️  No users found for franchise ${franchiseCode}. Status logs will record without user context.`);
+  }
+  const userId = user?.id || null;
   await db.query(
     `DELETE lps FROM load_plan_shipments lps
      JOIN load_plans lp ON lp.id = lps.load_plan_id
      WHERE lp.load_number = ? AND lp.franchise_id = ?`,
-    ["LP-DEMO-LIVE", franchiseId]
+    [demoLoadNumber, franchiseId]
   );
-  await db.query("DELETE FROM load_plans WHERE load_number = ? AND franchise_id = ?", ["LP-DEMO-LIVE", franchiseId]);
+  await db.query("DELETE FROM load_plans WHERE load_number = ? AND franchise_id = ?", [demoLoadNumber, franchiseId]);
   await db.query("DELETE FROM shipments WHERE franchise_id = ? AND shipment_cn LIKE 'FLEET-DEMO-%'", [franchiseId]);
+  const [existingRoutes] = await db.query(
+    "SELECT id FROM fleet_routes WHERE franchise_id = ? AND route_code IN ('MH14_PUN_BLR')",
+    [franchiseId]
+  );
+  const routeIds = existingRoutes.map((row) => row.id);
+  if (routeIds.length) {
+    const placeholders = routeIds.map(() => "?").join(", ");
+    await db.query(
+      `DELETE lps FROM load_plan_shipments lps
+       JOIN load_plans lp ON lp.id = lps.load_plan_id
+       WHERE lp.franchise_id = ? AND lp.route_id IN (${placeholders})`,
+      [franchiseId, ...routeIds]
+    );
+    await db.query(
+      `DELETE FROM load_plans WHERE franchise_id = ? AND route_id IN (${placeholders})`,
+      [franchiseId, ...routeIds]
+    );
+  }
   await db.query(
     "DELETE FROM fleet_routes WHERE franchise_id = ? AND route_code IN ('MH14_PUN_BLR')",
     [franchiseId]
@@ -210,7 +265,7 @@ const run = async () => {
     current_hub: "Pune",
     status: "AVAILABLE",
   });
-  const shipments = [
+  const baseShipments = [
     {
       shipment_cn: "FLEET-DEMO-001",
       sender_name: "Nikhil Patil",
@@ -342,6 +397,10 @@ const run = async () => {
       total_charge: 5285,
     },
   ];
+  const shipments = baseShipments.map((shipment, index) => ({
+    ...shipment,
+    shipment_cn: `${shipment.shipment_cn}-${franchiseCode || franchiseId}-${index + 1}`,
+  }));
   const shipmentIds = await insertShipments(db, franchiseId, shipments);
   const activeShipmentIds = shipmentIds.slice(0, 3);
   const plan = await createLoadPlan(
@@ -355,7 +414,7 @@ const run = async () => {
     },
     userId
   );
-  await db.query("UPDATE load_plans SET load_number = ? WHERE id = ?", ["LP-DEMO-LIVE", plan.id]);
+  await db.query("UPDATE load_plans SET load_number = ? WHERE id = ?", [demoLoadNumber, plan.id]);
   await updateVehicleTelemetry(liveVehicle.id, franchiseId, {
     lat: 16.4,
     lng: 75.2,
@@ -363,9 +422,10 @@ const run = async () => {
   });
   console.log("Fleet demo data ready:", {
     franchiseId,
+    franchiseCode,
     route: route.route_code,
     availableVehicle: availableVehicle.vehicle_number,
-    liveLoad: "LP-DEMO-LIVE",
+    liveLoad: demoLoadNumber,
     manifestedShipments: shipmentIds.length - activeShipmentIds.length,
   });
 };
