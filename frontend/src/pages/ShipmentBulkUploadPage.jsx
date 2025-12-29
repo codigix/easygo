@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { shipmentService } from "../services/shipmentService";
 import { AlertCircle, CheckCircle, Upload } from "lucide-react";
+
+const DEFAULT_SERVICE_TYPES = ["EXPRESS", "STANDARD", "ECONOMY"];
 
 export default function ShipmentBulkUploadPage() {
   const [file, setFile] = useState(null);
@@ -8,6 +10,24 @@ export default function ShipmentBulkUploadPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [uploadResult, setUploadResult] = useState(null);
+  const [serviceTypes, setServiceTypes] = useState(DEFAULT_SERVICE_TYPES);
+
+  useEffect(() => {
+    const loadServiceTypes = async () => {
+      try {
+        const response = await shipmentService.getServiceTypes();
+        const types = response.data || [];
+
+        if (types.length > 0) {
+          setServiceTypes(types);
+        }
+      } catch (err) {
+        console.error("Error fetching service types:", err);
+      }
+    };
+
+    loadServiceTypes();
+  }, []);
 
   const handleFileSelect = (e) => {
     const selectedFile = e.target.files[0];
@@ -105,7 +125,9 @@ export default function ShipmentBulkUploadPage() {
                 <li>receiver_city - City name</li>
                 <li>receiver_state - State name</li>
                 <li>weight - Weight in kg (max 30)</li>
-                <li>service_type - EXPRESS, STANDARD, or ECONOMY</li>
+                <li>
+                  service_type - one of: {serviceTypes.length ? serviceTypes.join(", ") : DEFAULT_SERVICE_TYPES.join(", ")}
+                </li>
               </ul>
               <p className="mt-3 font-semibold">Optional Columns:</p>
               <ul className="list-inside space-y-2 list-disc">

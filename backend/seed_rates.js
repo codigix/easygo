@@ -3,7 +3,13 @@ import { connectDatabase, getDb } from "./src/config/database.js";
 await connectDatabase();
 const db = getDb();
 
-const franchiseId = 6; // Your franchise
+const franchiseIdArg = process.argv[2] || process.env.SEED_FRANCHISE_ID;
+const franchiseId = franchiseIdArg ? Number(franchiseIdArg) : 6;
+
+if (!Number.isFinite(franchiseId) || franchiseId <= 0) {
+  console.error("❌ Please provide a valid franchise ID (e.g. node seed_rates.js 8)");
+  process.exit(1);
+}
 
 const ratesToInsert = [
   // Express rates

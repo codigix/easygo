@@ -9,6 +9,11 @@ export const shipmentService = {
     return response.data;
   },
 
+  getServiceTypes: async () => {
+    const response = await api.get("/rates/service-types/list");
+    return response.data;
+  },
+
   // Get all shipments
   getShipments: async (page = 1, limit = 20, filters = {}) => {
     const params = new URLSearchParams();

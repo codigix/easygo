@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { shipmentService } from "../services/shipmentService";
 import { AlertCircle, CheckCircle } from "lucide-react";
+
+const DEFAULT_SERVICE_TYPES = ["EXPRESS", "STANDARD", "ECONOMY"];
 
 export default function ShipmentCreatePage() {
   const [formData, setFormData] = useState({
@@ -21,13 +23,37 @@ export default function ShipmentCreatePage() {
     pieces: "1",
     content_description: "",
     declared_value: "",
-    service_type: "EXPRESS",
+    service_type: DEFAULT_SERVICE_TYPES[0],
     shipment_source: "MANUAL",
   });
 
+  const [serviceTypes, setServiceTypes] = useState(DEFAULT_SERVICE_TYPES);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    const loadServiceTypes = async () => {
+      try {
+        const response = await shipmentService.getServiceTypes();
+        const types = response.data || [];
+
+        if (types.length > 0) {
+          setServiceTypes(types);
+          setFormData((prev) => ({
+            ...prev,
+            service_type: types.includes(prev.service_type)
+              ? prev.service_type
+              : types[0],
+          }));
+        }
+      } catch (err) {
+        console.error("Error fetching service types:", err);
+      }
+    };
+
+    loadServiceTypes();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -124,7 +150,7 @@ export default function ShipmentCreatePage() {
         pieces: "1",
         content_description: "",
         declared_value: "",
-        service_type: "EXPRESS",
+        service_type: serviceTypes[0] || DEFAULT_SERVICE_TYPES[0],
         shipment_source: "MANUAL",
       });
     } catch (err) {
@@ -403,9 +429,11 @@ export default function ShipmentCreatePage() {
                   className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2"
                   required
                 >
-                  <option value="EXPRESS">EXPRESS</option>
-                  <option value="STANDARD">STANDARD</option>
-                  <option value="ECONOMY">ECONOMY</option>
+                  {serviceTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
                 </select>
               </div>
 

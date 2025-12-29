@@ -19,6 +19,11 @@ export const fetchRateFromMaster = async (
 ) => {
   try {
     const db = getDb();
+    const normalizedServiceType = (serviceType || "").trim().toUpperCase();
+
+    if (!normalizedServiceType) {
+      throw new Error("Service type is required for rate lookup");
+    }
 
     // Query RateMaster matching the booking parameters
     const [[rate]] = await db.query(
@@ -26,7 +31,7 @@ export const fetchRateFromMaster = async (
        WHERE franchise_id = ? 
        AND (from_pincode = ? OR from_pincode = '*')
        AND (to_pincode = ? OR to_pincode = '*')
-       AND service_type = ?
+       AND UPPER(service_type) = ?
        AND weight_from <= ?
        AND (weight_to >= ? OR weight_to IS NULL)
        AND status = 'active'
@@ -39,7 +44,7 @@ export const fetchRateFromMaster = async (
         franchiseId,
         fromPincode,
         toPincode,
-        serviceType,
+        normalizedServiceType,
         weight,
         weight,
         fromPincode,

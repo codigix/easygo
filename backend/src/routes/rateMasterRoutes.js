@@ -7,6 +7,7 @@ import {
   createRate,
   updateRate,
   deleteRate,
+  getServiceTypesForFranchise,
 } from "../controllers/rateMasterController.js";
 import {
   getAllCompanies,
@@ -44,6 +45,7 @@ router.delete("/company/:id", authenticate, deleteCompany);
 
 // Rate calculation (specific route)
 router.post("/calculate", authenticate, calculateRate);
+router.get("/service-types/list", authenticate, getServiceTypesForFranchise);
 
 // Original rate master routes (generic - must come last)
 router.get("/", authenticate, getAllRates);

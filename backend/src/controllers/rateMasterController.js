@@ -34,6 +34,25 @@ export const getAllRates = async (req, res) => {
   }
 };
 
+export const getServiceTypesForFranchise = async (req, res) => {
+  try {
+    const franchiseId = req.user.franchise_id;
+    const db = getDb();
+    const [serviceTypes] = await db.query(
+      "SELECT DISTINCT service_type FROM rate_master WHERE franchise_id = ? AND service_type IS NOT NULL ORDER BY service_type",
+      [franchiseId]
+    );
+
+    res.json({
+      success: true,
+      data: serviceTypes.map((row) => row.service_type).filter(Boolean),
+    });
+  } catch (error) {
+    console.error("Get service types error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch service types" });
+  }
+};
+
 export const getRateById = async (req, res) => {
   try {
     const franchiseId = req.user.franchise_id;
@@ -63,13 +82,21 @@ export const calculateRate = async (req, res) => {
     const franchiseId = req.user.franchise_id;
     const { from_pincode, to_pincode, weight, service_type } = req.body;
     const db = getDb();
+    const normalizedServiceType = (service_type || "").trim().toUpperCase();
+
+    if (!normalizedServiceType) {
+      return res.status(400).json({
+        success: false,
+        message: "Service type is required",
+      });
+    }
 
     const [[rate]] = await db.query(
       `SELECT * FROM rate_master 
        WHERE franchise_id = ? 
        AND (from_pincode = ? OR from_pincode = '*')
        AND (to_pincode = ? OR to_pincode = '*')
-       AND service_type = ?
+       AND UPPER(service_type) = ?
        AND weight_from <= ?
        AND (weight_to >= ? OR weight_to IS NULL)
        ORDER BY 
@@ -80,7 +107,7 @@ export const calculateRate = async (req, res) => {
         franchiseId,
         from_pincode,
         to_pincode,
-        service_type,
+        normalizedServiceType,
         weight,
         weight,
         from_pincode,
